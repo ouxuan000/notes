@@ -1,0 +1,286 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0065)http://www.java3z.com/cwbwebhome/article/article1a/124.jsp?id=191 -->
+<HTML><HEAD><TITLE>jdom学习:读取xml文件</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=gb2312"><LINK 
+href="jdom学习读取xml文件.files/index.css" type=text/css rel=stylesheet>
+<SCRIPT language=javaScript>
+function valiform() {
+	
+		
+	if(document.form2.keyword.value==""){
+		alert("请输入关键字！");
+		document.form2.keyword.focus();
+		return false;
+	   }
+	}
+  function valiform1(){
+         if(document.form5.pinjianame.value==""){
+		alert("请输入姓名！");
+		document.form5.pinjianame.focus();
+		return false;
+		}
+		if(document.form5.pinjiacontent.value==""){
+		alert("请输入评价内容！");
+		document.form5.pinjiacontent.focus();
+		return false;
+		}
+    }
+	
+</SCRIPT>
+
+<META content="MSHTML 6.00.2900.2627" name=GENERATOR></HEAD>
+<BODY bgColor=#ffffff leftMargin=0 background=jdom学习读取xml文件.files/background.gif 
+topMargin=0><BR>
+<TABLE class=LTR height=1146 cellSpacing=0 cellPadding=0 width=756 align=center 
+bgColor=#ffffff border=0>
+  <TBODY>
+  <TR>
+    <TD width=747 height=78>
+      <TABLE cellSpacing=0 cellPadding=0 width="100%" border=0>
+        <TBODY>
+        <TR>
+          <TD width="19%" height=65>
+            <DIV align=center><IMG height=50 src="jdom学习读取xml文件.files/logo.gif" 
+            width=120></DIV></TD>
+          <TD width="81%">
+            <TABLE class=LTR height=53 cellSpacing=0 cellPadding=0 width="94%" 
+            align=center border=0>
+              <TBODY>
+              <TR>
+                <TD height=53>
+                  <OBJECT 
+                  codeBase=http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0 
+                  height=53 width=580 
+                  classid=clsid:D27CDB6E-AE6D-11cf-96B8-444553540000><PARAM NAME="movie" VALUE="../../images/swf/baner2.swf"><PARAM NAME="quality" VALUE="high">
+                                                                              
+                  <embed src="../../images/swf/baner2.swf" quality="high" 
+                  pluginspage="http://www.macromedia.com/go/getflashplayer" 
+                  type="application/x-shockwave-flash" width="580" 
+                  height="53"></embed></OBJECT></TD></TR></TBODY></TABLE></TD></TR></TBODY></TABLE></TD></TR>
+  <TR>
+    <TD class=ArticleTeitle height=20>
+      <TABLE height=25 cellSpacing=0 cellPadding=0 width="100%" bgColor=#3399ff 
+      border=0>
+        <TBODY>
+        <TR>
+          <TD width="29%"><FONT color=#ffffff>
+            <DIV align=left>&nbsp;&nbsp;您的位置： 文章阅读 ┆ <A 
+            href="http://www.java3z.com/cwbwebhome/index.jsp"><FONT 
+            color=#ffffff>回首页</FONT></A></DIV></FONT></TD>
+          <TD width="71%"><FONT color=#ffffff>&nbsp; </FONT>
+            <DIV align=right><FONT color=#ffffff><A 
+            href="http://www.java3z.com/cwbwebhome/learn.jsp"><FONT 
+            color=#ffffff>学习笔记</FONT></A><FONT color=#ffffff>┆</FONT> &nbsp;<A 
+            href="http://www.java3z.com/cwbwebhome/article.jsp"><FONT 
+            color=#ffffff>java文摘</FONT></A><FONT color=#ffffff>┆</FONT> <A 
+            href="http://www.java3z.com/cwbwebhome/download.jsp"><FONT 
+            color=#ffffff>源码下载</FONT></A>&nbsp;<FONT color=#ffffff><FONT 
+            color=#ffffff>┆</FONT><A 
+            href="http://www.java3z.com/cwbwebhome/javacode.jsp"><FONT 
+            color=#ffffff>Java实例</FONT></A> <FONT color=#ffffff>┆</FONT><FONT 
+            color=#ffffff> <A 
+            href="http://www.java3z.com/cwbwebhome/tool.jsp"><FONT 
+            color=#ffffff>Java教学</FONT></A> ┆&nbsp;<A 
+            href="http://www.java3z.com/cwbwebhome/version.jsp"><FONT 
+            color=#ffffff>译文习作</FONT></A><FONT 
+            color=#ffffff>┆</FONT>&nbsp;&nbsp;<A 
+            href="http://www.java3z.com/cwbwebhome/reply.jsp"><FONT 
+            color=#ffffff>留言板</FONT></A>&nbsp;</FONT></DIV></FONT></FONT></TD></TR></TBODY></TABLE></TD></TR>
+  <TR>
+    <TD vAlign=top align=middle height=1039>
+      <TABLE height=1035 cellSpacing=0 cellPadding=0 width="100%" border=0>
+        <TBODY>
+        <TR>
+          <TD height=30>
+            <FORM name=form2 onsubmit="return valiform()" 
+            action=../../search.jsp method=post>
+            <TABLE height=20 cellSpacing=0 cellPadding=0 width="94%" align=right 
+            border=0>
+              <TBODY>
+              <TR>
+                <TD width="13%">
+                  <DIV align=center><FONT 
+                  color=#0066ff><STRONG>站内资源搜索:</STRONG></FONT></DIV></TD>
+                <TD width="60%">
+                  <DIV align=center><INPUT class=Active size=70 name=keyword> 
+                  </DIV></TD>
+                <TD>
+                  <DIV align=center></DIV><INPUT class=ActiveButton type=submit value=" GO! " name=Submit3> 
+                </TD></TR></TBODY></TABLE></FORM></TD></TR>
+        <TR>
+          <TD class=ArticleTeitle bgColor=#95caff height=25>
+            <TABLE height=26 cellSpacing=0 cellPadding=0 width="70%" 
+            align=center border=0>
+              <TBODY>
+              <TR>
+                <TD width="13%"><IMG height=25 
+                  src="jdom学习读取xml文件.files/fave.gif" width=72></TD>
+                <TD width="29%">
+                  <DIV align=right>┆ 将本文寄给朋友&nbsp;&nbsp; </DIV></TD>
+                <TD width="45%"><INPUT class=Active size=30 value=（暂没开通） 
+                  name=textfield32></TD>
+                <TD width="13%"><IMG height=25 
+                  src="jdom学习读取xml文件.files/button_send.gif" 
+              width=50></TD></TR></TBODY></TABLE></TD></TR>
+        <TR>
+          <TD vAlign=top align=middle height=977><BR>
+            <TABLE height=146 cellSpacing=0 cellPadding=0 width=684 align=center 
+            border=0>
+              <TBODY>
+              <TR>
+                <TD height=80>
+                  <TABLE class=ArticleTeitle height=47 cellSpacing=0 
+                  cellPadding=0 width="100%" align=center border=0>
+                    <TBODY>
+                    <TR>
+                      <TD width="72%" bgColor=#b5daff height=45>
+                        <DIV align=center><FONT face=黑体 color=#333333 
+                        size=4>jdom学习:读取xml文件</FONT></DIV></TD>
+                      <TD width="15%" bgColor=#b5daff>
+                        <P align=right>&nbsp;</P></TD>
+                      <TD width="1%" bgColor=#b5daff>&nbsp;</TD>
+                      <TD width="12%" bgColor=#b5daff>
+                        <P align=center> </P></TD></TR></TBODY></TABLE>
+                  <DIV align=right><FONT color=#333333><BR><STRONG>〖 作者：站长整理 〗〖 
+                  大小：1k 〗〖 发布日期：2005-08-08 〗〖 浏览：2779 
+                〗<BR></STRONG></FONT></DIV></TD></TR>
+              <TR>
+                <TD class=ArticleTeitle vAlign=top height=35>&nbsp;&nbsp;<FONT 
+                  color=#333333>&nbsp;&nbsp;用JDOM读取XML文件需先用org.jdom.input.SAXBuilder对象的build()方法创建Document对象,然后用Document类、Element类等的方法读取所需的内容。IBM&nbsp;:&nbsp;developerWorks&nbsp;中国站上有一个很好的例子： 
+                  <BR><BR></FONT>
+                  <TABLE width=657 border=0>
+                    <TBODY>
+                    <TR>
+                      <TD width=319><FONT 
+                        color=#333333>&lt;?xml&nbsp;version="1.0"&nbsp;encoding="UTF-8"?&gt; 
+                        <BR>&lt;HD&gt; 
+                        <BR>&nbsp;&nbsp;&lt;disk&nbsp;name="C"&gt; 
+                        <BR>&nbsp;&nbsp;&nbsp;&nbsp;&lt;capacity&gt;8G&lt;/capacity&gt; 
+                        <BR>&nbsp;&nbsp;&nbsp;&nbsp;&lt;directories&gt;200&lt;/directories&gt; 
+                        <BR>&nbsp;&nbsp;&nbsp;&nbsp;&lt;files&gt;1580&lt;/files&gt; 
+                        <BR>&nbsp;&nbsp;&lt;/disk&gt; 
+                        <BR><BR>&nbsp;&nbsp;&lt;disk&nbsp;name="D"&gt; 
+                        <BR>&nbsp;&nbsp;&nbsp;&nbsp;&lt;capacity&gt;10G&lt;/capacity&gt; 
+                        <BR>&nbsp;&nbsp;&nbsp;&nbsp;&lt;directories&gt;500&lt;/directories&gt; 
+                        <BR>&nbsp;&nbsp;&nbsp;&nbsp;&lt;files&gt;3000&lt;/files&gt; 
+                        <BR>&nbsp;&nbsp;&lt;/disk&gt; <BR>&lt;/HD&gt; 
+                      <BR></FONT></TD>
+                      <TD width=328>
+                        <SCRIPT type=text/javascript><!--
+google_ad_client = "pub-1832179689702023";
+google_ad_width = 250;
+google_ad_height = 250;
+google_ad_format = "250x250_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "FFFFFF";
+google_color_bg = "FFFFFF";
+google_color_link = "3366FF";
+google_color_text = "000000";
+google_color_url = "3D81EE";
+//--></SCRIPT>
+
+                        <SCRIPT src="jdom学习读取xml文件.files/show_ads.js" 
+                        type=text/javascript>
+</SCRIPT>
+                      </TD></TR></TBODY></TABLE><FONT 
+                  color=#333333><BR><BR>上面的sample.xml文档，描述了某台电脑中硬盘的基本信息(根节点&lt;HD&gt;代表硬盘，&lt;disk&gt;标签代表硬盘分区，从它的name属性可以看出有两个盘符名称为"C"和"D"的分区；每个分区下都包含&lt;capacity&gt;,&lt;directories&gt;&lt;files&gt;三个节点，分别代表了分区的空间大小、目录数量、所含文件个数) 
+                  <BR><BR>下面的程序读取此文件中的信息： <BR>import&nbsp;java.util.*; 
+                  <BR>import&nbsp;org.jdom.*; 
+                  <BR>import&nbsp;org.jdom.input.SAXBuilder; 
+                  <BR>public&nbsp;class&nbsp;Sample1&nbsp;{ 
+                  <BR>&nbsp;&nbsp;public&nbsp;static&nbsp;void&nbsp;main(String[]&nbsp;args)&nbsp;throws&nbsp;Exception{&nbsp; 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;SAXBuilder&nbsp;sb=new&nbsp;SAXBuilder(); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;Document&nbsp;doc=sb.build("sample.xml"); 
+                  //构造文档对象<BR>&nbsp;&nbsp;&nbsp;&nbsp;Element&nbsp;root=doc.getRootElement(); 
+                  //获取根元素<BR>&nbsp;&nbsp;&nbsp;&nbsp;List&nbsp;list=root.getChildren("disk");//取名字为disk的所有元素 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;for(int&nbsp;i=0;i&lt;list.size();i++){ 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Element&nbsp;element=(Element)list.get(i); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String&nbsp;name=element.getAttributeValue("name"); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String&nbsp;capacity=element.getChildText("capacity");//取disk子元素capacity的内容 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String&nbsp;directories=element.getChildText("directories"); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String&nbsp;files=element.getChildText("files"); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("磁盘信息:"); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("分区盘符:"+name); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("分区容量:"+capacity); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("目录数:"+directories); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("文件数:"+files); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("-----------------------------------"); 
+                  <BR>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp; <BR>&nbsp;&nbsp;} 
+                  <BR>} <BR>运行结果： <BR>C:\java&gt;java&nbsp;&nbsp;&nbsp;Sample1 
+                  <BR>磁盘信息: <BR>分区盘符:C <BR>分区容量:8G <BR>目录数:200 <BR>文件数:1580 
+                  <BR>----------------------------------- <BR>磁盘信息: <BR>分区盘符:D 
+                  <BR>分区容量:10G <BR>目录数:500 <BR>文件数:3000 
+                  <BR>----------------------------------- </FONT></TD></TR>
+              <TR>
+                <TD class=ArticleTeitle vAlign=top height=25>
+                  <P align=right><FONT size=4></FONT><FONT 
+                  color=#333333>来源</FONT><FONT color=#333333>： 
+                java学习室</FONT></P></TD></TR></TBODY></TABLE><BR>
+            <TABLE height=24 cellSpacing=0 cellPadding=0 width="100%" 
+              border=0><TBODY>
+              <TR>
+                <TD class=ArticleTeitle 
+                  bgColor=#95caff>&nbsp;严禁发表涉及封建迷信、国家政治等敏感问题的内容</TD></TR></TBODY></TABLE>
+            <FORM name=form5 onsubmit="return valiform1()" action="" 
+method=post>
+            <TABLE height=395 cellSpacing=0 cellPadding=0 width=600 align=center 
+            border=0>
+              <TBODY>
+              <TR>
+                <TD width=684 bgColor=#0080ff height=26><FONT 
+                  color=#ffffff>&nbsp;■ 对本文的评价（带 <FONT color=#ff0000>* 
+                  </FONT>为必填内容，400字以内）&nbsp;&nbsp;&nbsp;&nbsp;严禁发表涉及封建迷信、国家政治等敏感问题的内容。</FONT></TD></TR>
+              <TR>
+                <TD class=LTR height=253><BR>
+                  <TABLE height=275 cellSpacing=0 cellPadding=0 width=602 
+                  align=center border=0>
+                    <TBODY>
+                    <TR>
+                      <TD width=82 bgColor=#ddeeff height=26>
+                        <DIV align=right><FONT color=#ff0000>* 
+                        </FONT>您的姓名&nbsp;</DIV></TD>
+                      <TD width=117 bgColor=#ddeeff><INPUT class=Active 
+                        size=15 name=pinjianame> </TD>
+                      <TD width=80 bgColor=#ddeeff>
+                        <DIV align=right>您的电子邮件&nbsp;</DIV></TD>
+                      <TD width=323 bgColor=#ddeeff><INPUT class=Active 
+                        size=40 name=pinjiaemail> </TD></TR>
+                    <TR>
+                      <TD height=26>
+                        <DIV align=right>您的个人主页&nbsp;</DIV></TD>
+                      <TD colSpan=3><INPUT class=Active size=80 value=http:// 
+                        name=pinjiahome> </TD></TR>
+                    <TR>
+                      <TD vAlign=top bgColor=#ddeeff height=79>
+                        <DIV align=right><FONT color=#ff0000><BR>* 
+                        </FONT>您的评价&nbsp; </DIV></TD>
+                      <TD bgColor=#ddeeff colSpan=3><TEXTAREA class=Active name=pinjiacontent rows=12 cols=80></TEXTAREA> 
+                        <INPUT type=hidden value=191 name=Article_id> </TD></TR>
+                    <TR>
+                      <TD colSpan=4 height=19>
+                        <DIV align=center><BR><INPUT class=ActiveButton type=submit value="  提 交  " name=Submit32> 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <INPUT class=ActiveButton type=reset value="  清 空  " name=Submit33> 
+                        </DIV></TD></TR></TBODY></TABLE><BR></TD></TR>
+              <TR>
+                <TD bgColor=#0080ff height=26><FONT color=#ffffff>&nbsp;■ 
+                  以往的评价</FONT></TD></TR>
+              <TR>
+                <TD class=LTR align=middle 
+                  height=90><BR><BR>评价人:haha&nbsp;2009-02-17<BR><TEXTAREA class=Active disabled name=pinjiacontent rows=7 cols=100>very&nbsp;good!!</TEXTAREA><BR>
+                  <HR width="100%" color=#0000ff SIZE=1>
+                  评价人:fffffffffffffffff&nbsp;2008-08-27<BR><TEXTAREA class=Active disabled name=pinjiacontent rows=7 cols=100>fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff</TEXTAREA><BR>
+                  <HR width="100%" color=#0000ff SIZE=1>
+                  评价人:hlvcvukd&nbsp;2007-08-13<BR><TEXTAREA class=Active disabled name=pinjiacontent rows=7 cols=100>RSfrw9&nbsp;&lt;a&nbsp;href="http://rankqwszgngt.com/"&gt;aqiiecnlrecr&lt;/a&gt;,&nbsp;[URL=http://mjtroouxnvay.com/]rnsqyyqtmmqj[/URL],&nbsp;[LINK=http://qhgwmfhxigmt.com/]njthpdrnjxlw[/LINK],&nbsp;http://wmrhanfjusqz.com/</TEXTAREA><BR>
+                  <HR width="100%" color=#0000ff SIZE=1>
+                  <BR><BR><BR><BR></TD></TR></TBODY></TABLE></FORM><BR>
+            <TABLE cellSpacing=0 cellPadding=0 width="100%" border=0>
+              <TBODY>
+              <TR>
+                <TD class=ArticleTeitle bgColor=#95caff height=24>
+                  <DIV 
+                  align=center>以上文章版权由原作者所有。未经同意，不得将其任何一部分复制、转载、发布等未授权操作。</DIV></TD></TR></TBODY></TABLE>
+            <DIV align=center><BR><BR>Java学习室 — 陈伟波个人主页<BR>E-mail: <A 
+            href="mailto:zz3zcwb@sina.com">zz3zcwb@sina.com</A> <BR>COPY RIGHT 
+            2005 
+</DIV></TD></TR></TBODY></TABLE></TD></TR></TBODY></TABLE><BR></BODY></HTML>

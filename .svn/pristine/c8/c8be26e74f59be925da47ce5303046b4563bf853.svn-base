@@ -1,0 +1,309 @@
+1、软件源配置（fedora22）
+	a.自动选择最快插件
+
+	#yum install yum-fastestmirror
+	b.rpmfusion源
+	#rpm -ivh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm
+	#rpm -ivh http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-stable.noarch.rpm
+	c.flash源
+	#rpm -ivh http://linuxdownload.adobe.com/adobe-release/adobe-release-x86_64-1.0-1.noarch.rpm
+	#yum install flash-plugin
+
+	d.163源,sohu源,北交通,开源中国的直接可以用
+
+	#cd /etc/yum.repos.d
+	#wget http://mirrors.163.com/.help/fedora-163.repo
+	#wget http://mirrors.163.com/.help/fedora-updates-163.repo
+	#wget http://mirrors.sohu.com/help/fedora-sohu.repo
+	#wget http://mirrors.sohu.com/help/fedora-updates-sohu.repo
+	#wget http://mirror.bjtu.edu.cn/fedora-bjtu.repo
+	#wget http://mirror.bjtu.edu.cn/fedora-updates-bjtu.repo
+	#wget http://mirrors.oschina.net/help/fedora-oschina.repo
+	#wget http://mirrors.oschina.net/help/fedora-updates-oschina.repo
+
+	fedora 中文社区软件源
+		添加 FZUG 源
+
+		$ dnf config-manager --add-repo=http://repo.fdzh.org/FZUG/FZUG.repo (For Fedora 22+)
+
+		或 $ wget http://repo.fdzh.org/FZUG/FZUG.repo -P /etc/yum.repos.d/ 
+
+	#yum makecache
+
+2、输入法安装
+	中文社区源里有 直接 sudo dnf install sougoupinyin
+3、挂载磁盘
+	在/etc/fstab中加入
+		#windows c,d,e,f mount
+		# /mnt/windows was on /dev/sda1 UUID="E47A87957A876362"
+		UUID=E47A87957A876362 			/mnt/windows      ntfs    defaults      
+		  0       0
+		# /mnt/applications was on /dev/sda5 UUID="0005241A0001DE15"
+		UUID=0005241A0001DE15 			/mnt/applications  ntfs   defaults      
+		  0       0
+		# /mnt/resource was on /dev/sda6 UUID="000FDC74000D8E23"
+		UUID=000FDC74000D8E23			/mnt/resource      ntfs   defaults      
+		  0       0
+		# /mnt/media was on /dev/sda7 UUID="0009ED4F00048FE0"
+		UUID=0009ED4F00048FE0			/mnt/media	   ntfs   defaults      
+		  0       0
+	
+	sudo fdisk -l 查看磁盘盘号
+	sudo blkid 查看磁盘类型
+	mount -a会/etc/fstab中的项全部挂载，如果有错，则会提示错误，然后根据错误找出原因修改。
+4、软链接配置
+	ln -s /mnt/resources/笔记 /home/tt/Documents
+	ln -s /mnt/resources/编程类书籍 /home/tt/Documents
+	ln -s /mnt/media/比思图图/* /home/tt/Pictures	
+	ln -s /mnt/resources/JAVA/尚学堂 /home/tt/Videos
+	ln -s /mnt/resources/JAVA/传智 /home/tt/Videos
+	ln -s /mnt/resources/java网上在线支付实战视频 /home/tt/Videos
+	ln -s /mnt/resources/OA+工作流视频教程 /home/tt/Videos
+	ln -s /mnt/resources/巴巴运动网 /home/tt/Videos
+	ln -s /mnt/resources/传智播客ATM项目实战 /home/tt/Videos
+	ln -s /mnt/resources/传智播客-OA项目视频教程 /home/tt/Videos
+	ln -s /mnt/resources/动力节点_王勇DRP_中国电信客户分析系统 /home/tt/Videos
+	ln -s /mnt/resources/马士兵JAVA_贪吃蛇游戏开发视频教程 /home/tt/Videos
+	ln -s /mnt/resources/银行业务调度系统视频教程 /home/tt/Videos
+
+	ln -s /mnt/resources/lib/struts-2.3.4.1/docs/index.html struts_docs 
+	ln -s /mnt/resources/lib/hibernate/hibernate-release-4.1.7.Final/documentation/manual/en-US/html_single/index.html hibernate_manual
+	ln -s /mnt/resources/lib/hibernate/hibernate-release-4.1.7.Final/documentation/javadocs/index.html hibernate_javadocs
+	ln -s /mnt/resources/API/* api
+3、常用软件安装
+	sudo add-apt-repository ppa:nilarimogard/webupd8
+	搜狗拼音，谷歌拼音输入法，音乐播放器audicious
+	
+	安装qq
+	sudo add-apt-repository ppa:lainme/pidgin-lwqq
+
+	sudo apt-get update
+
+	sudo apt-get install pidgin-lwqq
+
+	sudo apt-get install pidgin
+        
+	无线分享
+	ubuntu安装ap-hotspot分享无线网 ：添加这个源 sudo add-apt-repository ppa:nilarimogard/webupd8，sudo apt-get update
+	sudo apt-get install hostapd
+
+	笔记basket note pads
+
+    api工具 zeal sudo dnf install zeal
+
+    java ide itellij idea
+
+    uml工具 astah 下载软件包
+
+    版本控制工具 subversion
+
+    自动化构建 maven
+
+    游戏 dontstarve minecraft
+
+    图像处理工具 imagemagick
+
+
+
+	配置环境变量
+		/etc/profile配置java环境变量
+		#java环境变量
+		export JAVA_HOME=/home/tt/applications/jdk1.8.0_51
+		export JRE_HOME=${JAVA_HOME}/jre    
+		export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib    
+		export PATH=${JAVA_HOME}/bin:$PATH 
+
+		#Oracle
+		#这个写你后头要安装的路径
+		export ORACLE_BASE=/home/tt/app/tt
+		export ORACLE_HOME=${ORACLE_BASE}/product/11.2.0/dbhome_1
+		#数据库的sid
+		export ORACLE_SID=orcl
+		export ORACLE_UNQNAME=orcl
+		#环境变量
+		export PATH=$PATH:${ORACLE_HOME}/bin/;
+	立即生效
+		$source /etc/profile
+
+	安装eclipse
+	tar -xzvf eclipse-SDK-3.8.2-linux-gtk-x86_64.tar.gz -C /home/tt/applications
+
+	安装astah-professional.deb，并且破解
+
+	安装myeclipse10.7 破解
+	./myeclipse-10.7.1-offline-installer-linux.run
+
+	安装mysql
+		
+	ubuntu配置vsftpd
+	看了网上很多关于vsftpd的安装配置教程，发现很多都是不可以用的，经过多次尝试，总结了一个最简单的设置方法。
+
+	第一步：安装vsftpd
+
+	sudo apt-get install vsftpd
+
+	第二步：配置
+
+	sudo vi /etc/vsftpd.conf
+
+	注销掉，关闭匿名访问
+
+	#anonymous_enable=YES
+
+	去掉注销，#让本地账号可以访问，比如root，等系统登录账号
+
+	local_enable=YES 
+
+	write_enable=YES
+
+	第三步：如果你需要让root可以访问需要执行第三步
+
+	sudo vi /etc/ftpusers
+
+	把root去掉
+
+	第四步：增加一个访问账号
+
+	增加一个ftpgroup用户组
+
+	sudo groupadd ftpgroup
+
+	增加用户ftpuser并设置其目录为/ftp/ftpuser(可以修改，但是必须创建该文件夹) （我用的是/home/myftp -d参数。配置用户家目录）
+
+	sudo useradd -g ftpgroup -d /ftp/ftpuser -M ftpuser
+
+	如果上面的/ftp/ftpuser没有被创建，即需要创建该文件夹
+
+	sudo mkdir /ftp
+
+	sudo mkdir /ftp/ftpuser
+
+	用户必须拥有权限才可以访问，赋予访问/ftp/ftpuser的权限
+
+	sudo chmod 777 /ftp/ftpuser
+
+	第五步：设置ftpuser密码
+
+	sudo passwd ftpuser
+
+	第六步：重启vsftpd
+
+	sudo restart vsftpd
+	
+	这时候直接用useradd的帐号登录ftp会530 login incorrect
+	解决方案
+	sudo vim /etc/pam.d/vsftpd
+	注释掉 
+	#auth    required pam_shells.so
+
+	安装ap-hotspot
+	sudo apt-get install ap-hotspot
+	配置$sudo ap-hotspot configure
+	关闭防火墙
+	$sudo ufw disable（随便）
+	启动（关闭其他无线）： $sudo ap-hotspot start
+
+	安装ssh服务器
+	sudo apt-get install openssh-server 
+	启动服务器
+	sudo /etc/init.d/ssh start
+	查看是否服务i开启
+	ps -e |grep ssh
+
+	安装wps，文件缺失，在home目录建立.fonts文件
+
+	astah安装，fedora22安装了jdk8，安装astah7.0.rpm显示需要jdk1.7以上版本，但是就不能安装！！，最后使用astah7.0.zip文件，将chmod755,直接运行./astah即可
+
+	ctags安装，下载ctags.tar.gz文件，编译运行。默认安装目录在/usr/local/bin/;  如果不安装，打开java文件不会显示方法列表
+
+	linux安装bcloud（linux版本百度云）、smplayer、smplayer可以播放百度云中的流媒体
+
+ubuntu 安装oracle配置
+	#!/bin/bash
+	sudo apt-get install bzip2
+	sudo apt-get install elfutils
+	sudo apt-get install automake
+	sudo apt-get install autotools-dev
+	sudo apt-get install binutils
+	sudo apt-get install expat
+	sudo apt-get install gawk
+	sudo apt-get install gcc
+	sudo apt-get install gcc-multilib
+	sudo apt-get install g++-multilib
+	sudo apt-get install ia32-libs
+	sudo apt-get install ksh
+	sudo apt-get install less
+	sudo apt-get install lesstif2
+	sudo apt-get install lesstif2-dev
+	sudo apt-get install lib32z1
+	sudo apt-get install libaio1
+	sudo apt-get install libaio-dev
+	sudo apt-get install libc6-dev
+	sudo apt-get install libc6-dev-i386
+	sudo apt-get install libc6-i386
+	sudo apt-get install libelf-dev
+	sudo apt-get install libltdl-dev
+	sudo apt-get install libmotif4
+	sudo apt-get install libodbcinstq4-1 libodbcinstq4-1:i386
+	sudo apt-get install libpth-dev
+	sudo apt-get install libpthread-stubs0
+	sudo apt-get install libpthread-stubs0-dev
+	sudo apt-get install libstdc++5
+	sudo apt-get install lsb-cxx
+	sudo apt-get install make
+	sudo apt-get install openssh-server
+	sudo apt-get install pdksh
+	sudo apt-get install rlwrap
+	sudo apt-get install rpm
+	sudo apt-get install sysstat
+	sudo apt-get install unixodbc
+	sudo apt-get install unixodbc-dev
+	sudo apt-get install unzip
+	sudo apt-get install x11-utils
+	sudo apt-get install zlibc
+
+	#!/bin/bash
+	sudo ln -s /etc /etc/rc.d
+	sudo ln -s /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib64/
+	sudo ln -s /usr/bin/awk /bin/awk
+	sudo ln -s /usr/bin/basename /bin/basename
+	sudo ln -s /usr/bin/rpm /bin/rpm
+	sudo ln -s /usr/lib/x86_64-linux-gnu/libc_nonshared.a /usr/lib64/
+	sudo ln -s /usr/lib/x86_64-linux-gnu/libpthread_nonshared.a /usr/lib64/
+	sudo ln -s /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /lib64/
+	sudo ln -s /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib64/
+	sudo echo ‘Red Hat Linux release 5′ > /etc/redhat-release
+
+fedora 安装oracle的依赖
+	#!/bin/sh
+yum install binutils
+yum install compat-libstdc++-33   //这是我的系统所缺少的 
+yum install compat-libstdc++-33.i686  //同上
+yum install gcc
+yum install gcc-c++
+yum install glibc
+yum install glibc.i686
+yum install glibc-common
+yum install glibc-devel
+yum install glibc-devel.i686
+yum install glibc-headers   
+
+yum install libaio
+yum install libaio.i686
+yum install libaio-devel
+yum install libaio-devel.i686
+yum install libgcc
+yum install libgcc.i686
+yum install libstdc++
+yum install libstdc++.i686
+yum install libstdc++-devel
+yum install make
+yum install numactl-devel
+yum install sysstat
+yum install unixODBC
+yum install unixODBC.i686
+yum install unixODBC-devel
+yum install unixODBC-devel.i686 
+
+
+

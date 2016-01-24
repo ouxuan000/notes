@@ -1,0 +1,3 @@
+
+net user administrator /active:yes//强制激活administrator
+runas /user:administrator "cmd /k"//管理员模式命令提示符

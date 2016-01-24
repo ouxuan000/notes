@@ -1,0 +1,14 @@
+） 检查注册表。
+  看HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Curren Version和HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion下，所有以"Run"开头的键值名，其下有没有可疑的文件名。如果有，就需要删除相应的键值，再删除相应的应用程序。
+2） 检查启动组。
+  木马们如果隐藏在启动组虽然不是十分隐蔽，但这里的确是自动加载运行的好场所，因此还是有木马喜欢在这里驻留的。启动组对应的文件夹为：C:\windows\start menu\programs\startup，在注册表中的位置：HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders Startup="C:\windows\start menu\programs\startup"。要注意经常检查这两个地方哦！
+3） Win.ini以及System.ini也是木马们喜欢的隐蔽场所，要注意这些地方。
+  比方说，Win.ini的[Windows]小节下的load和run后面在正常情况下是没有跟什么程序的，如果有了那就要小心了，看看是什么；在System.ini的[boot]小节的Shell=Explorer.exe 后面也是加载木马的好场所，因此也要注意这里了。当你看到变成这样：Shell=Explorer.exe wind0ws.exe，请注意那个wind0ws.exe很有可能就是木马服务端程序！赶快检查吧。
+4） 检查C:\windows\winstart.bat、C:\windows\wininit.ini、Autoexec.bat。木马们也很可能隐藏在那里。
+5） 如果是EXE文件启动，那么运行这个程序，看木马是否被装入内存，端口是否打开。如果是的话，则说明要么是该文件启动木马程序，要么是该文件捆绑了木马程序，只好再找一个这样的程序，重新安装一下了。
+6） 木马启动都有一个方式，它只是在一个特定的情况下启动，所以，平时多注意一下你的端口，查看一下正在运行的程序，用此来监测大部分木马应该没问题的。
+ 2． 目前已经有一些专门的清除木马的软件，在新推出天网防火墙里面捆绑有强大的木马清除功能，清除一般木马的机制原理主要是： 
+1） 检测木马。
+2） 找到木马启动文件，一般在注册表及与系统启动有关的文件里能找到木马文件的位置。
+3） 删除木马文件，并且删除注册表或系统启动文件中关于木马的信息。
+  但对于一些十分狡滑的木马，这些措施是无法把它们找出来的，现在检测木马的手段无非是通过网络连接和查看系统进程，事实上，一些技术高明的木马编制者完全可以通过合理的隐藏通讯和进程使木马很难被检测到。 

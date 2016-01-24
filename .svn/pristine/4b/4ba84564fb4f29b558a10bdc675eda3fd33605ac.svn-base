@@ -1,0 +1,353 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=x-gbk">
+<title>Spring AOP的底层实现技术---JDK动态代理 - chenxionghua_java的个人空间 - ZDNet专家博客</title>
+<meta name="keywords" content="软件&amp;开发,Spring AOP的底层实现技术---JDK动态代理 - chenxionghua_java的个人空间">
+<meta name="description" content="Spring AOP的底层实现技术---JDK动态代理 - chenxionghua_java的个人空间,JDK动态代理 在JDK 1.3以后提供了动态代理的技术，允许开发者在运行期创建接口的代理实例。在Sun刚推出动态代理时，还很难想象它有多大的实际用途，现在我们终于发现动态代理是实现AOP的绝好底层技术。 JDK的动态">
+<link rel="alternate" type="application/rss+xml" href="http://blog.zdnet.com.cn/?uid-289390-action-rss-type-blog" title="chenxionghua_java的个人空间">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://blog.zdnet.com.cn/xmlrpc.php?rsd=289390">
+<link id="commonstyle" rel="stylesheet" type="text/css" href="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/space.css">	
+<link href="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/edc_expert.css" rel="stylesheet" type="text/css"><script type="text/javascript">
+var siteUrl = "http://blog.zdnet.com.cn";
+</script>
+<script type="text/javascript" language="javascript" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/ajax.js"></script>
+<script type="text/javascript" language="javascript" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/common.js"></script>
+<!-- base --></head><body>
+<div class="quanbu">
+<div class="menu"><img src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/blog_07_00.jpg" usemap="#Map" border="0">
+<map name="Map" id="Map"><area shape="rect" coords="4,3,155,36" href="http://space.zdnet.com.cn/?action-expert"></map><div class="menu_right"><a href="http://www.zdnet.com.cn/" target="_blank">ZDNet首页</a><a href="http://net.zdnet.com.cn/" target="_blank">网络</a><a href="http://security.zdnet.com.cn/" target="_blank">安全</a><a href="http://stor-age.zdnet.com.cn/" target="_blank">存储</a><a href="http://server.zdnet.com.cn/" target="_blank">服务器</a><a href="http://soft.zdnet.com.cn/" target="_blank">软件</a><a href="http://product.zdnet.com.cn/" target="_blank">桌面产品</a><a href="http://builder.zdnet.com.cn/" target="_blank">开发</a><a href="http://cio.zdnet.com.cn/" target="_blank">CIO</a><a href="http://itpapers.zdnet.com.cn/" target="_blank">白皮书</a><a href="http://ec.zdnet.com.cn/" target="_blank">管理软件</a><a href="http://news.zdnet.com.cn/" target="_blank">新闻</a><a href="http://download.zdnet.com.cn/" target="_blank">下载</a><a href="http://bbs.zdnet.com.cn/" target="_blank">社区</a><a href="http://space.zdnet.com.cn/html/expert.html" target="_blank">专家博客</a><a href="http://video.zdnet.com.cn/" target="_blank">视频</a></div></div><div class="banner"><div class="b_left"><a href="http://blog.zdnet.com.cn/?289390"><h1>chenxionghua_java的个人空间</h1></a><h2 class="zinew"></h2>
+<div class="user_menu">
+  <ul><span>用户菜单：</span>
+    <li class="u_m_1"><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewpro">留言</a></li>
+    <li class="u_m_2"><a href="javascript:;" onclick="javascript:joinfriend('289390');">加为好友</a></li>
+    <li class="u_m_3"><a href="http://bbs.zdnet.com.cn/pm.php?action=send&amp;uid=289390">发信息</a></li>
+    <li class="u_m_4"><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewpro-showpro-1">个人介绍</a></li>
+    <li class="u_m_5"><a href="http://blog.zdnet.com.cn/?uid-289390-action-rss-type-">Rss订阅</a></li>
+  </ul>
+  </div>
+  <div>
+    <form id="xspace-search" action="http://blog.zdnet.com.cn/index.php?uid/289390/action/spacelist/php/1" method="post">
+			<input id="xspace-searchkey" name="searchkey" value="" type="text">
+			<input name="searchsubmit" value="yes" type="hidden">
+			<input name="xspace-dosearch" id="xspace-dosearch" value="搜索" type="submit">
+			</form>
+    </div>
+</div><div class="b_img imgnew"><img src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/space_noface.gif"></div><div class="fix"></div>
+</div><div class="hui"><a href="http://blog.zdnet.com.cn/">专家博客首页</a> &gt; <a href="http://blog.zdnet.com.cn/?uid-289390">chenxionghua_java的个人空间</a> &gt; <a href="http://blog.zdnet.com.cn/?uid-289390-action-spacelist-type-blog">博文</a></div><div class="main"><div class="left_wai"><div class="left_1">
+      <h3>Spring AOP的底层实现技术---JDK动态代理</h3><div class="lai_y"><div class="time_l"><span>2008-06-12 10:38:54</span> </div><div class="ping_r" style="color: rgb(0, 153, 0);"><img src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/chakan_00.png">查看( <a href="#xspace-tracks">509</a> ) / <img src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/pinglun_00.png">评论( <a href="#xspace-itemreply">0</a> ) </div>
+      </div>
+	  <div class="fix"></div>
+          <div class="c_14">
+            <p><font size="3"><strong>JDK动态代理</strong><br>&nbsp;&nbsp;&nbsp;</font><font size="2"> 在JDK 1.3以后提供了动态代理的技术，允许开发者在运行期创建接口的代理实例。在Sun刚推出动态代理时，还很难想象它有多大的实际用途，现在我们终于发现动态代理是实现AOP的绝好底层技术。<br>&nbsp;&nbsp;&nbsp;
+JDK的动态代理主要涉及到java.lang.reflect包中的两个类：Proxy和InvocationHandler。其中
+InvocationHandler是一个接口，可以通过实现该接口定义横切逻辑，在并通过反射机制调用目标类的代码，动态将横切逻辑和业务逻辑编织在一
+起。<br>&nbsp;&nbsp; 而Proxy为InvocationHandler实现类动态创建一个符合某一接口的代理实例。这样讲一定很抽象，我们马上着手动用Proxy和InvocationHandler这两个魔法戒对上一节中的性能监视代码进行AOP式的改造。<br>&nbsp;&nbsp;&nbsp; 首先，我们从业务类ForumServiceImpl 中删除性能监视的横切代码，使ForumServiceImpl只负责具体的业务逻辑，如所示：<br>代码清单 5 ForumServiceImpl：移除性能监视横切代码<br></font><font size="2"></font></p>
+<div style="overflow: auto; width: 500px;"><pre style="border: 1px solid black; padding: 4px; background-color: rgb(237, 237, 237);"><div><!--
+Code highlighting produced by Actipro CodeHighlighter (freeware)
+http://www.CodeHighlighter.com/
+--><font size="2"><img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"><span style="color: rgb(0, 0, 0);">package com.baobaotao.proxy;
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">public class ForumServiceImpl implements ForumService {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> public void removeTopic(int topicId) {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">       <font color="#00ff00"> </font><font color="#339966"> ①</font>
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  System.out.println("模拟删除Topic记录:"+topicId);
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  try {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">   Thread.currentThread().sleep(20);
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  } catch (Exception e) {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">   throw new RuntimeException(e);
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  }
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  <font color="#339966"> ②</font>
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> }
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> public void removeForum(int forumId) {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">      <font color="#000000"> </font><font color="#99cc00"> </font><font color="#339966"> ①</font>
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  System.out.println("模拟删除Forum记录:"+forumId);
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  try {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">   Thread.currentThread().sleep(40);
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  } catch (Exception e) {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">   throw new RuntimeException(e);
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  }
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">    <font color="#339966">     ②</font>
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> }
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">}
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"></span></font></div>
+</pre></div>
+<p><font size="2">&nbsp;&nbsp;&nbsp; 在代码清单 5中的①和②处，原来的性能监视代码被移除了，我们只保留了真正的业务逻辑。<br>&nbsp;&nbsp;&nbsp; 从业务类中移除的横切代码当然还得找到一个寄居之所，InvocationHandler就是横切代码的家园乐土，我们将性能监视的代码安置在PerformaceHandler中，如代码清单 6所示：<br>代码清单 6 PerformaceHandler<br><font size="2"></font></font></p>
+<div style="overflow: auto; width: 500px;"><pre style="border: 1px solid black; padding: 4px; background-color: rgb(237, 237, 237);"><div><!--
+Code highlighting produced by Actipro CodeHighlighter (freeware)
+http://www.CodeHighlighter.com/
+--><font size="2"><font size="2"><img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"><span style="color: rgb(0, 0, 0);">package com.baobaotao.proxy;
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">import java.lang.reflect.InvocationHandler;
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">import java.lang.reflect.Method;
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">public class PerformaceHandler implements InvocationHandler {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">    private Object target;
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> public PerformaceHandler(Object target<font color="#339966">){//①target为目标的业务类</font>
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  this.target = target;
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> }
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> public Object invoke(Object proxy, Method method, Object[] args)
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">   throws Throwable {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  PerformanceMonitor.begin(target.getClass().getName()+"."+ method.getName());
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  Object bj = method.invoke(target, args<font color="#339966"><font color="#000000">);</font>//②通过反射方法调用目标业务类的业务方法</font>
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  PerformanceMonitor.end();
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  return obj;
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> }
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">}
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"></span></font></font></div>
+</pre></div>
+<p><font size="2"><font size="2">&nbsp;&nbsp;&nbsp;
+粗体部分的代码为性能监视的横切代码，我们发现，横切代码只出现一次，而不是原来那样星洒各处。大家注意②处的method.invoke()，该语句通
+过反射的机制调用目标对象的方法，这样InvocationHandler的invoke(Object proxy, Method method,
+Object[]
+args)方法就将横切代码和目标业务类代码编织到一起了，所以我们可以将InvocationHandler看成是业务逻辑和横切逻辑的编织器。下面，
+我们对这段代码做进一步的说明。<br>首先，我们实现InvocationHandler接口，该接口定义了一个 invoke(Object
+proxy, Method method, Object[]
+args)的方法，proxy是代理实例，一般不会用到；method是代理实例上的方法，通过它可以发起对目标类的反射调用；args是通过代理类传入
+的方法参数，在反射调用时使用。<br>&nbsp;&nbsp;&nbsp;
+此外，我们在构造函数里通过target传入真实的目标对象，如①处所示，在接口方法invoke(Object proxy, Method
+method, Object[] args)里，将目标类实例传给method.invoke()方法，通过反射调用目标类方法，如②所示。<br>&nbsp;&nbsp;&nbsp; 下面，我们通过Proxy结合PerformaceHandler创建ForumService接口的代理实例，如代码清单 7所示：<br>代码清单 7 TestForumService：创建代理实例<br></font></font></p>
+<div style="overflow: auto; width: 500px;"><pre style="border: 1px solid black; padding: 4px; background-color: rgb(237, 237, 237);"><div><!--
+Code highlighting produced by Actipro CodeHighlighter (freeware)
+http://www.CodeHighlighter.com/
+--><font size="2"><font size="2"><img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"><span style="color: rgb(0, 0, 0);">package com.baobaotao.proxy;
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">import java.lang.reflect.Proxy;
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">public class TestForumService {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> public static void main(String[] args) {
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  ForumService target = new ForumServiceImpl<font color="#339966"><font color="#000000">();</font>//①目标业务类</font>
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"><font color="#339966">//② 将目标业务类和横切代码编织到一起</font>
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  PerformaceHandler handler = new PerformaceHandler(target);
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">         <font color="#339966">//③为编织了目标业务类逻辑和性能监视横切逻辑的handler创建代理类</font>
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  ForumService proxy = (ForumService) Proxy.newProxyInstance(
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">target.getClass().getClassLoader(),
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">    target.getClass().getInterfaces(),
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> handler);
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">         <font color="#339966">//④ 操作代理实例</font>
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  proxy.removeForum(10);
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">  proxy.removeTopic(1012);
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"> }
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">}
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"></span></font></font></div>
+</pre></div>
+<p><font size="2"><font size="2">&nbsp;&nbsp;&nbsp;
+上面的代码完成了业务类代码和横切代码编织和接口代理实例生成的工作，其中在②处，我们将ForumService实例编织为一个包含性能监视逻辑的
+PerformaceHandler实例，然后在③处，通过Proxy的静态方法newProxyInstance()为融合了业务类逻辑和性能监视逻辑
+的handler创建一个ForumService接口的代理实例，该方法的第一个入参为类加载器，第二个入参为创建的代理实例所要实现的一组接口，第三
+个参数是整合了业务逻辑和横切逻辑的编织器对象。<br>按照③处的设置方式，这个代理实例就实现了目标业务类的所有接口，也即ForumServiceImpl的ForumService接口。这样，我们就可以按照调用ForumService接口的实例相同的方式调用代理实例，如④所示。运行以上的代码，输出以下的信息：<br><font size="2"></font></font></font></p>
+<div style="overflow: auto; width: 500px;"><pre style="border: 1px solid black; padding: 4px; background-color: rgb(237, 237, 237);"><div><!--
+Code highlighting produced by Actipro CodeHighlighter (freeware)
+http://www.CodeHighlighter.com/
+--><font size="2"><font size="2"><font size="2"><img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"><span style="color: rgb(0, 0, 0);">begin monitor...
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">模拟删除Forum记录:10
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">end monitor...
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">com.baobaotao.proxy.ForumServiceImpl.removeForum花费47毫秒。
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">begin monitor...
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">模拟删除Topic记录:1012
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">end monitor...
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">com.baobaotao.proxy.ForumServiceImpl.removeTopic花费26毫秒。
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top">
+<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/None.gif" align="top"></span></font></font></font></div>
+</pre></div>
+<p><font size="2"><font size="2"><font size="2">&nbsp;&nbsp;
+我们发现，程序的运行效果和直接在业务类中编写性能监视逻辑的效果一致，但是在这里，原来分散的横切逻辑代码已经被我们抽取到
+PerformaceHandler中。当其它业务类（如UserService、SystemService等）的业务方法也需要使用性能监视时，我们
+只要按照以上的方式，分别为它们创建代理对象就可以了。下面，我们用时序图描述调用关系，进一步代理实例的本质，如图1所示：<br>&nbsp;<img alt="" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/071311285.gif" width="554" height="349"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+图 1代理实例的时序图<br>&nbsp;&nbsp;&nbsp;
+我们在上图中特别使用虚线阴影的方式对通过代理器创建的ForumService实例进行凸显，该实例内部利用PerformaceHandler整合横
+切逻辑和业务逻辑。调用者调用代理对象的的removeForum()和removeTopic()方法时，上图的内部调用时序清晰地告诉了我们实际上所
+发生的一切。</font></font></font></p><font size="2"><font size="2"><font size="2"></font>
+</font></font><p></p>
+<p><font size="2"><font size="2">&nbsp;</font></font></p>
+<p><font size="2"><font size="2">&nbsp;</font></font></p>
+<p><font size="2"><font size="2">&nbsp;</font></font></p><font size="2"><font size="2"></font>
+</font><p></p>
+<p><font size="2">&nbsp;</font></p>
+<p><font size="2">&nbsp;</font></p>
+<p><font size="2">&nbsp;</font></p><font size="2"></font>
+<p></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+      </div><div class="up_c"><div><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewspace-itemid-838705">上一篇：Spring AOP的底层实现技术---带有横切逻辑的实例</a></div><div><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewspace-itemid-838729">下一篇：Spring AOP的底层实现技术---CGLib动态代理</a></div></div><div class="ping_e">文章评论</div>
+         <div class="li_c">以下网友留言只代表其个人观点，不代表至顶网的观点或立场</div><span id="xspace-itemreply"></span><div class="up_c1">
+           <form id="xspace-commentform" action="http://blog.zdnet.com.cn/batch.comment.php" method="post" target="xspace-phpframe">
+             <strong>发表评论</strong>
+             <div class="p_l_u"><label for="xspace-nickname">昵&nbsp; 称：</label>
+               <input size="20" id="xspace-nickname" name="nickname" value="" type="text">
+             </div>
+             <div class="p_l_u"><label for="xspace-seccode">验证码：</label>
+             <span id="xspace-seccodeline">
+               <input size="10" id="xspace-seccode" name="seccode" value="" type="text">
+				<label for="xspace-seccode"><img id="xspace-imgseccode" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/batch.png" onclick="javascript:newseccode(this);" alt="seccode" title="看不清？点击换一个"></label></span></div>
+             <div><div class="nr"><label for="xspace-commentmsg">内&nbsp; 容：</label></div>            
+               <textarea id="xspace-commentmsg" name="message"></textarea>
+             </div>
+             <div class="an_n">
+               <input name="itemid" value="838716" type="hidden">
+               <button value="true" type="submit" name="submitcomment" id="xspace-btncomment">提交评论</button>
+               <input name="button3" id="button3" value="重置" type="reset">
+             </div>
+           </form>
+         </div>
+	</div>
+	</div><script language="javascript" type="text/javascript">
+<!--
+function showcomment(page) {
+	var x = new Ajax('statusid', 'XML');
+	x.get('{S_URL}/batch.comment.php?action=view&itemid=$item[itemid]&page='+page, function(s) {
+			getbyid("xspace-itemreply").innerHTML = s.lastChild.firstChild.nodeValue;
+	});
+}
+function deletecomment(cid) {
+	var x = new Ajax('statusid', 'XML');
+	x.get('{S_URL}/batch.comment.php?action=delete&cid='+cid, function(s) {
+			alert(s.lastChild.firstChild.nodeValue);
+	});
+}
+
+function moresmilies() {
+	var smilies = document.getElementById('xspace-smilies');
+	if (smilies.style.height=='auto') {
+		smilies.style.height = '';
+	} else {
+		smilies.style.height = 'auto';
+	}
+}
+//addImgLink("xspace-showmessage");
+//addMediaAction('xspace-showmessage');
+//-->
+</script><iframe id="xspace-phpframe" name="xspace-phpframe" marginwidth="0" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/a.htm" width="0" frameborder="0" height="0"></iframe><div class="right_1">
+    <div class="r_bottom">
+      <h5>博客列表</h5>
+   	    <ul class="r_con"><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewspace-itemid-1215283" title="使用Spring MVC表单标签（五）">使用Spring MVC表单标签（</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewspace-itemid-1215281" title="使用Spring MVC表单标签（四）">使用Spring MVC表单标签（</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewspace-itemid-1215279" title="使用Spring MVC表单标签（三）">使用Spring MVC表单标签（</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewspace-itemid-1215276" title="使用Spring MVC表单标签（二）">使用Spring MVC表单标签（</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewspace-itemid-1215272" title="使用Spring MVC表单标签（一）">使用Spring MVC表单标签（</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewspace-itemid-1214750" title="Spring 让 LOB 数据操作变得简单易行（五）">Spring 让 LOB 数据操作变</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewspace-itemid-1214722" title="Spring 让 LOB 数据操作变得简单易行（四）">Spring 让 LOB 数据操作变</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-viewspace-itemid-1214697" title="Spring 让 LOB 数据操作变得简单易行（三）">Spring 让 LOB 数据操作变</a></li></ul></div><div class="r_bottom"><h5>我的存档</h5><ul class="r_con"><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-spacelist-starttime-1214841600-endtime-1217520000">2008年07月</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-spacelist-starttime-1212249600-endtime-1214841600">2008年06月</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-spacelist-starttime-1209571200-endtime-1212249600">2008年05月</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-spacelist-starttime-1206979200-endtime-1209571200">2008年04月</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-spacelist-starttime-1204300800-endtime-1206979200">2008年03月</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-spacelist-starttime-1201795200-endtime-1204300800">2008年02月</a></li><li><a href="http://blog.zdnet.com.cn/?uid-289390-action-spacelist-starttime-1199116800-endtime-1201795200">2008年01月</a></li></ul></div> <div class="r_bottom"><h5>博客访问统计</h5>
+   	    <ul class="r_con">
+   	      <li>访问量：29447</li>
+          <li>日志数：63</li>
+          <li>图片数：0</li>
+          <li>建立时间：2008-01-21</li>
+          <li>更新时间：2008-07-09</li>
+   	    </ul>
+      </div>
+    
+    </div>
+    <div class="fix"></div>
+
+</div>
+<!--
+<div class="main">
+
+	
+   	  <div class="r_bottom"><h5>博客访问统计</h5>
+   	    <ul class="r_con">
+   	      <li>访问量：470</li>
+          <li>日志数：20</li>
+          <li>图片数：10</li>
+          <li>建立时间：2008-01-20</li>
+          <li>更新时间：2008-04-08</li>
+   	    </ul>
+      </div>
+    
+    </div>
+    <div class="fix"></div>
+
+</div>
+
+-->
+<div id="footer">
+	<div class="leadbtm">
+		<a id="f" href="http://www.zdnet.com.cn/"></a>		
+		<div id="infoblock">
+		<a href="http://www.xcar.com.cn/" class="normallink">爱卡汽车网</a> | 
+		<a href="http://www.cnetnews.com.cn/" class="normallink">CNET科技资讯网</a> | 
+		<a href="http://www.cweek.com.cn/" class="normallink">CWEEK</a> | 
+		<a href="http://www.fengniao.com/" class="normallink">蜂鸟网</a> | 
+		<a href="http://www.gamespot.com.cn/" class="normallink">GameSpot China</a> | 
+		<a href="http://www.pcpro.com.cn/" class="normallink">个人电脑</a> | 
+		<a href="http://www.builder.com.cn/" class="normallink">开发者在线</a> | 
+		<a href="http://www.pchome.net/" class="normallink">PChome</a> | 
+		<a href="http://www.solidot.org/" class="normallink">Solidot</a> | 
+		<a href="http://www.spn.com.cn/" class="normallink">SPN</a> | <br>
+
+		<a href="http://www.projectorpro.cn/" class="normallink">投影顾问网</a> | 
+		<a href="http://www.ea3w.com.cn/" class="normallink">万维家电网</a> | 
+		<a href="http://www.netfriends.com.cn/" class="normallink">网友世界</a> | 
+		<a href="http://www.xiyuit.com/" class="normallink">西域IT</a> | 
+		<a href="http://www.zdnet.com.cn/" class="normallink">ZDNet China</a> | 
+		<a href="http://www.zol.com.cn/" class="normallink">中关村在线</a> | 
+		<a href="http://www.esmb.com.cn/" class="normallink">中小企业成长网</a> | 
+		<a href="http://www.onlylady.com/" class="normallink">onlylady女人志</a>
+
+	
+		  <div class="services">
+				<ul>
+					<li><a href="http://blog.zdnet.com.cn/i/zdnet/div/contact.shtml">联系我们</a> | </li>
+					<li><a href="http://blog.zdnet.com.cn/i/zdnet/div/site_nav.shtml">网站导航</a> | </li>
+					<li><a href="http://blog.zdnet.com.cn/i/zdnet/div/introd.shtml">网站简介</a> | </li>
+
+					<li><a href="http://blog.zdnet.com.cn/i/zdnetnews/div/links/links_all.htm">友情链接</a> | </li>
+					<li><a href="http://www.zdnet.com.cn/zdnet/links/links_reg.php">申请自助链接</a></li>
+			</ul>
+				<div class="networkFooter">
+							<a href="http://www.cnetnetworks.com.cn/" target="_blank">CNET Networks</a><script language="javascript">document.write("旗下网站: <select name=\"menu\" id=\"form_menu\" ><option selected value=\"\">选择网站</option><option value=\"http://www.bnet.com\">BNET</option><option value=\"http://www.cnet.com\">CNET.com</option><option value=\"http://www.download.com\">CNET Download.com</option><option value=\"http://www.news.com\">CNET News.com</option><option value=\"http://reviews.cnet.com\">CNET Reviews</option><option value=\"http://shopper.cnet.com\">CNET Shopper.com</option><option value=\"http://www.gamespot.com\">GameSpot</option><option value=\"http://www.mp3.com\">MP3.com</option><option value=\"http://www.mysimon.com\">mySimon</option><option value=\"http://www.release1-0.com\">Release 1.0</option><option value=\"http://www.search.com\">Search.com</option><option value=\"http://techrepublic.com.com/\">TechRepublic</option><option value=\"http://www.tv.com\">TV.com</option><option value=\"http://www.webshots.com\">Webshots</option><option value=\"http://www.zdnet.com\">ZDNet</option></select> <a onClick=\"window.location=document.getElementById('form_menu').options[document.getElementById('form_menu').selectedIndex].value;\"><img src=\"http://i.i.com.com/cnwk.1d/i/go_button.gif\" class=\"go-btn\" align=\"absmiddle\" /></a>");</script>旗下网站: <select name="menu" id="form_menu"><option selected="selected" value="">选择网站</option><option value="http://www.bnet.com">BNET</option><option value="http://www.cnet.com">CNET.com</option><option value="http://www.download.com">CNET Download.com</option><option value="http://www.news.com">CNET News.com</option><option value="http://reviews.cnet.com">CNET Reviews</option><option value="http://shopper.cnet.com">CNET Shopper.com</option><option value="http://www.gamespot.com">GameSpot</option><option value="http://www.mp3.com">MP3.com</option><option value="http://www.mysimon.com">mySimon</option><option value="http://www.release1-0.com">Release 1.0</option><option value="http://www.search.com">Search.com</option><option value="http://techrepublic.com.com/">TechRepublic</option><option value="http://www.tv.com">TV.com</option><option value="http://www.webshots.com">Webshots</option><option value="http://www.zdnet.com">ZDNet</option></select> <a onclick="window.location=document.getElementById('form_menu').options[document.getElementById('form_menu').selectedIndex].value;"><img src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/go_button.gif" class="go-btn" align="absmiddle"></a>
+										<noscript>
+<div id="cnwk-ftr2" align="left" style="clear:left;"><a
+href="http://www.bnet.com/">BNET</a> | <a
+href="http://www.cnet.com/">CNET.com</a> | <a
+href="http://www.cnetchannel.com/main/default.aspx">CNET Channel</a> |
+<a href="http://www.gamespot.com/">GameSpot</a> | <a
+href="http://www.cnetnetworks.com/advertise/properties/international.html">International
+Media</a> | <a href="http://www.mp3.com/">MP3.com</a> | <a
+href="http://www.mysimon.com/2001-1_8-0.html">mySimon</a> | <a
+href="http://www.search.com/">Search.com</a> | <a
+href="http://techrepublic.com.com/">TechRepublic</a> | <a
+href="http://www.tv.com/">TV.com</a> | <a
+href="http://www.webshots.com/">Webshots</a> | <a
+href="http://www.zdnet.com/">ZDNet</a> </div> </noscript>
+
+	
+	
+					
+	
+				</div>
+		  </div><!-- //services -->
+
+				<div class="f_copy"><a href="http://www.hd315.gov.cn/beian/view.asp?bianhao=010202001021500016"><img src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/gs.gif"></a>Copyright &#169; 1997-2008 CNET Networks 版权所有。 ZDNet 是CNET Networks公司注册服务商标。<br>
+				  中华人民共和国电信与信息服务业务经营许可证编号：京ICP证010391号
+				</div>
+		</div>
+
+	</div>
+	<div class="fix"></div>
+</div>
+
+
+
+<div id="toolbarshowbtn"><a href="javascript:;" onmouseover="showtoolbar();">Open Toolbar</a></div>
+<div id="toolbarframe"><iframe src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/batch.htm" scrolling="no" width="100%" frameborder="0"></iframe></div>
+<!-- 无标签信息 -->	
+
+<script language="javascript" src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/pv.js"></script><img src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/pvhit0001.gif" width="1" border="0" height="1"><iframe src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/adshow.htm" scrolling="no" width="0" height="0"></iframe><iframe src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/time.htm" scrolling="no" width="0" height="0"></iframe>
+ 	<script src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/dw.js"></script>
+ 	<script>
+ 
+   		DW.pageParams = {
+     	siteid: 71
+   		};
+   
+   		DW.clear();
+
+	</script>
+    </div>
+<script language="javascript">
+			<!--
+			var Modified = new Date(document.lastModified);
+			var copyright = document.getElementById("xspace-copyright");
+			if(copyright) {
+				copyright.innerHTML += "Last update: <a href=\"http://blog.zdnet.com.cn/index.php?uid/289390/action/viewspace/itemid/838716/php/1\" title=\"点击可以立即更新本页面\">"+(Modified.getYear()<200?(Modified.getYear()+1900):Modified.getYear())+"-"+(Modified.getMonth()+1)+"-"+Modified.getDate()+" "+Modified.getHours()+":"+Modified.getMinutes()+":"+Modified.getSeconds() + "</a><br>";
+			}
+			document.write('<script src="http://blog.zdnet.com.cn/batch.html.php?code=http%253A%252F%252Fblog.zdnet.com.cn%252Findex.php%253Fuid%252F289390%252Faction%252Fviewspace%252Fitemid%252F838716%2F1260841608%2F300%2F289390%2F838716%2Fviewspace&amp;lastmodified=' + Modified.getTime() + '" type="text\/javascript" language="javascript"><\/script>');
+			//-->
+			</script><script src="JDK_Proxy_InvocationHandler_%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86_files/batch_002.htm" type="text/javascript" language="javascript"></script></body></html>

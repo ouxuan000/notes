@@ -1,0 +1,3 @@
+HEKEY-LOCAL-MACHINE\SYSTEM\C0ntrol\graphicsDRIWERS\CONFIGURATION
+
+在configuration上右键 查找  输入scaling 右框找到scaling 将值改为3即可 原值为4

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-cn"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><script src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/analytics.js" async=""></script><script src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/postmoduletext" async=""></script>
+<meta charset="utf-8">
+<title>Java中的泛型方法 - 杨元 - 博客园</title>
+<link type="text/css" rel="stylesheet" href="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bundle-Custom.css">
+<link type="text/css" rel="stylesheet" href="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/135156.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/iyangyuan/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/iyangyuan/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/iyangyuan/wlwmanifest.xml">
+<script src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/gpt.js" type="text/javascript" async=""></script><script src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/jquery.js" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'iyangyuan', cb_enable_mathjax=false;</script>
+<script src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/blog-common.js" type="text/javascript"></script>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"><script src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/pubads_impl_66.js" type="text/javascript" async=""></script></head>
+<body>
+<a name="top"></a>
+<div id="page_begin_html"></div><script>load_page_begin_html();</script>
+
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a id="lnkBlogLogo" href="http://www.cnblogs.com/iyangyuan/"><img id="blogLogo" src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/iyangyuan/">杨元的博客</a></h1>
+<h2>Happy wife Happy life!</h2>
+
+
+
+		
+	<canvas id="bubbleCanvas" width="328" height="255"></canvas></div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li></li>
+<li><a id="MyLinks1_MyHomeLink" class="menu" href="http://www.cnblogs.com/iyangyuan/">首页</a></li>
+
+
+<li><a href="http://www.cnblogs.com/iyangyuan/category/434942.html">原创程序</a></li><li><a href="http://www.cnblogs.com/iyangyuan/category/434944.html">技术文章</a></li><li><a href="http://www.cnblogs.com/iyangyuan/category/434943.html">灵感算法</a></li><li><a href="http://www.cnblogs.com/iyangyuan/category/434945.html">学习笔记</a></li><li><a href="http://www.cnblogs.com/iyangyuan/category/434946.html">其他</a></li><li><a id="MyLinks1_Syndication" class="menu" href="http://www.cnblogs.com/iyangyuan/rss">订阅</a>
+<!--<a id="MyLinks1_XMLLink" class="aHeaderXML" href="http://www.cnblogs.com/iyangyuan/rss"><img src="http://www.cnblogs.com/images/xml.gif" alt="订阅" /></a>--></li>
+<li><a id="MyLinks1_Admin" class="menu" rel="nofollow" href="http://i.cnblogs.com/">管理</a></li>
+</ul>
+		<div class="blogStats">
+			
+			
+<!--done-->
+随笔- 197&nbsp;
+文章- 0&nbsp;
+评论- 385&nbsp;
+
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			<a id="cb_post_title_url" class="postTitle2" href="http://www.cnblogs.com/iyangyuan/archive/2013/04/09/3011274.html">Java中的泛型方法</a>
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			<div id="cnblogs_post_body"><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+泛型是什么意思在这就不多说了，而Java中泛型类的定义也比较简单，例如：public class 
+Test&lt;T&gt;{}。这样就定义了一个泛型类Test，在实例化该类时，必须指明泛型T的具体类型，例
+如：Test&lt;Object&gt; t = new Test&lt;Object&gt;();，指明泛型T的类型为Object。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 但是Java中的泛型方法就比较复杂了。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 泛型类，是在实例化类的时候指明泛型的具体类型；泛型方法，是在调用方法的时候指明泛型的具体类型。</p>
+<p>&nbsp;</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color: #0000ff;"><strong>定义泛型方法</strong></span>语法格式如下：</p>
+<p><img style="display: block; margin-left: auto; margin-right: auto; width: 867px;" src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/09221852-b0d764f4340946baa1a063da5a0d993e.png" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color: #0000ff;"><strong>调用泛型方法</strong></span>语法格式如下：</p>
+<p><img style="display: block; margin-left: auto; margin-right: auto; width: 867px;" src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/09222350-5e3bf238febe4b2ebba99973c69e0054.png" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 说明一下，定义泛型方法时，必须在返回值前边加一个&lt;T&gt;，来声明这是一个泛型方法，持有一个泛型T，然后才可以用泛型T作为方法的返回值。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Class&lt;T&gt;的作用就是指明泛型的具体类型，而Class&lt;T&gt;类型的变量c，可以用来创建泛型类的对象。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+为什么要用变量c来创建对象呢？既然是泛型方法，就代表着我们不知道具体的类型是什么，也不知道构造方法如何，因此没有办法去new一个对象，但可以利用
+变量c的newInstance方法去创建对象，也就是利用反射创建对象。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+泛型方法要求的参数是Class&lt;T&gt;类型，而Class.forName()方法的返回值也是Class&lt;T&gt;，因此可以用
+Class.forName()作为参数。其中，forName()方法中的参数是何种类型，返回的Class&lt;T&gt;就是何种类型。在本例
+中，forName()方法中传入的是User类的完整路径，因此返回的是Class&lt;User&gt;类型的对象，因此调用泛型方法时，变量c的
+类型就是Class&lt;User&gt;，因此泛型方法中的泛型T就被指明为User，因此变量obj的类型为User。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 当然，泛型方法不是仅仅可以有一个参数Class&lt;T&gt;，可以根据需要添加其他参数。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 为什么要使用泛型方法呢？因为泛型类要在实例化的时候就指明类型，如果想换一种类型，不得不重新new一次，可能不够灵活；而泛型方法可以在调用的时候指明类型，更加灵活。</p>
+<p>&nbsp;</p>
+<p><strong>附：Java</strong><strong>泛型方法演示代码。</strong></p>
+<p><a href="http://pan.baidu.com/share/link?shareid=383851&amp;uk=1394763765" target="_blank">点击下载</a></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p></div><div style="display: block;" id="MySignature"><div id="AllanboltSignature"><div class="blog-signature"><p id="PSignature" style="line-height:20px;border-top: #e0e0e0 1px dashed; border-right: #e0e0e0 1px dashed; border-bottom: #e0e0e0 1px dashed; border-left: #e0e0e0 1px dashed; padding-top: 10px;padding-right: 10px;padding-bottom: 10px;padding-left: 60px; background: url(http://images.cnblogs.com/cnblogs_com/iyangyuan/434969/o_2010092119181033.png) #FFFAEA no-repeat 2% 50%; font-size:12px;">作者：<a href="http://www.cnblogs.com/iyangyuan" target="_blank">杨元</a><br>欢迎任何形式的转载，但请务必注明出处。</p></div></div></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="http://www.cnblogs.com/iyangyuan/category/434944.html">技术文章</a>, <a href="http://www.cnblogs.com/iyangyuan/category/434945.html">学习笔记</a></div>
+<div id="EntryTag">标签: <a href="http://www.cnblogs.com/iyangyuan/tag/Java%E6%B3%9B%E5%9E%8B/">Java泛型</a></div>
+<div id="blog_post_info"><div id="green_channel">
+绿色通道：
+<a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(3011274,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
+<a id="green_channel_follow" onclick="c_follow();" href="javascript:void(0);">关注我</a>
+<a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a><a id="green_channel_contact" href="http://msg.cnblogs.com/send/%E6%9D%A8%E5%85%83" target="_blank">与我联系</a>
+<a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/icon_weibo_24.png" alt=""></a>
+</div>
+<div id="author_profile">
+<div id="author_profile_info" class="author_profile_info">
+<a href="http://home.cnblogs.com/u/iyangyuan/" target="_blank"><img src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/20141011122109.png" class="author_avatar" alt=""></a>
+<div id="author_profile_detail" class="author_profile_info">
+<a href="http://home.cnblogs.com/u/iyangyuan/">杨元</a><br>
+<a href="http://home.cnblogs.com/u/iyangyuan/followees">关注 - 4</a><br>
+<a href="http://home.cnblogs.com/u/iyangyuan/followers">粉丝 - 255</a>
+</div>
+</div>
+<div class="clear"></div>
+<div id="author_profile_honor"></div>
+<div id="author_profile_follow">
+    <a href="javascript:void(0);" onclick="c_follow();return false;">+加关注</a>
+</div>
+</div>
+<div id="div_digg">										
+    <div class="diggit" onclick="votePost(3011274,'Digg')">
+        <span class="diggnum" id="digg_count">2</span>
+    </div>
+	<div class="buryit" onclick="votePost(3011274,'Bury')"> 
+		<span class="burynum" id="bury_count">0</span>
+	</div>
+	<div class="clear"></div>	
+	<div class="diggword" id="digg_tips">
+    (请您对文章做出评价)
+    </div>	
+</div>
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="http://www.cnblogs.com/iyangyuan/archive/2013/03/31/2992395.html" class="p_n_p_prefix">« </a> 上一篇：<a href="http://www.cnblogs.com/iyangyuan/archive/2013/03/31/2992395.html" title="发布于2013-03-31 22:11">别了，我的执着</a><br><a href="http://www.cnblogs.com/iyangyuan/archive/2013/04/15/3021341.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/iyangyuan/archive/2013/04/15/3021341.html" title="发布于2013-04-15 00:55">程序模拟网易163邮箱注册帮助文档</a><br></div>
+</div>
+
+
+		</div>
+		<div class="postDesc">posted @ <span id="post-date">2013-04-09 22:29</span> <a href="http://www.cnblogs.com/iyangyuan/">杨元</a> 阅读(<span id="post_view_count">36591</span>) 评论(<span id="post_comment_count">7</span>)  <a href="http://i.cnblogs.com/EditPosts.aspx?postid=3011274" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(3011274);return false;">收藏</a></div>
+	</div>
+	<script type="text/javascript">var allowComments=true,isLogined=false,cb_blogId=135156,cb_entryId=3011274,cb_blogApp=currentBlogApp,cb_blogUserGuid='3fb40fff-1135-e211-aa8f-842b2b196315',cb_entryCreatedDate='2013/4/9 22:29:00';loadViewCount(cb_entryId);</script>
+	
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"><div id="comments_pager_top"></div>
+<br>
+<div class="feedback_area_title">评论列表</div>
+<div class="feedbackNoItems"></div>	
+
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="#2865026" class="layer">#1楼</a><a name="2865026" id="comment_anchor_2865026"></a>  <span class="comment_date">2014-01-20 21:58</span> <a id="a_comment_author_2865026" href="http://www.cnblogs.com/xiaoluo501395377/" target="_blank">xiaoluo501395377</a> <a href="http://msg.cnblogs.com/send/xiaoluo501395377" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2865026" class="blog_comment_body">言简意赅。。。赞一个</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2865026,'Digg',this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2865026,'Bury',this)">反对(0)</a></div><span id="comment_2865026_avatar" style="display:none;">http://pic.cnblogs.com/face/432441/20130521121358.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="#2866687" class="layer">#2楼</a><a name="2866687" id="comment_anchor_2866687"></a>  <span class="comment_date">2014-01-23 11:12</span> <a id="a_comment_author_2866687" href="http://www.cnblogs.com/wweichinese/" target="_blank">子非余</a> <a href="http://msg.cnblogs.com/send/%E5%AD%90%E9%9D%9E%E4%BD%99" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2866687" class="blog_comment_body">清晰多了</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2866687,'Digg',this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2866687,'Bury',this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="#2942788" class="layer">#3楼</a><a name="2942788" id="comment_anchor_2942788"></a>  <span class="comment_date">2014-05-20 17:11</span> <a id="a_comment_author_2942788" href="http://home.cnblogs.com/u/566447/" target="_blank">wangxiang243</a> <a href="http://msg.cnblogs.com/send/wangxiang243" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2942788" class="blog_comment_body">TF_R_TML_ARCH.TERMINAL_STATE 空闲的</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2942788,'Digg',this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2942788,'Bury',this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="#2967304" class="layer">#4楼</a><a name="2967304" id="comment_anchor_2967304"></a>  <span class="comment_date">2014-06-18 22:38</span> <a id="a_comment_author_2967304" href="http://www.cnblogs.com/twlkyao/" target="_blank">twlkyao</a> <a href="http://msg.cnblogs.com/send/twlkyao" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2967304" class="blog_comment_body">简单明了。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2967304,'Digg',this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2967304,'Bury',this)">反对(0)</a></div><span id="comment_2967304_avatar" style="display:none;">http://pic.cnblogs.com/face/197426/20140509111349.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="#3077439" class="layer">#5楼</a><a name="3077439" id="comment_anchor_3077439"></a>  <span class="comment_date">2014-12-03 18:12</span> <a id="a_comment_author_3077439" href="http://www.cnblogs.com/asiawang/" target="_blank">AsiaWang</a> <a href="http://msg.cnblogs.com/send/AsiaWang" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_3077439" class="blog_comment_body">6666666</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3077439,'Digg',this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3077439,'Bury',this)">反对(0)</a></div><span id="comment_3077439_avatar" style="display:none;">http://pic.cnblogs.com/face/683217/20141019203025.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="#3079371" class="layer">#6楼</a><a name="3079371" id="comment_anchor_3079371"></a>  <span class="comment_date">2014-12-05 17:38</span> <a id="a_comment_author_3079371" href="http://www.cnblogs.com/leestar54/" target="_blank">leestar54</a> <a href="http://msg.cnblogs.com/send/leestar54" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_3079371" class="blog_comment_body">豁然开朗~迷糊了好久</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3079371,'Digg',this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3079371,'Bury',this)">反对(0)</a></div><span id="comment_3079371_avatar" style="display:none;">http://pic.cnblogs.com/face/u413024.jpg?id=26234158</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="#3177152" class="layer">#7楼</a><a name="3177152" id="comment_anchor_3177152"></a><span id="comment-maxId" style="display:none;">3177152</span><span id="comment-maxDate" style="display:none;">2015/5/6 12:56:20</span>  <span class="comment_date">2015-05-06 12:56</span> <a id="a_comment_author_3177152" href="http://www.cnblogs.com/fulai/" target="_blank">fulai_xy</a> <a href="http://msg.cnblogs.com/send/fulai_xy" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_3177152" class="blog_comment_body">好</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3177152,'Digg',this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3177152,'Bury',this)">反对(0)</a></div>
+			</div>
+		</div>
+	<div id="comments_pager_bottom"></div></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login('commentform');">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="site_nav_under"><a href="http://www.cnblogs.com/" target="_blank" title="开发者的网上家园">博客园首页</a><a href="http://q.cnblogs.com/" target="_blank" title="程序员问答社区">博问</a><a href="http://news.cnblogs.com/" target="_blank" title="IT新闻">新闻</a><a href="http://home.cnblogs.com/ing/" target="_blank">闪存</a><a href="http://job.cnblogs.com/" target="_blank">程序员招聘</a><a href="http://kb.cnblogs.com/" target="_blank">知识库</a></div>
+<div id="opt_under_post"></div>
+<script type="text/javascript">
+    var enableGoogleAd = canShowAdsense(); 
+    fixPostBodyFormat();
+</script>
+<script type="text/javascript">
+  var googletag = googletag || {};
+  googletag.cmd = googletag.cmd || [];
+    (function () {
+        if (enableGoogleAd) {
+            var gads = document.createElement('script');
+            gads.async = true;
+            gads.type = 'text/javascript';
+            var useSSL = 'https:' == document.location.protocol;
+            gads.src = (useSSL ? 'https:' : 'http:') +
+              '//www.googletagservices.com/tag/js/gpt.js';
+            var node = document.getElementsByTagName('script')[0];
+            node.parentNode.insertBefore(gads, node);
+        }
+  })();
+</script>
+<script type="text/javascript">
+    try {
+        if (enableGoogleAd) {
+            googletag.cmd.push(function() {
+            googletag.defineSlot('/1090369/cnblogs_blogpost_C2', [468, 60], 'div-gpt-ad-1433581717989-0').addService(googletag.pubads());
+            googletag.defineSlot('/1090369/cnblogs_blogpost_C1_sitehome', [300, 250], 'div-gpt-ad-1433581717989-1').addService(googletag.pubads());
+            googletag.pubads().enableSingleRequest();
+            googletag.pubads().collapseEmptyDivs();
+            googletag.enableServices();
+            });
+        };
+    } catch (e) { }
+</script>
+<div id="google_ad_c1" class="c_ad_block">
+    <div id="div-gpt-ad-1433581717989-1" style="height:250px; width:300px;">
+    <script type="text/javascript">
+        try {
+            if (enableGoogleAd) {
+                googletag.cmd.push(function () { googletag.display('div-gpt-ad-1433581717989-1'); });
+            } else {
+                $('#div-gpt-ad-1433581717989-1').hide();
+            }
+    } catch (e) { }
+    </script>
+    <div style="border: 0pt none;" id="google_ads_iframe_/1090369/cnblogs_blogpost_C1_sitehome_0__container__"><iframe src="javascript:&quot;<html><body style='background:transparent'></body></html>&quot;" style="border: 0px none; vertical-align: bottom;" marginheight="0" marginwidth="0" scrolling="no" name="google_ads_iframe_/1090369/cnblogs_blogpost_C1_sitehome_0" id="google_ads_iframe_/1090369/cnblogs_blogpost_C1_sitehome_0" frameborder="0" height="250" width="300"></iframe></div><iframe src="javascript:&quot;<html><body style='background:transparent'></body></html>&quot;" style="border: 0px none; vertical-align: bottom; visibility: hidden; display: none;" marginheight="0" marginwidth="0" scrolling="no" name="google_ads_iframe_/1090369/cnblogs_blogpost_C1_sitehome_0__hidden__" id="google_ads_iframe_/1090369/cnblogs_blogpost_C1_sitehome_0__hidden__" frameborder="0" height="0" width="0"></iframe></div>
+</div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="http://news.cnblogs.com/n/524840/" target="_blank">Reddit危机：开放社区之痛</a><br> ·  <a href="http://news.cnblogs.com/n/524839/" target="_blank">股市暴涨暴跌另一个更致命的影响，被高估的人民币大幅贬值</a><br> ·  <a href="http://news.cnblogs.com/n/524838/" target="_blank">NASA合成图像显示太阳像橙色弹珠</a><br> ·  <a href="http://news.cnblogs.com/n/524837/" target="_blank">格力手机开机画面曝光 董明珠头像惊呆网友</a><br> ·  <a href="http://news.cnblogs.com/n/524836/" target="_blank">苹果挽救iPod出招 不排除提供联网能力</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="google_ad_c2" class="c_ad_block">
+<div id="div-gpt-ad-1433581717989-0" style="height:60px; width:468px;">
+<script type="text/javascript">
+try {
+    if (enableGoogleAd) {
+        googletag.cmd.push(function () { googletag.display('div-gpt-ad-1433581717989-0'); });
+    } else {
+        $('#div-gpt-ad-1433581717989-0').hide();
+    }
+} catch (e) { }
+</script>
+<div style="border: 0pt none;" id="google_ads_iframe_/1090369/cnblogs_blogpost_C2_0__container__"><iframe src="javascript:&quot;<html><body style='background:transparent'></body></html>&quot;" style="border: 0px none; vertical-align: bottom;" marginheight="0" marginwidth="0" scrolling="no" name="google_ads_iframe_/1090369/cnblogs_blogpost_C2_0" id="google_ads_iframe_/1090369/cnblogs_blogpost_C2_0" frameborder="0" height="60" width="468"></iframe></div></div>
+</div>
+<div id="under_post_kb"><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/511067/" target="_blank">编程王道，唯“慢”不破</a><br> ·  <a href="http://kb.cnblogs.com/page/524473/" target="_blank">程序员要有持续产出</a><br> ·  <a href="http://kb.cnblogs.com/page/517172/" target="_blank">代码审查过程</a><br> ·  <a href="http://kb.cnblogs.com/page/523508/" target="_blank">所谓软件工程</a><br> ·  <a href="http://kb.cnblogs.com/page/519939/" target="_blank">也谈怎么学好英语这件小事</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+$(function () {
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 200);
+});
+</script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	<div id="blog-news"><div style="display: none;" id="yy-notice">
+  <p>本博客最新支持Ctrl+F11全屏浏览文章</p>
+</div><div id="profile_block"><span class="yy-head"></span>昵称：<a href="http://home.cnblogs.com/u/iyangyuan/">杨元</a><br>园龄：<a href="http://home.cnblogs.com/u/iyangyuan/" title="入园时间：2012-11-23">2年7个月</a><br>粉丝：<a href="http://home.cnblogs.com/u/iyangyuan/followers/">255</a><br>关注：<a href="http://home.cnblogs.com/u/iyangyuan/followees/">4</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="cnblogs.UserManager.FollowBlogger('3fb40fff-1135-e211-aa8f-842b2b196315')">+加关注</a></div></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			<div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk" type="text">&nbsp;<input onclick="zzk_go()" value="找找看" id="btnZzk" class="btn_my_zzk" type="button"></div>
+
+</div>
+</div>
+
+</div><div id="sidebar_toptags" class="sidebar-block">
+<div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+<li><a href="http://www.cnblogs.com/iyangyuan/tag/JavaScript/">JavaScript</a>(30)</li><li><a href="http://www.cnblogs.com/iyangyuan/tag/Handlebars.js/">Handlebars.js</a>(15)</li><li><a href="http://www.cnblogs.com/iyangyuan/tag/Java/">Java</a>(7)</li><li><a href="http://www.cnblogs.com/iyangyuan/tag/jQuery/">jQuery</a>(7)</li><li><a href="http://www.cnblogs.com/iyangyuan/tag/html/">html</a>(5)</li><li><a href="http://www.cnblogs.com/iyangyuan/tag/CSS/">CSS</a>(4)</li><li><a href="http://www.cnblogs.com/iyangyuan/tag/ajax/">ajax</a>(4)</li><li><a href="http://www.cnblogs.com/iyangyuan/tag/JsRender/">JsRender</a>(3)</li><li><a href="http://www.cnblogs.com/iyangyuan/tag/%E7%AE%97%E6%B3%95/">算法</a>(2)</li><li><a href="http://www.cnblogs.com/iyangyuan/tag/box/">box</a>(2)</li><li><a href="http://www.cnblogs.com/iyangyuan/tag/">更多</a></li>
+</ul>
+</div></div><div id="sidebar_categories">
+</div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<div class="catListView">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div id="TopDiggPostsBlock"><ul><li><a href="http://www.cnblogs.com/iyangyuan/archive/2013/03/27/2983813.html">1. 经验分享：CSS浮动(float,clear)通俗讲解(176)</a></li><li><a href="http://www.cnblogs.com/iyangyuan/archive/2013/03/05/2943660.html">2. 全网首发：原创SQL数据库同步工具(18)</a></li><li><a href="http://www.cnblogs.com/iyangyuan/p/4190773.html">3. 原生JavaScript事件详解(7)</a></li><li><a href="http://www.cnblogs.com/iyangyuan/archive/2013/06/01/3111704.html">4. CSS从大图中抠取小图完整教程(background-position应用)(7)</a></li><li><a href="http://www.cnblogs.com/iyangyuan/p/4631696.html">5. 触摸java常量池(6)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		
+<!--done-->
+Copyright ©2015 杨元
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<!-- 公共js Begin-->
+<script src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/iyangyuan.js" type="text/javascript"></script>
+<!--公共js End-->
+<!-- Canvas气泡 Begin-->
+<script src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/bubble.js" type="text/javascript"></script>
+<!--Canvas气泡 End-->
+<!-- 全屏 Begin-->
+<script src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/fullscreen.js" type="text/javascript"></script><script src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/check_359604.js" type="text/javascript" async=""></script><iframe class="yscolrauagxzqkjutxkt" style="visibility: hidden; display: none;" src="Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B%E6%96%B9%E6%B3%95%20-%20%E6%9D%A8%E5%85%83%20-%20%E5%8D%9A%E5%AE%A2%E5%9B%AD_files/container.html"></iframe>
+<!--全屏 End-->
+<!--PageEndHtml Block End-->
+
+
+</body></html>

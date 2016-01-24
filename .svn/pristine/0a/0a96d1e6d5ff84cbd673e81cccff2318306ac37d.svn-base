@@ -1,0 +1,4 @@
+1、俩种启动tomcat的方式，使用startup.sh（关闭用shutdown.sh），另一种方式，使用catalina.sh start（关闭使用catalina.sh stop），其实startup内部就是调用catalina;windows下的tomcat貌似不用敲后面的bat（试一下）。
+2、大多数webserver监听的是80端口
+3、tomcat启动不了，可以使用catalina.sh debug,然后后面输入一个run。
+4、html是一种xml，xhtml是一种符合xml标准的html

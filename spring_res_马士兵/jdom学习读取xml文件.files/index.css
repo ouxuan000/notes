@@ -1,0 +1,72 @@
+INPUT.ButtonSmall {
+	BORDER-RIGHT: 0px; BACKGROUND-POSITION: 0px 0px; BORDER-TOP: 0px; FONT-SIZE: 12px; BACKGROUND-ATTACHMENT: fixed; BACKGROUND-IMAGE: url(../images/buttonbs.jpg); BORDER-LEFT: 0px; WIDTH: 50px; CURSOR: auto; COLOR: #005bb7; BORDER-BOTTOM: 0px; BACKGROUND-REPEAT: no-repeat; FONT-FAMILY: Tahoma; HEIGHT: 20px
+}
+.FrameTeitle {
+	FONT: bold 12px "Tahoma"; COLOR: #ffffff
+}
+A {
+	FONT-SIZE: 12px; COLOR: #0066ff; FONT-FAMILY: "Tahoma"; TEXT-DECORATION: none
+}
+A:hover {
+	FONT-SIZE: 12px; LEFT: 1px; COLOR: #80b3ff; FONT-FAMILY: Tahoma; POSITION: relative; TOP: 1px; TEXT-DECORATION: none
+}
+BODY {
+	FONT-SIZE: 12px; COLOR: #666666; FONT-FAMILY: Tahoma; TEXT-DECORATION: none
+}
+TD {
+	FONT-SIZE: 12px; FONT-FAMILY: "Tahoma"; TEXT-DECORATION: none
+}
+.Active {
+	BORDER-RIGHT: #0066ff 1px dashed; BORDER-TOP: #0066ff 1px dashed; FONT-SIZE: 12px; OVERFLOW: hidden; BORDER-LEFT: #0066ff 1px dashed; COLOR: #0066ff; BORDER-BOTTOM: #0066ff 1px dashed; FONT-FAMILY: "Tahoma"; TEXT-DECORATION: none
+}
+.ActiveButton {
+	BORDER-RIGHT: #0066ff 1px dotted; BORDER-TOP: #0066ff 1px dotted; FONT-SIZE: 12px; BORDER-LEFT: #0066ff 1px dotted; COLOR: #0066ff; BORDER-BOTTOM: #0066ff 1px dotted; FONT-FAMILY: "Tahoma"; BACKGROUND-COLOR: #99ccff; TEXT-DECORATION: none
+}
+.white {
+	FONT-SIZE: 12px; COLOR: #ffffff; FONT-FAMILY: "Tahoma"; TEXT-DECORATION: none
+}
+.Bule {
+	FONT-SIZE: 12px; COLOR: #0066ff; FONT-FAMILY: "Tahoma"; TEXT-DECORATION: none
+}
+.WebStyle1 {
+	BORDER-RIGHT: #0066ff 1px dashed; BORDER-TOP: 0px; FONT-SIZE: 12px; BORDER-LEFT: #0066ff 1px dashed; BORDER-BOTTOM: 0px; FONT-FAMILY: "Tahoma"; TEXT-DECORATION: none
+}
+.WebStyle2 {
+	BORDER-LEFT: #0066ff 1px dashed
+}
+.WebStyle3 {
+	BORDER-TOP: #0066ff 1px dashed
+}
+.LTR {
+	BORDER-RIGHT: #0071ff 1px dashed; BORDER-TOP: #0071ff 1px dashed; FONT-SIZE: 12px; BORDER-LEFT: #0071ff 1px dashed; BORDER-BOTTOM: #0071ff 1px dashed; FONT-FAMILY: "Tahoma"; BACKGROUND-COLOR: #ffffff; TEXT-DECORATION: none
+}
+.Gery {
+	FONT-SIZE: 12px; COLOR: #999999; FONT-STYLE: normal; FONT-FAMILY: "Tahoma"; TEXT-DECORATION: none
+}
+.BorderAll {
+	BORDER-RIGHT: #0066ff 1px dashed; BORDER-TOP: #0066ff 1px; BORDER-LEFT: #0066ff 1px dashed; BORDER-BOTTOM: #0066ff 1px dashed
+}
+.ArticleTeitle {
+	BORDER-RIGHT: #0066ff 1px; BORDER-TOP: #0066ff 1px solid; BORDER-LEFT: #0066ff 1px; BORDER-BOTTOM: #0066ff 1px solid
+}
+.SmallTeitle {
+	FONT-WEIGHT: bolder; FONT-SIZE: 12px; COLOR: #333333; FONT-FAMILY: "Tahoma"; TEXT-DECORATION: none
+}
+.Article {
+	FONT-SIZE: 12px; COLOR: #333333; FONT-FAMILY: "Tahoma"; TEXT-DECORATION: none
+}
+.ArticleCode {
+	BORDER-RIGHT: 5px; BORDER-TOP: 5px; FONT-SIZE: 12px; Z-INDEX: 5; LEFT: 5px; VISIBILITY: inherit; BORDER-LEFT: 5px; CLIP: rect(auto auto auto 5px); COLOR: #333333; BORDER-BOTTOM: 5px; FONT-STYLE: normal; FONT-FAMILY: "Tahoma"; POSITION: static; BACKGROUND-COLOR: #eeeeee
+}
+.ArticlePicture {
+	BORDER-RIGHT: #333333 1px solid; BORDER-TOP: #333333 1px solid; BORDER-LEFT: #333333 1px solid; BORDER-BOTTOM: #333333 1px solid
+}
+A.noMove {
+	FONT-SIZE: 12px; COLOR: #0066ff; FONT-FAMILY: "Tahoma"; TEXT-DECORATION: none
+}
+A.noMove:hover {
+	FONT-SIZE: 12px; RIGHT: 0px; LEFT: 0px; COLOR: #80b3ff; BOTTOM: 0px; FONT-FAMILY: Tahoma; POSITION: relative; TOP: 0px; TEXT-DECORATION: none
+}
+.datetime {
+	FONT-SIZE: 9px; COLOR: #999999; FONT-FAMILY: Tahoma; TEXT-DECORATION: none
+}

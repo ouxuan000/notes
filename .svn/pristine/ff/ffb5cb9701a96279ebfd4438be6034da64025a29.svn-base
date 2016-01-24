@@ -1,0 +1,150 @@
+﻿1、servlet中一般不会去重写service方法，因为这个方法会默认帮我们调用doGet（）{}和doPost（）{}方法！以什么方式请求，就调用什么方法
+2、什么时候是get方式：直接在地址栏中敲地址，使用的get方式
+3、什么时候是post方式：在form表单中，点提交，而且form的method属性设置为post
+4、servlet是在服务器段运行的小程序（并不仅仅在web），我们需要一个在http服务器段运行的程序，大材小用了！service方法被容器调用（所有类型的服务器）。所以我们可以使用实现了servlet接口的httpservlet类，继承了这个类，就相当于也实现了这个接口
+5、j2ee里，在一个服务器里，只new一个servlet，init（）{}方法只执行一次
+6、destroy（）{}方法只有在整个application停止的时候才会被调用
+7、servletconfig ：初始化时候告诉servlet时候，告诉servlet你是怎么配起来的，保存着这个servlet的配置信息（web.xml）
+
+8、enumeration和interiter都是遍历集合用的，不过interater更加先进
+
+9、200表示正常处理，404表示页面找不着，403禁止访问，500服务器内部错误。
+10、再jsp的书中，在webapp中建立新的子目录，访问其中的文件，只要添加路径即可，并不需要像马氏兵第二将所说，需要必须有web_Inf文件夹，为什么？？
+我用的是html文件，难道是jsp文件才需要这个
+11、servlet中url-pattern永远以/开头，/是相对于url地址的webapps的根路径，
+12 、cookie服务器可以向客户端写东西；只能是文本内容；客户端可以阻止服务器写入；只能拿自己webapps写入的东西；浏览器都有自己独一无二的编号session
+13、request：封装了客户端到服务器段的一系列请求，服务器用这个对象告诉servlet内容；response：服务器端发送给客户端的东西
+14、cookie分俩种，session-cookie相当于放到内存里，只要窗口不关闭它就存活，但是在文件中找不到，一旦窗口关闭就不存在了（注意：从一个窗口中，new一个新窗口，相当于原窗口的孩子，也可以看到父亲的窗口。）！另一种是写到文件中，persistent-cookie，关闭浏览器后还可以找到！
+15、一个servlet或jsp设置的cookie能够被同一个目录中或者子路径下面的servlet或者jsp读到（注意：这里的路径指的是url）
+16、session和cookie的重要区别就是，cookie记录在客户端，而session记录在服务器端
+17、服务器建立的session只能由同一个浏览器，或者其子窗口访问！
+18、××××session的俩种实现方式：1、通过cookie实现；2、通过url重写实现×××××
+19、规则：
+	如果浏览器支持cookie，创建session的时候，会把sessionid保存在cookie里
+	如果不支持cookie，必须自己编程使用url重写分方式实现session
+20、response方法把cookie写到客户端，使用request拿到客户端的cookie  
+	resquest.getCookies();//返回值为cookie数组
+21、所有的class文件都在classes文件下面，但是url-pattern里面的路径可以随便写，它都能找到！对于cookie，能找到路径是他同级，或者子路径的cookie（意思就是说，创建cookie的哪个类，setcookies设置的路径，必须是showcookies的同级路径，或者是父路径）
+22、访问页面创建的session会被写入到cookie中，如果禁止了cookie，那么每次访问页面都认为是新的访问，建立的sessionid各不相同
+23、session名字永远是string类型，值可以是任何类型
+24、cookie里面的东西，只有客户端才能访问；session里面的，每一个只能访问自己对应的；多个客户端都可以访问他
+25、每一个webapplication的运行环境称为一个context
+26 、组建就是一系列的类综合在一起，对外提供服务！
+27、javabean俩种：
+	狭义： sun规定的一系列标准，具有界面形式；
+	广义：普通的java类，（要求：属性名字第一个字母都是小写，这个属性必须具有get（）和set（）方法，必须private类型）
+	为什么要get set方法，面向对象原则是要隐藏细节，该封装的东西封装起来，不让别人访问！而get（），set（）就是为了让读和改私有属性。
+28、jsp具有一切servlet的特点，但是第一次访问需要先编译成servlet，所以会慢一点
+
+********* 在myeclipse写servlet程序的时候需要引入tomcat中的servlet-api.jar文件，具体见视频************* 
+mysql视频教程中提到如何在官网下载mysql-connector
+29、Directive叫做编译期间指令
+30、编译期间的指令标记include，会在编译期间加入到jsp文件中，这样效率会更高，但是也有弊端，就是不能直接在路径后面传递参数。
+31、jsp标签中flush=true值得是另外一个网页赶快输出，一般默认都设置为true。
+31、如果俩个标签直接没有内容，可以在标签后面的尖括号前加一个/表示结束 例如<jsp:include xxxxx />
+32、new java.until.Date().toLocalString（）转换成本地字符串
+33、forward和sendRedirect的区别（相当重要）
+	首先、forward跳转页面后，地址栏显示的路径还是原来的路径，而且在原来页面传递参数，跳转的页面可以接受到（这里使用了在地址栏传参数，name=value的形式）；而sendRedirect跳转页面后，路径也会跟着变化到跳转到的页面，原来页面的参数不能传递到这个页面。这里考虑，使用表单提交也可以算一种跳转方式吧
+	其次、forward跳转后，俩个页面其实是一个request，而sendRedirect跳转后是俩个不同的request，所以不能传值。
+34、<%@include file="date.jsp" %>和<jsp:include page="date.jsp?aaa=action" flush="true" />，前者不能在jsp后面直接？跟参数（可以在地址栏中输入参数），而后面的可以直接跟，也可以地址栏中输入。
+35、html中的form表单也可以提交到jsp页面中，比如compute.html
+36、在地址栏传参数时候，前面的链接是哪个，就传给哪个页面，33中，因为forward中，request是用的一个，所以跳转过去的页面也能得到！而sendredirect得不到
+37、javaBean中，type用来制定定义的类的类型，注意，不能使用裸体类，必须把bean放在classes文件里
+******javaBean不需要在xml中配置,使用<jsp:useBean>的方式，在前面不需要引入.class文件********
+38、jsp简名教程  scope中作用域：从小到大 pagecontext request session application
+	
+——————————————————————————————————————————————————————————————————————————————————————————————
+<jsp:useBean id='u1' class="com.bjsxt.user" scope = "request">(注意，这里的包名即使引入了也不能省略)
+上面的等价于这样写<%   User user = (User)request.getAttrivute("u1");
+			if(user = null){
+				request.setAttribute("u1", new User())
+
+}%>
+			
+<jsp:setProperty property="name" name = "u1" value="zhangsan">
+ 等价于
+User user = (User)request.getAttrivute("u1");
+user.setName("zhangsan");
+-------------------------------------------------------------------------------------------------
+
+39、<jsp:setProperty property="name" name = "u1" value="zhangsan">在bean里面不一定要有name这个属性，只要有setName()这个方法就可以了。
+40、<jsp:setProperty property="*" name = "u1">自动根据表单进行匹配，提交过来的页面和bean中的属性相对应
+41、×××马士兵第28讲，转码问题，如果前面使用了useBean，定义了id=u1，后面是否可以使用，u1.getName() or u1.setName()方法
+42、使用转码的方式是从最根本上解决乱码的方法，前提你要知道原来的编码，和你要转换的编码！udp传输，原来编码是iso8859-1
+	String s = request.getParameter("name");
+	new String(s.getBytes("iso8859-1"),"gbk");
+43、使用request.setCharacterEncoding("gbk");转码，如果是request方式提交过了就用request。同理
+44、写出jsp常用内置对象，及其方法
+
+45、
+-------------------------------------------------------------------------------------------------------
+	××××××××使用request.setCharacterEncoding和使用response.setContentType区别×××××××××
+	request.setCharacterEncoding（）是设置从request中取得的值或从数据库中取出的值
+	response.setContentType("text/xml;charset=GBK")是设置页面中为中文编码
+	前者是设置动态文字（参数，数据库），后者设置页面静态文字
+
+	response.setContentType指定 HTTP 响应的编码,同时指定了浏览器显示的编码.
+	response.setCharacterEncoding设置HTTP 响应的编码,如果之前使用response.setContentType设置了编码格式,则使用response.setCharacterEncoding指定的编码格式覆盖之前的设置.
+	与response.setContentType相同的是,调用此方法,必须在getWriter执行之前或者response被提交之前
+
+补充:
+问题1 ：从Jsp页面页面传递参数到Servlet显示中文乱码
+解决办法：
+
+如果是post 方法提交 则加入以下代码：
+request.setCharacterEncoding("GBK");//注意首先保证编码一至，jsp页面用什么编码在此就用什么编码(GBK/GB2312等)，此代码只对post提交方式有效
+response.setContentType("text/xml;charset=GBK")是设置页面中为中文编码
+备注：以上两行代码必须放在PrintWriterout=response.getWriter(); 之前
+get 方法提交
+如变量name 用
+String name = new String(request.getParameter("name").getBytes("ISO-8859-1"),"GBK");
+
+问题2：解决get方式提交乱码问题:
+
+修改tomcat server.xml 文件，加上红色部分代码
+
+<Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443"
+               URIEncoding="GBK"/>
+
+备注：以上字符编码格式根据自己需要设定，只要保持一致即可
+
+-------------------------------------------------------------------------------------------------------------------------
+
+46、对于javabean中page request session application范围的一些总结：
+	page：相当于局部变量，只要页面发生跳转就没用了
+	request：如果是foward跳转，那么对下一个页面request还是同一个，相当于还有效，如果是sendRddirect（）那么，下一个页面是一个新的request，无效
+	session：只要在一个会话周期内有效，是子窗口，不关闭浏览器同一个id的session就是同一个，见session.jsp；
+
+47、PreparedStatement接口是Statement接口扩展出来的，如果需要重复执行某一个sql语句，使用PreparStatement效率高；
+
+48、使用各种数据库是，入mysql和oracle，不使用myeclipse等工具，手动搭建webapps，记得要吧jdbc驱动器。例如mysqljdbc.jar或者oracle的classes12.jar放到tomcat的lib目录下.例如tomcat_8.0.8\common\lib 
+
+49、对于HTML窗体中的文本框，文本区域，组合框（组合框就是可以多选的列表框，在select里加有multiple属性，就变成组合框了），列表框、复选框和单选按钮而言，可以随意制定value属性。对于文本域和文本区域，value属性制定在文本域和文本区域中显示的默认值、用户也可以输入新的值来替换他，对于组合框、列表框，复选框和单选按钮来说，value属性指定从getParameter和getParameterValues方法中返回的值。如果没有位组合框或者列表框value属性指定值，它返回从组合框或列表框中选定的字符；如果没有位单选按钮或这复选框的value属性指定值，对于选定的单选按钮或者复选框返回字符串on、对于没有选定的返回null。
+
+50、记得在classpath中添加j2ee的类库，因为sun只是提供了一系列的标准，谁实现了标准就用谁的、tomcat实现了标准、所以我们使用tomcat的servlet类库，calsspath环境变量就是指定了我们需要使用到的类库所存放的路径。我们需要吧tomcat_8.0.8\common\lib\servlet_api.jar包放到lib目录下。
+
+51、form表单提交的时候，不管是post还是get方式，都会把表单中的信息打包成为。类似href中xxx.html?username = xxx & password = xxx;区别是一个隐藏参数，一个显示参数。
+
+52、在ubuntu下，使用myeclipse开发jsp项目，如果有表单，action就不能在用？添加参数了，否者提交页面通过request访问不到该参数。
+
+53、<!--  特别注意，使用xxx? op=xxx传递参数时候，op和等号直接，还有等号和参数之间不能有空格，否则会出错，切记-->
+   	<a href = "<%=request.getContextPath()%>/user?op=startUser&id=<%=u.getId()%>" >停用</a>
+
+54、request也可以得到form表单中select的值，只需要在select标签中加入name属性即可，option加不加value都可以得到选择的值，如果是多选需要加入multiple
+
+55、分页的设计思路，首先肯定是有一个页码对象。里面包含记录总条数，总页数，页码，数据（数据是放在集合中，集合又放在pager中），每页显示条数。
+	如果一个页面用到了分页，那么上一页，下一页，以及通过页码改变时，传回去的数据，必须与第一次访问这个页面时，那个servlet方法所包含的数据一致。
+	所以如果一个servlet传给一个jsp页面一个页码对象，那么这个servlet得到的与分页相关的信息也必须一并传给jsp页面，以便回调的时候，继续使用这些数据。
+
+分页自己的小技巧：	
+	分页合不合逻辑可以用句子来尝试念，比如请销假系统中，查找结果，查找条件是：我要找‘状态’是‘请假’的学生记录，那么它会通过form表单传一个condition是状态，keyword是请假的俩个参数给servlet，然后servlet通过list打包一个page对象，第一次访问默认返回第一页的信息，servlet得到从list返回的page对象，然后它将这个page对象给了searchresult页面。如果光是给一个page对象，在searchresult.jsp页面中如果修改页码的话，会出问题的。如果不会解决我们可以这样试着读一下，比如我要显示第二页，读作：我要显示‘状态’是‘请假’的学生的第二页的记录。servlet知道你是要显示第二页，但是它怎么知道你要显示第二页的什么呢，所以你必须把‘状态’和‘请假’俩个字符串传过去即condition和keyword传过去。（get方式不支持汉字，第一次通过表单传过去的汉字已经转换了，我们直接使用转换的结果）。
+
+56、form表单，如果使用get方式，action后面路径中？后面的参数不会被识别，如果get方式要使用参数，可以使用表单域，使用post方式随意。
+
+57、使用project视图 deployment部署的意思。
+58、php和jsp的最大区别：php（小刀）做半年和3年没区别，jsp（菜刀）发展空间更大。
+
+
+

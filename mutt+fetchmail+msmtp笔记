@@ -1,0 +1,79 @@
+1、执行fetchmail -v报错，must have no more than -rwx
+解决方式:配置文件.fetchmailrc的文件权限设置为600
+
+2、注意:如果你在这个文件中写上了密码用户名之类的东西，那也请你注意权限问题。
+
+Linux下使用mutt、fetchmail、msmtp、procmail收取管理邮件
+
+发布时间：July 14, 2012 // 分类：Mail // No Comments
+
+这几个软件分工如下：
+mutt：用户客户端MTA，用于邮件管理
+fetchmai：连接邮件服务器收取邮件
+msmtp：通过smtp协议发送邮件
+procmail：邮件投递代理MDA，用于邮件投递或邮件过滤
+
+mutt配置：
+	
+cat ~/.muttrc
+set sendmail="/usr/local/msmtp/bin/msmtp" #MTA
+set use_from
+set reverse_name=yes
+set editor="vim" #邮件编辑器
+set folder = "/root/Mail" #邮件目录
+set mbox_type = Maildir #邮件目录类型
+set spoolfile = "/root/Mail/inbox" #收件箱
+set move=yes #移动已读邮件
+set mbox=~/Mail/seen #放已读邮件
+set record=~/Mail/sent #放已发邮件
+set postponed=~/Mail/draft #放草稿
+set include #回复调用原文
+auto_view text/html #自动显示html
+set charset="utf-8" #编码
+
+默认mutt查看html邮件以htmlview显示乱码，配置为以w3m查看：
+	
+yum install w3m
+cat ~/.mailcap 
+text/html ; w3m -T text/html -I %{charset} -dump %s ;nametemplate=%s.html ; copiousoutput
+
+fetchmail配置：
+	
+cat ~/.fetchmailrc 
+set logfile /var/log/fetchmail.log
+poll smtp.www.haiyun.me
+proto pop3
+port 995
+user 'user'
+password 'passwd'
+mda "/usr/bin/procmail -f %F -d %T";
+ssl 
+keep
+set daemon 60
+
+msmtp配置：
+	
+cat ~/.msmtprc
+logfile /var/log/msmtp.log
+account default
+host smtp.www.haiyun.me
+port 587
+from admin@www.haiyun.me
+auth login
+tls on
+tls_certcheck off
+user user
+password passwd
+
+procmail配置：
+	
+cat ~/.procmailrc 
+PATH=/bin:/sbin:/usr/bin:/usr/sbin/:/usr/local/bin:/usr/local/sbin
+MAILDIR=$HOME/Mail
+DEFAULT=$MAILDIR/inbox
+VERBOSE=off
+LOGFILE=/var/log/procmaillog
+ 
+:0
+* .*
+inbox

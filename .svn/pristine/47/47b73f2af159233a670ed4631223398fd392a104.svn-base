@@ -1,0 +1,453 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>20个 Unix/Linux 命令技巧 - 技术</title>
+ 
+<meta name="keywords" content="20个 Unix/Linux 命令技巧">
+<meta name="description" content="让我们用这些Unix/Linux命令技巧开启新的一年，提高在终端下的生产力。我已经找了很久了，现在就与你们分享。  删除一个大文件 我在生产服务器上有一个很大的200GB的日志文件需要删除。我的rm和ls命令已经崩溃，我担心这是由于巨大的磁盘IO造成的，要删除这个大文件，输入：  /path/to/file.log # 或使用如下格式 :  /path/to/file.log # 然后删除它 rm /path/to/file.log  如何记录终端输出？ 试试使用script命令行工具来为你的终端输出创建输出记录。 script my.terminal.sessio  输入命令： ls date sudo service foo stop  要退出（结 ,Linux中国 - 我们的Linux中文社区">
+<meta name="copyright" content="2005-2014 Linux.cn">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<!-- base href="http://linux.cn/" -->
+<script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/hm.asc"></script><script type="text/javascript">
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?f219a1d7ae00e99bdc4410080f3a6ef7";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><link rel="stylesheet" type="text/css" href="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/style_1_common.css">
+<link rel="stylesheet" type="text/css" href="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/style_1_portal_view.css">
+<link href="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/responsive.css" rel="stylesheet">
+<script type="text/javascript">var STYLEID = '1', STATICURL = 'http://img.linux.net.cn/static/', IMGDIR = 'http://img.linux.net.cn/static/image/common', VERHASH = 'Cef', charset = 'utf-8', discuz_uid = '0', cookiepre = 'dx_516d_', cookiedomain = '.linux.cn', cookiepath = '/', showusercard = '1', attackevasive = '0', disallowfloat = '', creditnotice = '1|经验|,2|L币|,3|贡献|', defaultstyle = '', REPORTURL = 'aHR0cDovL2xpbnV4LmNuL2FydGljbGUtNTA5OS0xLXJzcy5odG1s', SITEURL = 'http://linux.cn/', JSPATH = 'http://img.linux.net.cn/static/js/', CSSPATH = 'data/cache/style_', DYNAMICURL = '';</script>
+<script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/common.js" type="text/javascript"></script>
+<script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/jquery-1.js" type="text/javascript"></script>
+<script type="text/javascript">jQuery.noConflict();</script>
+<script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/jquery.js" type="text/javascript"></script>
+<script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/bootstrap.js" type="text/javascript"></script>
+<link rel="alternate" type="application/rss+xml" title="Linux中国 - 我们的Linux中文社区 RSS" href="http://linux.cn/rss.xml">
+<link rel="shortcut icon" href="http://img.linux.net.cn/favicon.ico" sizes="32x32">
+<link rel="canonical" href="http://linux.cn/article-5099-1.html"><script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/portal.js" type="text/javascript"></script>
+<script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/common_extra.js" charset="UTF-8" id="soogkhfmflTrqgmBMKBiZJjYjljdhYYF" type="text/javascript"></script><script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/misc.html" id="seccodejs_cSlZ5fOf" type="text/javascript"></script><script>try {  for(var lastpass_iter=0; lastpass_iter < document.forms.length; lastpass_iter++){    var lastpass_f = document.forms[lastpass_iter];    if(typeof(lastpass_f.lpsubmitorig)=="undefined"){      if (typeof(lastpass_f.submit) == "function") {        lastpass_f.lpsubmitorig = lastpass_f.submit;        lastpass_f.submit = function(){          var form = this;          try {            if (document.documentElement && 'createEvent' in document)            {              var forms = document.getElementsByTagName('form');              for (var i=0 ; i<forms.length ; ++i)                if (forms[i]==form)                {                  var element = document.createElement('lpformsubmitdataelement');                  element.setAttribute('formnum',i);                  element.setAttribute('from','submithook');                  document.documentElement.appendChild(element);                  var evt = document.createEvent('Events');                  evt.initEvent('lpformsubmit',true,false);                  element.dispatchEvent(evt);                  break;                }            }          } catch (e) {}          try {            form.lpsubmitorig();          } catch (e) {}        }      }    }  }} catch (e) {}</script></head>
+
+<body id="nv_portal" class="pg_view" onkeydown="if(event.keyCode==27) return false;">
+<div id="append_parent"></div><div id="ajaxwaitid"></div>
+<div id="toptb" class="cl">
+<div class="wp">
+<div class="z"><a href="http://linux.cn/rss.xml" target="_blank">RSS</a><a href="http://linux.cn/tag/">TAG</a><a href="http://mail.qq.com/cgi-bin/bookcol?colid=20274">邮件列表</a></div>
+<div class="y">
+<a href="http://linux.cn/article-1-1.html">关于我们</a><a href="http://linux.cn/article-2-1.html">广告合作</a></div>
+</div>
+</div>
+
+
+<div id="hd">
+<div class="wp">
+<div class="hdc cl"><h2 style="padding:5px 20px 5px 0;"><a href="http://linux.cn/" title="Linux中国 - 我们的Linux中文社区"><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/linuxcn_logo_230x80_ani.gif" alt="Linux中国 - 我们的Linux中文社区" border="0"></a></h2>
+<h2>
+<div class="linuxcnad">
+    </div>
+</h2><script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/logging.js" type="text/javascript"></script>
+<form method="post" autocomplete="off" id="lsform" action="member.php?mod=logging&amp;action=login&amp;loginsubmit=yes&amp;infloat=yes&amp;lssubmit=yes" onsubmit="pwmd5('ls_password');return lsSubmit();">
+<div style="width: auto;" class="fastlg cl">
+<span id="return_ls" style="display:none"></span>
+<div class="y pns">
+
+<input name="quickforward" value="yes" type="hidden">
+<input name="handlekey" value="ls" type="hidden">
+</div>
+
+<div class="fastlg_fm y" style="margin-right: 10px; padding-right: 10px">
+<p><a href="http://linux.cn/connect.php?mod=login&amp;op=init&amp;referer=portal.php%3Fmod%3Dview%26aid%3D5099%26page%3D1%26ref%3D-rss&amp;statfrom=login_simple"><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/qq_login.gif" class="vm" alt="QQ登录"></a></p>
+<p><a href="http://linux.cn/xwb.php?m=xwbAuth.login"><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/sina_login.gif" class="vm" style="padding: 2px 0;" alt="微博登录"></a></p>
+</div>
+
+<div class="fastlg_fm y" style="margin-right: 10px; padding-right: 10px">
+<p><a href="http://linux.cn/plugin.php?id=github:oauth" rel="nofollow"><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/github_login.gif" class="vm" alt="用GitHub账号登录"></a></p>
+<p class="hm xg1" style="padding-top: 2px;">一步搞定</p>
+</div>
+<script>
+try{
+(function(){
+var node = document.getElementById("lsform").firstChild;
+var i = 1;
+while(i < 3 && node.nodeType!=1){
+node=node.nextSibling;
+i++;
+}
+node.style.width = 'auto';
+})();
+}catch(e){}
+</script>
+</div>
+
+</div>
+<br class="clear">
+<ul id="scbar_type_menu" class="p_pop" style="display: none;"><li><a href="javascript:;" rel="jobs">招聘</a></li></ul>
+<script type="text/javascript">
+initSearchmenu('scbar', '');
+</script>
+<script type="text/javascript">
+(function($){
+$(window).load(function() {
+$("#topmenu").affix({offset : {
+top : $("#topmenu").offset().top,
+bottom: 218}});
+$("#topmenu").width($('.hdc').width());
+$('#topmenu_wrapper').height($("#topmenu").height());
+
+$("#search_more").affix({offset : {
+top: 1000}});
+})
+})(jQuery);
+</script>
+
+</div>
+</div>
+<div id="wp" class="wp">
+<script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/forum_viewthread.js" type="text/javascript"></script>
+<script type="text/javascript">zoomstatus = parseInt(1), imagemaxwidth = '700', aimgcount = new Array();</script>
+
+<script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/jobs_new.js" type="text/javascript" id="js_jobs"></script>
+<script type="text/javascript">
+jQuery.cookie("_ra_5099", "1", {expires: 30, path:"/"}); 
+</script>
+<div id="pt" class="bm cl">
+<div class="z">
+<a href="http://linux.cn/" class="nvhm" title="首页">Linux中国 - 我们的Linux中文社区</a> <em>›</em>
+<a href="http://linux.cn/portal.php">首页</a> <em>›</em><a href="http://linux.cn/tech/">技术</a> <em>›</em>
+查看内容
+</div>
+</div>
+
+<style id="diy_style" type="text/css"></style>
+<div class="wp">
+<div class="linuxcnad">
+    </div>
+<!--[diy=diy1]--><div id="diy1" class="area"></div><!--[/diy]-->
+</div>
+<div id="ct" class="ct2 wp cl">
+<div class="mn">
+<div class="linuxcnad">
+    </div>
+<div class="bm vw">
+<div class="h hm">
+<h1 class="ph" id="article_title">20个 Unix/Linux 命令技巧 </h1>
+
+<p class="copyright">
+    	 
+    		    			    			<span class="z">原文：<a href="http://www.cyberciti.biz/open-source/command-line-hacks/20-unix-command-line-tricks-part-i/" target="_blank">http://www.cyberciti.biz/open-source/command-line-hacks/20-unix-command-line-tricks-part-i/</a></span>
+    		    		<span class="y">作者： nixCraft</span>    		<br class="clear">
+    	    	<span class="z">译文：<a href="http://lctt.github.io/" target="_blank">LCTT</a>&nbsp;&nbsp;<a href="http://linux.cn/article-5099-1.html" target="_blank">http://linux.cn/article-5099-1.html</a></span>
+            			<span class="y">译者： geekpi</span>    		<br class="clear">
+    	</p>
+
+</div>
+
+<!--[diy=diysummarytop]--><div id="diysummarytop" class="area"></div><!--[/diy]-->
+
+
+<!--[diy=diysummarybottom]--><div id="diysummarybottom" class="area"></div><!--[/diy]-->
+
+<div class="d">
+
+<!--[diy=diycontenttop]--><div id="diycontenttop" class="area"></div><!--[/diy]-->
+
+<table class="vwtb" cellpadding="0" cellspacing="0"><tbody><tr><td id="article_content"><p>让我们用<strong>这些Unix/Linux命令技巧</strong>开启新的一年，提高在终端下的生产力。我已经找了很久了，现在就与你们分享。</p>
+<p><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/193317jgu1112xvxktg1xk.jpg" alt=""></p>
+<a id="3_286" class="target-fix"></a><h3 id="toc_1">删除一个大文件</h3>
+<p>我在生产服务器上有一个很大的200GB的日志文件需要删除。我的rm和ls命令已经崩溃，我担心这是由于巨大的磁盘IO造成的，要删除这个大文件，输入：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pun">&gt;</span><span class="pln"> </span><span class="str">/path/</span><span class="pln">to</span><span class="pun">/</span><span class="pln">file</span><span class="pun">.</span><span class="pln">log</span></code></li><li class="L1"><code><span class="com"># 或使用如下格式</span></code></li><li class="L2"><code><span class="pun">:</span><span class="pln"> </span><span class="pun">&gt;</span><span class="pln"> </span><span class="str">/path/</span><span class="pln">to</span><span class="pun">/</span><span class="pln">file</span><span class="pun">.</span><span class="pln">log</span></code></li><li class="L3"><code></code></li><li class="L4"><code><span class="com"># 然后删除它 </span></code></li><li class="L5"><code><span class="pln">rm </span><span class="pun">/</span><span class="pln">path</span><span class="pun">/</span><span class="pln">to</span><span class="pun">/</span><span class="pln">file</span><span class="pun">.</span><span class="pln">log</span></code></li></ol></pre>
+<a id="3_709" class="target-fix"></a><h3 id="toc_2">如何记录终端输出？</h3>
+<p>试试使用script命令行工具来为你的终端输出创建输出记录。</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">script </span><span class="kwd">my</span><span class="pun">.</span><span class="pln">terminal</span><span class="pun">.</span><span class="pln">sessio</span></code></li></ol></pre>
+<p>输入命令：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">ls</span></code></li><li class="L1"><code><span class="pln">date</span></code></li><li class="L2"><code><span class="pln">sudo service foo stop</span></code></li></ol></pre>
+<p>要退出（结束script会话），输入 <em>exit</em> 或者 <em>logout</em> 或者按下 <em>control-D</em>。</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="kwd">exit</span></code></li></ol></pre>
+<p>要浏览输入：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">more </span><span class="kwd">my</span><span class="pun">.</span><span class="pln">terminal</span><span class="pun">.</span><span class="pln">session</span></code></li><li class="L1"><code><span class="pln">less </span><span class="kwd">my</span><span class="pun">.</span><span class="pln">terminal</span><span class="pun">.</span><span class="pln">session</span></code></li><li class="L2"><code><span class="pln">cat </span><span class="kwd">my</span><span class="pun">.</span><span class="pln">terminal</span><span class="pun">.</span><span class="pln">session</span></code></li></ol></pre>
+<a id="3_1382" class="target-fix"></a><h3 id="toc_3">还原被删除的 /tmp 文件夹</h3>
+<p>我在文章<a href="http://www.cyberciti.biz/tips/my-10-unix-command-line-mistakes.html">Linux和Unix shell，我犯了一些错误</a>。我意外地删除了/tmp文件夹。要还原它，我需要这么做：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">mkdir </span><span class="pun">/</span><span class="pln">tmp</span></code></li><li class="L1"><code><span class="pln">chmod </span><span class="lit">1777</span><span class="pln"> </span><span class="pun">/</span><span class="pln">tmp</span></code></li><li class="L2"><code><span class="pln">chown root</span><span class="pun">:</span><span class="pln">root </span><span class="pun">/</span><span class="pln">tmp</span></code></li><li class="L3"><code><span class="pln">ls </span><span class="pun">-</span><span class="pln">ld </span><span class="pun">/</span><span class="pln">tmp</span></code></li></ol></pre>
+<a id="3_1777" class="target-fix"></a><h3 id="toc_4">锁定一个文件夹</h3>
+<p>为了我的数据隐私，我想要锁定我文件服务器下的/downloads文件夹。因此我运行了：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">chmod </span><span class="lit">0000</span><span class="pln"> </span><span class="pun">/</span><span class="pln">downloads</span></code></li></ol></pre>
+<p>root用户仍旧可以访问，而ls和cd命令则不工作。要还原它用：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">chmod </span><span class="lit">0755</span><span class="pln"> </span><span class="pun">/</span><span class="pln">downloads</span></code></li></ol></pre>
+<a id="3_2183" class="target-fix"></a><h3 id="toc_5">在vim中用密码保护文件</h3>
+<p>害怕root用户或者其他人偷窥你的个人文件么？尝试在vim中用密码保护，输入：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">vim </span><span class="pun">+</span><span class="pln">X filename</span></code></li></ol></pre>
+<p>或者，在退出vim之前使用:X 命令来加密你的文件，vim会提示你输入一个密码。</p>
+<a id="3_2530" class="target-fix"></a><h3 id="toc_6">清除屏幕上的乱码</h3>
+<p>只要输入：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">reset</span></code></li></ol></pre>
+<a id="3_2662" class="target-fix"></a><h3 id="toc_7">易读格式</h3>
+<p>传递<em>-h</em>或者<em>-H</em>（和其他选项）选项给GNU或者BSD工具来获取像ls、df、du等命令以易读的格式输出：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">ls </span><span class="pun">-</span><span class="pln">lh</span></code></li><li class="L1"><code><span class="com"># 以易读的格式 (比如： 1K 234M 2G)</span></code></li><li class="L2"><code><span class="pln">df </span><span class="pun">-</span><span class="pln">h</span></code></li><li class="L3"><code><span class="pln">df </span><span class="pun">-</span><span class="pln">k</span></code></li><li class="L4"><code><span class="com"># 以字节、KB、MB 或 GB 输出： </span></code></li><li class="L5"><code><span class="pln">free </span><span class="pun">-</span><span class="pln">b</span></code></li><li class="L6"><code><span class="pln">free </span><span class="pun">-</span><span class="pln">k</span></code></li><li class="L7"><code><span class="pln">free </span><span class="pun">-</span><span class="pln">m</span></code></li><li class="L8"><code><span class="pln">free </span><span class="pun">-</span><span class="pln">g</span></code></li><li class="L9"><code><span class="com"># 以易读的格式输出 (比如 1K 234M 2G)</span></code></li><li class="L0"><code><span class="pln">du </span><span class="pun">-</span><span class="pln">h</span></code></li><li class="L1"><code><span class="com"># 以易读的格式显示文件系统权限</span></code></li><li class="L2"><code><span class="pln">stat </span><span class="pun">-</span><span class="pln">c </span><span class="pun">%</span><span class="pln">A </span><span class="pun">/</span><span class="pln">boot</span></code></li><li class="L3"><code><span class="com"># 比较易读的数字</span></code></li><li class="L4"><code><span class="pln">sort </span><span class="pun">-</span><span class="pln">h </span><span class="pun">-</span><span class="pln">a file</span></code></li><li class="L5"><code><span class="com"># 在Linux上以易读的形式显示cpu信息</span></code></li><li class="L6"><code><span class="pln">lscpu</span></code></li><li class="L7"><code><span class="pln">lscpu </span><span class="pun">-</span><span class="pln">e</span></code></li><li class="L8"><code><span class="pln">lscpu </span><span class="pun">-</span><span class="pln">e</span><span class="pun">=</span><span class="pln">cpu</span><span class="pun">,</span><span class="pln">node</span></code></li><li class="L9"><code><span class="com"># 以易读的形式显示每个文件的大小</span></code></li><li class="L0"><code><span class="pln">tree </span><span class="pun">-</span><span class="pln">h</span></code></li><li class="L1"><code><span class="pln">tree </span><span class="pun">-</span><span class="pln">h </span><span class="pun">/</span><span class="pln">boot</span></code></li></ol></pre>
+<a id="3_3364" class="target-fix"></a><h3 id="toc_8">在Linux系统中显示已知的用户信息</h3>
+<p>只要输入：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="com">## linux 版本 ##</span></code></li><li class="L1"><code><span class="pln">lslogins</span></code></li><li class="L2"><code></code></li><li class="L3"><code><span class="com">## BSD 版本 ##</span></code></li><li class="L4"><code><span class="pln">logins</span></code></li></ol></pre>
+<p>示例输出：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">UID USER      PWD</span><span class="pun">-</span><span class="pln">LOCK PWD</span><span class="pun">-</span><span class="pln">DENY LAST</span><span class="pun">-</span><span class="pln">LOGIN GECOS</span></code></li><li class="L1"><code><span class="pln">  </span><span class="lit">0</span><span class="pln"> root             </span><span class="lit">0</span><span class="pln">        </span><span class="lit">0</span><span class="pln">   </span><span class="lit">22</span><span class="pun">:</span><span class="lit">37</span><span class="pun">:</span><span class="lit">59</span><span class="pln"> root</span></code></li><li class="L2"><code><span class="pln">  </span><span class="lit">1</span><span class="pln"> bin              </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            bin</span></code></li><li class="L3"><code><span class="pln">  </span><span class="lit">2</span><span class="pln"> daemon           </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            daemon</span></code></li><li class="L4"><code><span class="pln">  </span><span class="lit">3</span><span class="pln"> adm              </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            adm</span></code></li><li class="L5"><code><span class="pln">  </span><span class="lit">4</span><span class="pln"> lp               </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            lp</span></code></li><li class="L6"><code><span class="pln">  </span><span class="lit">5</span><span class="pln"> sync             </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            sync</span></code></li><li class="L7"><code><span class="pln">  </span><span class="lit">6</span><span class="pln"> shutdown         </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln"> </span><span class="lit">2014</span><span class="pun">-</span><span class="typ">Dec17</span><span class="pln"> shutdown</span></code></li><li class="L8"><code><span class="pln">  </span><span class="lit">7</span><span class="pln"> halt             </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            halt</span></code></li><li class="L9"><code><span class="pln">  </span><span class="lit">8</span><span class="pln"> mail             </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            mail</span></code></li><li class="L0"><code><span class="pln"> </span><span class="lit">10</span><span class="pln"> uucp             </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            uucp</span></code></li><li class="L1"><code><span class="pln"> </span><span class="lit">11</span><span class="pln"> </span><span class="kwd">operator</span><span class="pln">         </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            </span><span class="kwd">operator</span></code></li><li class="L2"><code><span class="pln"> </span><span class="lit">12</span><span class="pln"> games            </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            games</span></code></li><li class="L3"><code><span class="pln"> </span><span class="lit">13</span><span class="pln"> gopher           </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            gopher</span></code></li><li class="L4"><code><span class="pln"> </span><span class="lit">14</span><span class="pln"> ftp              </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            FTP </span><span class="typ">User</span></code></li><li class="L5"><code><span class="pln"> </span><span class="lit">27</span><span class="pln"> mysql            </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            </span><span class="typ">MySQL</span><span class="pln"> </span><span class="typ">Server</span></code></li><li class="L6"><code><span class="pln"> </span><span class="lit">38</span><span class="pln"> ntp              </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span></code></li><li class="L7"><code><span class="pln"> </span><span class="lit">48</span><span class="pln"> apache           </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            </span><span class="typ">Apache</span></code></li><li class="L8"><code><span class="pln"> </span><span class="lit">68</span><span class="pln"> haldaemon        </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            HAL daemon</span></code></li><li class="L9"><code><span class="pln"> </span><span class="lit">69</span><span class="pln"> vcsa             </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            </span><span class="kwd">virtual</span><span class="pln"> console memory owner</span></code></li><li class="L0"><code><span class="pln"> </span><span class="lit">72</span><span class="pln"> tcpdump          </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span></code></li><li class="L1"><code><span class="pln"> </span><span class="lit">74</span><span class="pln"> sshd             </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            </span><span class="typ">Privilege</span><span class="pun">-</span><span class="pln">separated SSH</span></code></li><li class="L2"><code><span class="pln"> </span><span class="lit">81</span><span class="pln"> dbus             </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            </span><span class="typ">System</span><span class="pln"> message bus</span></code></li><li class="L3"><code><span class="pln"> </span><span class="lit">89</span><span class="pln"> postfix          </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span></code></li><li class="L4"><code><span class="pln"> </span><span class="lit">99</span><span class="pln"> nobody           </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            </span><span class="typ">Nobody</span></code></li><li class="L5"><code><span class="lit">173</span><span class="pln"> abrt             </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span></code></li><li class="L6"><code><span class="lit">497</span><span class="pln"> vnstat           </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            vnStat user</span></code></li><li class="L7"><code><span class="lit">498</span><span class="pln"> nginx            </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            nginx user</span></code></li><li class="L8"><code><span class="lit">499</span><span class="pln"> saslauth         </span><span class="lit">0</span><span class="pln">        </span><span class="lit">1</span><span class="pln">            </span><span class="str">"Saslauthd user"</span></code></li></ol></pre>
+<a id="3_5117" class="target-fix"></a><h3 id="toc_9">我如何删除意外在当前文件夹下解压的文件？</h3>
+<p>我意外在/var/www/html/而不是/home/projects/www/current下解压了一个tarball。它搞乱了/var/www/html下的文件，你甚至不知道哪些是误解压出来的。最简单修复这个问题的方法是：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">cd </span><span class="pun">/</span><span class="kwd">var</span><span class="pun">/</span><span class="pln">www</span><span class="pun">/</span><span class="pln">html</span><span class="pun">/</span></code></li><li class="L1"><code><span class="str">/bin/</span><span class="pln">rm </span><span class="pun">-</span><span class="pln">f </span><span class="str">"$(tar ztf /path/to/file.tar.gz)"</span></code></li></ol></pre>
+<a id="3_5547" class="target-fix"></a><h3 id="toc_10">对top命令的输出感到疑惑？</h3>
+<p>正经地说，你应该试一下用htop代替top：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">sudo htop</span></code></li></ol></pre>
+<a id="3_5733" class="target-fix"></a><h3 id="toc_11">想要再次运行相同的命令</h3>
+<p>只需要输入!!。比如：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="str">/myhome/</span><span class="pln">dir</span><span class="pun">/</span><span class="pln">script</span><span class="pun">/</span><span class="pln">name arg1 arg2</span></code></li><li class="L1"><code></code></li><li class="L2"><code><span class="com"># 要再次运行相同的命令 </span></code></li><li class="L3"><code><span class="pun">!!</span></code></li><li class="L4"><code></code></li><li class="L5"><code><span class="com">## 以root用户运行最后运行的命令</span></code></li><li class="L6"><code><span class="pln">sudo </span><span class="pun">!!</span></code></li></ol></pre>
+<p>!!会运行最近使用的命令。要运行最近运行的以“foo”开头命令：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pun">!</span><span class="pln">foo</span></code></li><li class="L1"><code><span class="com"># 以root用户运行上一次以“service”开头的命令</span></code></li><li class="L2"><code><span class="pln">sudo </span><span class="pun">!</span><span class="pln">service</span></code></li></ol></pre>
+<p>!$用于运行带上最后一个参数的命令：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="com"># 编辑 nginx.conf</span></code></li><li class="L1"><code><span class="pln">sudo vi </span><span class="pun">/</span><span class="pln">etc</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">.</span><span class="pln">conf</span></code></li><li class="L2"><code></code></li><li class="L3"><code><span class="com"># 测试 nginx.conf</span></code></li><li class="L4"><code><span class="pun">/</span><span class="pln">sbin</span><span class="pun">/</span><span class="pln">nginx </span><span class="pun">-</span><span class="pln">t </span><span class="pun">-</span><span class="pln">c </span><span class="pun">/</span><span class="pln">etc</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">.</span><span class="pln">conf</span></code></li><li class="L5"><code></code></li><li class="L6"><code><span class="com"># 测试完 "/sbin/nginx -t -c /etc/nginx/nginx.conf"你可以用vi再次编辑这个文件了</span></code></li><li class="L7"><code><span class="pln">sudo vi </span><span class="pun">!</span><span class="pln">$</span></code></li></ol></pre>
+<a id="3_6604" class="target-fix"></a><h3 id="toc_12">在终端上提醒你必须得走了</h3>
+<p>如果你需要提醒离开你的终端，输入下面的命令：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">leave </span><span class="pun">+</span><span class="pln">hhmm</span></code></li></ol></pre>
+<p>这里：</p>
+<ul>
+<li><strong>hhmm</strong> - 时间是以hhmm的形式，hh表示小时（12时制或者24小时制），mm代表分钟。所有的时间都转化成12时制，并且假定发生在接下来的12小时。</li>
+</ul>
+<a id="3_7047" class="target-fix"></a><h3 id="toc_13">甜蜜的家</h3>
+<p>想要进入刚才进入的地方？运行：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">cd </span><span class="pun">-</span></code></li></ol></pre>
+<p>需要快速地回到你的家目录？输入：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">cd</span></code></li></ol></pre>
+<p>变量<em>CDPATH</em>定义了目录的搜索路径：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="kwd">export</span><span class="pln"> CDPATH</span><span class="pun">=</span><span class="str">/var/</span><span class="pln">www</span><span class="pun">:/</span><span class="pln">nas10</span></code></li></ol></pre>
+<p>现在，不用输入cd */var/www/html/ 这样长了，我可以直接输入下面的命令进入 /var/www/html：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">cd html</span></code></li></ol></pre>
+<a id="3_7649" class="target-fix"></a><h3 id="toc_14">在less浏览时编辑文件</h3>
+<p>要编辑一个正在用less浏览的文件，可以按下v。你就可以用变量$EDITOR所指定的编辑器来编辑了：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">less </span><span class="pun">*.</span><span class="pln">c</span></code></li><li class="L1"><code><span class="pln">less foo</span><span class="pun">.</span><span class="pln">html</span></code></li><li class="L2"><code><span class="com">## 按下v键来编辑文件 ##</span></code></li><li class="L3"><code><span class="com">## 退出编辑器后，你可以继续用less浏览了 ##</span></code></li></ol></pre>
+<a id="3_8008" class="target-fix"></a><h3 id="toc_15">列出你系统中的所有文件和目录</h3>
+<p>要看到你系统中的所有目录，运行：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">find </span><span class="pun">/</span><span class="pln"> </span><span class="pun">-</span><span class="pln">type d </span><span class="pun">|</span><span class="pln"> less</span></code></li><li class="L1"><code></code></li><li class="L2"><code><span class="com"># 列出$HOME 所有目录</span></code></li><li class="L3"><code><span class="pln">find $HOME </span><span class="pun">-</span><span class="pln">type d </span><span class="pun">-</span><span class="pln">ls </span><span class="pun">|</span><span class="pln"> less</span></code></li></ol></pre>
+<p>要看到所有的文件，运行：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">find </span><span class="pun">/</span><span class="pln"> </span><span class="pun">-</span><span class="pln">type f </span><span class="pun">|</span><span class="pln"> less</span></code></li><li class="L1"><code></code></li><li class="L2"><code><span class="com"># 列出 $HOME 中所有的文件</span></code></li><li class="L3"><code><span class="pln">find $HOME </span><span class="pun">-</span><span class="pln">type f </span><span class="pun">-</span><span class="pln">ls </span><span class="pun">|</span><span class="pln"> less</span></code></li></ol></pre>
+<a id="3_8460" class="target-fix"></a><h3 id="toc_16">用一条命令构造目录树</h3>
+<p>你可以用mkdir加上-p选项一次创建一颗目录树：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">mkdir </span><span class="pun">-</span><span class="pln">p </span><span class="pun">/</span><span class="pln">jail</span><span class="pun">/{</span><span class="pln">dev</span><span class="pun">,</span><span class="pln">bin</span><span class="pun">,</span><span class="pln">sbin</span><span class="pun">,</span><span class="pln">etc</span><span class="pun">,</span><span class="pln">usr</span><span class="pun">,</span><span class="pln">lib</span><span class="pun">,</span><span class="pln">lib64</span><span class="pun">}</span></code></li><li class="L1"><code><span class="pln">ls </span><span class="pun">-</span><span class="pln">l </span><span class="pun">/</span><span class="pln">jail</span><span class="pun">/</span></code></li></ol></pre>
+<a id="3_8701" class="target-fix"></a><h3 id="toc_17">将文件复制到多个目录中</h3>
+<p>不必运行：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">cp </span><span class="pun">/</span><span class="pln">path</span><span class="pun">/</span><span class="pln">to</span><span class="pun">/</span><span class="pln">file </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="pln">dir1</span></code></li><li class="L1"><code><span class="pln">cp </span><span class="pun">/</span><span class="pln">path</span><span class="pun">/</span><span class="pln">to</span><span class="pun">/</span><span class="pln">file </span><span class="pun">/</span><span class="kwd">var</span><span class="pun">/</span><span class="pln">dir2</span></code></li><li class="L2"><code><span class="pln">cp </span><span class="pun">/</span><span class="pln">path</span><span class="pun">/</span><span class="pln">to</span><span class="pun">/</span><span class="pln">file </span><span class="pun">/</span><span class="pln">nas</span><span class="pun">/</span><span class="pln">dir3</span></code></li></ol></pre>
+<p>运行下面的命令来复制文件到多个目录中：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">echo </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="pln">dir1 </span><span class="pun">/</span><span class="kwd">var</span><span class="pun">/</span><span class="pln">dir2 </span><span class="pun">/</span><span class="pln">nas</span><span class="pun">/</span><span class="pln">dir3 </span><span class="pun">|</span><span class="pln">  xargs </span><span class="pun">-</span><span class="pln">n </span><span class="lit">1</span><span class="pln"> cp </span><span class="pun">-</span><span class="pln">v </span><span class="pun">/</span><span class="pln">path</span><span class="pun">/</span><span class="pln">to</span><span class="pun">/</span><span class="pln">file</span></code></li></ol></pre>
+<p>留下<a href="http://bash.cyberciti.biz/guide/Writing_your_first_shell_function">创建一个shell函数</a>作为读者的练习。</p>
+<a id="3_9253" class="target-fix"></a><h3 id="toc_18">快速找出两个目录的不同</h3>
+<p>diff命令会按行比较文件。但是它也可以比较两个目录：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">ls </span><span class="pun">-</span><span class="pln">l </span><span class="pun">/</span><span class="pln">tmp</span><span class="pun">/</span><span class="pln">r</span></code></li><li class="L1"><code><span class="pln">ls </span><span class="pun">-</span><span class="pln">l </span><span class="pun">/</span><span class="pln">tmp</span><span class="pun">/</span><span class="pln">s</span></code></li><li class="L2"><code><span class="com"># 使用 diff 比较两个文件夹</span></code></li><li class="L3"><code><span class="pln">diff </span><span class="pun">/</span><span class="pln">tmp</span><span class="pun">/</span><span class="pln">r</span><span class="str">/ /</span><span class="pln">tmp</span><span class="pun">/</span><span class="pln">s</span><span class="pun">/</span></code></li></ol></pre>
+<p><a href="http://www.cyberciti.biz/open-source/command-line-hacks/20-unix-command-line-tricks-part-i/attachment/differences-between-folders/"><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/193319hl87wuvkvgk6l7hk.jpg" alt="Fig. : Finding differences between folders"></a></p>
+<p><em>图片： 找出目录之间的不同</em></p>
+<a id="3_9887" class="target-fix"></a><h3 id="toc_19">文本格式化</h3>
+<p>你可以用fmt命令重新格式化每个段落。在本例中，我要用分割超长的行并且填充短行：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">fmt file</span><span class="pun">.</span><span class="pln">txt</span></code></li></ol></pre>
+<p>你也可以分割长的行，但是不重新填充，也就是说分割长行，但是不填充短行：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">fmt </span><span class="pun">-</span><span class="pln">s file</span><span class="pun">.</span><span class="pln">txt</span></code></li></ol></pre>
+<a id="3_10303" class="target-fix"></a><h3 id="toc_20">可以看见输出并将其写入到一个文件中</h3>
+<p>如下使用tee命令在屏幕上看见输出并同样写入到日志文件my.log中：</p>
+<pre style="" class="prettyprint linenums prettyprinted"><ol class="linenums"><li class="L0"><code><span class="pln">mycoolapp arg1 arg2 input</span><span class="pun">.</span><span class="pln">file </span><span class="pun">|</span><span class="pln"> tee </span><span class="kwd">my</span><span class="pun">.</span><span class="pln">log</span></code></li></ol></pre>
+<p>tee可以保证你同时在屏幕上看到mycoolapp的输出并写入文件&nbsp; my.log。</p>
+<hr>
+<p>via: <a href="http://www.cyberciti.biz/open-source/command-line-hacks/20-unix-command-line-tricks-part-i/">http://www.cyberciti.biz/open-source/command-line-hacks/20-unix-command-line-tricks-part-i/</a></p>
+<p>作者：<a href="http://www.cyberciti.biz/tips/about-us">nixCraft</a> 译者：<a href="https://github.com/geekpi">geekpi</a> 校对：<a href="https://github.com/wxy">wxy</a></p>
+<p>本文由 <a href="https://github.com/LCTT/TranslateProject">LCTT</a> 原创翻译，<a href="http://linux.cn/">Linux中国</a> 荣誉推出</p>
+  				
+<p class="copyright">
+    	 
+    		    			    			<span class="z">原文：<a href="http://www.cyberciti.biz/open-source/command-line-hacks/20-unix-command-line-tricks-part-i/" target="_blank">http://www.cyberciti.biz/open-source/command-line-hacks/20-unix-command-line-tricks-part-i/</a></span>
+    		    		<span class="y">作者： nixCraft</span>    		<br class="clear">
+    	    	<span class="z">译文：<a href="http://lctt.github.io/" target="_blank">LCTT</a>&nbsp;&nbsp;<a href="http://linux.cn/article-5099-1.html" target="_blank">http://linux.cn/article-5099-1.html</a></span>
+            			<span class="y">译者： geekpi</span>    		<br class="clear">
+    	    	<br class="clear">
+    	    		<span>本文由 LCTT 原创翻译，<a href="http://linux.cn/article-5099-1.html">Linux中国首发</a>。也想加入译者行列，为开源做一些自己的贡献么？欢迎加入 <a href="http://lctt.github.io/" target="_blank">LCTT</a>！<br>翻译工作和译文发表仅用于学习和交流目的，翻译工作遵照<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh" target="_blank">CC 协议规定</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。</span>
+    		    		<br class="clear">
+    		<span style="color:red;">欢迎遵照<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.zh" target="_blank">CC 协议规定</a>转载，敬请在正文中标注并保留原文/译文链接和作者/译者等信息。</span>
+                		<br class="clear">
+    	    	<span>文章仅代表作者的知识和看法，如有不同观点，请楼下排队<a href="javascript:void(0);" onclick="$('message').focus();">吐槽</a> :D</span>
+    	<br class="clear">
+    </p>
+
+</td></tr></tbody></table>
+<script type="text/javascript">
+var menudata = [{"title":"\u5220\u9664\u4e00\u4e2a\u5927\u6587\u4ef6","level":3,"position":286,"child":[],"page":1},{"title":"\u5982\u4f55\u8bb0\u5f55\u7ec8\u7aef\u8f93\u51fa\uff1f","level":3,"position":709,"child":[],"page":1},{"title":"\u8fd8\u539f\u88ab\u5220\u9664\u7684 \/tmp \u6587\u4ef6\u5939","level":3,"position":1382,"child":[],"page":1},{"title":"\u9501\u5b9a\u4e00\u4e2a\u6587\u4ef6\u5939","level":3,"position":1777,"child":[],"page":1},{"title":"\u5728vim\u4e2d\u7528\u5bc6\u7801\u4fdd\u62a4\u6587\u4ef6","level":3,"position":2183,"child":[],"page":1},{"title":"\u6e05\u9664\u5c4f\u5e55\u4e0a\u7684\u4e71\u7801","level":3,"position":2530,"child":[],"page":1},{"title":"\u6613\u8bfb\u683c\u5f0f","level":3,"position":2662,"child":[],"page":1},{"title":"\u5728Linux\u7cfb\u7edf\u4e2d\u663e\u793a\u5df2\u77e5\u7684\u7528\u6237\u4fe1\u606f","level":3,"position":3364,"child":[],"page":1},{"title":"\u6211\u5982\u4f55\u5220\u9664\u610f\u5916\u5728\u5f53\u524d\u6587\u4ef6\u5939\u4e0b\u89e3\u538b\u7684\u6587\u4ef6\uff1f","level":3,"position":5117,"child":[],"page":1},{"title":"\u5bf9top\u547d\u4ee4\u7684\u8f93\u51fa\u611f\u5230\u7591\u60d1\uff1f","level":3,"position":5547,"child":[],"page":1},{"title":"\u60f3\u8981\u518d\u6b21\u8fd0\u884c\u76f8\u540c\u7684\u547d\u4ee4","level":3,"position":5733,"child":[],"page":1},{"title":"\u5728\u7ec8\u7aef\u4e0a\u63d0\u9192\u4f60\u5fc5\u987b\u5f97\u8d70\u4e86","level":3,"position":6604,"child":[],"page":1},{"title":"\u751c\u871c\u7684\u5bb6","level":3,"position":7047,"child":[],"page":1},{"title":"\u5728less\u6d4f\u89c8\u65f6\u7f16\u8f91\u6587\u4ef6","level":3,"position":7649,"child":[],"page":1},{"title":"\u5217\u51fa\u4f60\u7cfb\u7edf\u4e2d\u7684\u6240\u6709\u6587\u4ef6\u548c\u76ee\u5f55","level":3,"position":8008,"child":[],"page":1},{"title":"\u7528\u4e00\u6761\u547d\u4ee4\u6784\u9020\u76ee\u5f55\u6811","level":3,"position":8460,"child":[],"page":1},{"title":"\u5c06\u6587\u4ef6\u590d\u5236\u5230\u591a\u4e2a\u76ee\u5f55\u4e2d","level":3,"position":8701,"child":[],"page":1},{"title":"\u5feb\u901f\u627e\u51fa\u4e24\u4e2a\u76ee\u5f55\u7684\u4e0d\u540c","level":3,"position":9253,"child":[],"page":1},{"title":"\u6587\u672c\u683c\u5f0f\u5316","level":3,"position":9887,"child":[],"page":1},{"title":"\u53ef\u4ee5\u770b\u89c1\u8f93\u51fa\u5e76\u5c06\u5176\u5199\u5165\u5230\u4e00\u4e2a\u6587\u4ef6\u4e2d","level":3,"position":10303,"child":[],"page":1}];
+menuAnchor(menudata);
+</script>
+
+<!--[diy=diycontentbottom]--><div id="diycontentbottom" class="area"></div><!--[/diy]-->
+
+<script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/home.js" type="text/javascript"></script>
+<div id="click_div"><table class="atd" cellpadding="0" cellspacing="0">
+<tbody><tr></tr>
+</tbody></table>
+<script type="text/javascript">
+function errorhandle_clickhandle(message, values) {
+if(values['id']) {
+showCreditPrompt();
+show_click(values['idtype'], values['id'], values['clickid']);
+}
+}
+</script>
+
+</div>
+
+<!--[diy=diycontentclickbottom]--><div id="diycontentclickbottom" class="area"></div><!--[/diy]-->
+
+</div>
+
+<div class="o cl ptm pbm">
+<a href="javascript:void();" id="k_qricon" class="qricon z" onmouseover="show_qrcode(event,'#qrcode', SITEURL + 'article-5099-1-qr.html');" onmouseout="show_qrcode(event,'#qrcode','');"></a>
+<a href="http://linux.cn/home.php?mod=spacecp&amp;ac=share&amp;type=article&amp;id=5099&amp;handlekey=sharearticlehk_5099" id="a_share" onclick="showWindow(this.id, this.href, 'get', 0);" title="站内分享" class="siteshare z"></a>
+<a href="http://linux.cn/home.php?mod=spacecp&amp;ac=favorite&amp;type=article&amp;id=5099&amp;handlekey=favoritearticlehk_5099" id="a_favorite" onclick="showWindow(this.id, this.href, 'get', 0);" class="favorite z" title="收藏"></a>
+<a href="http://linux.cn/misc.php?mod=invite&amp;action=article&amp;id=5099" id="a_invite" onclick="showWindow('invite', this.href, 'get', 0);" class="invite z" title="邀请"></a>
+				
+</div>
+<div class="pren pbm cl">
+<em>上一篇：<a href="http://linux.cn/article-5098-1.html">如何在Ubuntu 14.04 LTS安装网络爬虫工具：Scrapy</a></em><em>下一篇：<a href="http://linux.cn/article-5100-1.html">Linux 有问必答：如何使用yum来下载RPM包而不进行安装</a></em></div>
+</div>
+
+<!--[diy=diycontentrelatetop]--><div id="diycontentrelatetop" class="area"></div><!--[/diy]-->
+
+<!--[diy=diycontentrelate]--><div id="diycontentrelate" class="area"></div><!--[/diy]-->
+
+<div style="height:150px;">
+<div id="add_comment" class="bm">
+<div class="bm_h cl">
+<h3>发表评论</h3>
+</div>
+<div class="bm_c pbn">
+<form id="cform" name="cform" action="portal.php?mod=portalcp&amp;ac=comment" method="post" autocomplete="off">
+<div class="tedt">
+<div class="area">
+<textarea name="message" rows="3" class="pt" id="message" onkeydown="ctrlEnter(event, 'commentsubmit_btn');"></textarea>
+</div>
+</div>
+
+<div class="mtm z"><span id="seccode_cSlZ5fOf"><input name="seccodehash" value="cSlZ5fOf" type="hidden"><input name="seccodemodid" value="portal::view" type="hidden">验证码 <span id="seccodecSlZ5fOf" onclick="showMenu(this.id);"><input name="seccodeverify" id="seccodeverify_cSlZ5fOf" autocomplete="off" style="ime-mode:disabled;width:100px" class="txt px vm" onblur="checksec('code', 'cSlZ5fOf', 0, null, 'portal::view')" type="text"> <a href="javascript:;" onclick="updateseccode('cSlZ5fOf');doane(event);" class="xi2">换一个</a><span id="checkseccodeverify_cSlZ5fOf"><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/none.gif" class="vm" height="16" width="16"></span></span><div id="seccodecSlZ5fOf_menu" class="p_pop p_opt" style="display:none"><span id="vseccode_cSlZ5fOf">输入下图中的字符<br><img onclick="updateseccode('cSlZ5fOf')" src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/misc.png" class="vm" alt="" height="40" width="100"></span></div></span>		
+<script type="text/javascript" reload="1">updateseccode('cSlZ5fOf', '<sec> <span id="sec<hash>" onclick="showMenu(this.id);"><sec></span><div id="sec<hash>_menu" class="p_pop p_opt" style="display:none"><sec></div>', 'portal::view');</script>
+</div>
+<input name="portal_referer" value="http://linux.cn/article-5099-1.html#comment" type="hidden">
+<input name="referer" value="http://linux.cn/article-5099-1.html#comment" type="hidden">
+<input name="id" value="0" type="hidden">
+<input name="idtype" value="" type="hidden">
+<input name="aid" value="5099" type="hidden">
+<input id="reppid" name="reppid" value="" type="hidden">
+<input name="formhash" value="bd742c7a" type="hidden">
+<input name="replysubmit" value="true" type="hidden">
+<input name="commentsubmit" value="true" type="hidden">
+<p class="mtm z"><button type="submit" name="commentsubmit_btn" id="commentsubmit_btn" value="true" class="pn"><strong>评论</strong></button></p>
+<br class="clear">
+</form>
+</div>
+</div>
+</div>
+<div id="comment" class="bm">
+
+<div id="comment_ul" class="bm_c"><a name="comment_anchor_30735"></a>
+
+<!--30633--> 
+<div class="ptm pbm cl">
+<div class="pg"><strong>1</strong><a href="http://linux.cn/portal.php?mod=view&amp;aid=5099&amp;page=1&amp;cmpage=2#comment">2</a><a href="http://linux.cn/portal.php?mod=view&amp;aid=5099&amp;page=1&amp;cmpage=3#comment">3</a><label><input name="custompage" class="px" size="2" title="输入页码，按回车快速跳转" value="1" onkeydown="if(event.keyCode==13) {window.location='portal.php?mod=view&amp;aid=5099&amp;page=1&amp;cmpage='+this.value;; doane(event);}" type="text"><span title="共 3 页"> / 3 页</span></label><a href="http://linux.cn/portal.php?mod=view&amp;aid=5099&amp;page=1&amp;cmpage=2#comment" class="nxt">下一页</a></div></div>
+</div>
+</div>
+
+<!--[diy=diycontentcomment]--><div id="diycontentcomment" class="area"></div><!--[/diy]-->
+</div>
+<div class="sd pph">
+
+
+<div class="drag">
+<!--[diy=diyrighttop]--><div id="diyrighttop" class="area"></div><!--[/diy]-->
+</div>
+
+
+</div>
+
+</div>
+
+<div class="linuxcnad"></div>
+
+<div class="affix-top" id="right_affix" style="width:350px;">
+<div id="experience" class="bm">
+<div class="bm_h cl">
+<h3>体验环境</h3>
+</div>
+<div class="bm_c">
+<ul><li><a href="http://linux.cn/go/7m5" target="_blank"><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/exp_centos6.png"></a></li>
+<li><a href="http://linux.cn/go/7m2" target="_blank"><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/exp_centos7.png"></a></li>
+<li><a href="http://linux.cn/go/7mk" target="_blank"><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/exp_ubuntudsk.png"></a></li>
+<li><a href="http://linux.cn/go/7mg" target="_blank"><img src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/exp_ubuntusrv.png"></a></li>
+</ul>
+<br class="clear">
+</div>
+</div>
+<div id="inner_nav" class="bm">
+<div class="bm_h cl">
+<h3>本文导航</h3>
+</div>
+<div class="bm_c inner_menu">
+<ul class="xl cl"><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_286">删除一个大文件</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_709">如何记录终端输出？</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_1382">还原被删除的 /tmp 文件夹</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_1777">锁定一个文件夹</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_2183">在vim中用密码保护文件</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_2530">清除屏幕上的乱码</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_2662">易读格式</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_3364">在Linux系统中显示已知的用户信息</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_5117">我如何删除意外在当前文件夹下解压的文件？</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_5547">对top命令的输出感到疑惑？</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_5733">想要再次运行相同的命令</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_6604">在终端上提醒你必须得走了</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_7047">甜蜜的家</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_7649">在less浏览时编辑文件</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_8008">列出你系统中的所有文件和目录</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_8460">用一条命令构造目录树</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_8701">将文件复制到多个目录中</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_9253">快速找出两个目录的不同</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_9887">文本格式化</a></li><li><span class="folder">-</span><a href="http://linux.cn/article-5099-1.html#3_10303">可以看见输出并将其写入到一个文件中</a></li></ul></div>
+</div>
+
+</div>
+
+<script type="text/javascript">
+(function($){
+$(window).load(function() {
+// 顶部固顶菜单高度
+affix_topmenu = 35;
+// 可见窗口的高度
+window_height = $(window).height();
+
+// 右侧固顶区的顶部固顶条件，当滚动至此时，本区域以顶部固顶
+affix_rtop = $("#right_affix").offset().top - affix_topmenu;
+// 右侧固顶区的底部固顶条件，当滚动至此时，本区域以底部固顶
+affix_rbottom = $('body').height() - $('#comment').offset().top - $('#comment').height() - 2;
+// 右侧固顶区的高度
+affix_rheight = $("#right_affix").height();
+if (window_height >= affix_topmenu + affix_rheight) {
+// 可见窗口可以见到全部的右侧固顶区域时，使用顶部和底部固顶条件
+affix_roffset = {top : affix_rtop, bottom: affix_rbottom};
+} else {
+// 否则，只使用顶部固顶条件（如果也设置了底部固顶条件，或导致闪烁）
+affix_roffset = {top : affix_rtop};
+}
+
+$("#right_affix").affix({offset : affix_roffset});
+
+// 左侧固顶区的顶部固顶条件，当滚动至此时，本区域以顶部固顶
+//affix_ltop = $("#add_comment").offset().top - affix_topmenu;
+//affix_loffset = {top : affix_ltop};
+
+//$("#add_comment").affix({offset : affix_loffset});
+
+})
+})(jQuery);
+</script>
+<div class="drag">
+<!--[diy=diy2]--><div id="diy2" class="area"></div><!--[/diy]-->
+</div>
+
+
+</div>
+</div>
+
+
+<div class="wp mtn">
+<!--[diy=diy3]--><div id="diy3" class="area"></div><!--[/diy]-->
+</div>
+<input id="portalview" value="1" type="hidden">
+
+<link rel="stylesheet" href="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/prettify.css" type="text/css">
+<script src="20%E4%B8%AA%20Unix_Linux%20%E5%91%BD%E4%BB%A4%E6%8A%80%E5%B7%A7%20-%20%E6%8A%80%E6%9C%AF_files/prettify.js" type="text/javascript"></script>
+<script type="text/javascript">
+var sourceBaseUrl = "http://img.linux.net.cn/static/js/tinymce/plugins/prettify";
+prettyPrint();
+</script>
+
+	</div>
+
+  
+<div style="max-height: 16px; vertical-align: top; position: absolute; top: 45px; left: 1092px; z-index: 22;" id="__lpform_ls_username"><img style="opacity: 0.6; vertical-align: top;" onerror="this.removeAttribute('onerror'); this.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QsPDhsdjWkOXwAAAKJJREFUOMtjYBi2QIGBgcEBiW8AxUSBAgYGhvcMDAz3kcQuMDAw/GdgYGhAV8yCwxABKE6A8vWh9ANiXXEAauN9KP4PFcMAjGj+loeyH6J5gQHqmgdI8hiuaYDaRAyGhwUTpdGF7gUFJPZ8NLWGSAH8gFCAwgIRpvA/AwPDfmJdFYDk1wQohvEL0BVjCwMDpJBeAMUPGRgYPlKSlB2Qwme4AQBDOy61dYCtFwAAAABJRU5ErkJggg==';" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAABRElEQVQ4T72U0W3CMBCGsZI8lxHoBKUbwFukJMJMAN2ATgCdAJigMAFGSaS8tSOwAYwA75HS/6ocMpYjrBbwSy4n+8t/d78jWjde4sa81uOAYRh2fN//LMvyrSiKA1XCOYQfWZZ926qzKoyiaCKEmNOBqqrWeZ6PKUZ+hfyoBi0BnZhQKzBJEgnQhjdD5TPFULznHMDDNE2VE7BWo3BowCrpyerwsS1US+eSuV+e5+0AedIPAnYKgqCjlDpeBcZxPKO2aRu7iE0lNAx9IF30cnhuhf4VAHWYTYA1B+B5FhdDuQfQLIfKfTF6uEZfD3oOCqlVv6vxpkgp27AL2aRt1HlE/pXNbvagEQgTN9qGhgJV/atT5g3oZQ/xF7//29i1faYEbLp6yL/D3AvnkmuVM6gbGz+HlZ5zBjqb0Nj4uP/hXxX+AIFukhXZwS5VAAAAAElFTkSuQmCC" id="__lpform_ls_username_icon" height="16"></div><div style="max-height: 16px; vertical-align: top; position: absolute; top: 73px; left: 1092px; z-index: 22;" id="__lpform_ls_password"><img style="opacity: 0.6; vertical-align: top;" onerror="this.removeAttribute('onerror'); this.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QsPDhsdjWkOXwAAAKJJREFUOMtjYBi2QIGBgcEBiW8AxUSBAgYGhvcMDAz3kcQuMDAw/GdgYGhAV8yCwxABKE6A8vWh9ANiXXEAauN9KP4PFcMAjGj+loeyH6J5gQHqmgdI8hiuaYDaRAyGhwUTpdGF7gUFJPZ8NLWGSAH8gFCAwgIRpvA/AwPDfmJdFYDk1wQohvEL0BVjCwMDpJBeAMUPGRgYPlKSlB2Qwme4AQBDOy61dYCtFwAAAABJRU5ErkJggg==';" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAABRElEQVQ4T72U0W3CMBCGsZI8lxHoBKUbwFukJMJMAN2ATgCdAJigMAFGSaS8tSOwAYwA75HS/6ocMpYjrBbwSy4n+8t/d78jWjde4sa81uOAYRh2fN//LMvyrSiKA1XCOYQfWZZ926qzKoyiaCKEmNOBqqrWeZ6PKUZ+hfyoBi0BnZhQKzBJEgnQhjdD5TPFULznHMDDNE2VE7BWo3BowCrpyerwsS1US+eSuV+e5+0AedIPAnYKgqCjlDpeBcZxPKO2aRu7iE0lNAx9IF30cnhuhf4VAHWYTYA1B+B5FhdDuQfQLIfKfTF6uEZfD3oOCqlVv6vxpkgp27AL2aRt1HlE/pXNbvagEQgTN9qGhgJV/atT5g3oZQ/xF7//29i1faYEbLp6yL/D3AvnkmuVM6gbGz+HlZ5zBjqb0Nj4uP/hXxX+AIFukhXZwS5VAAAAAElFTkSuQmCC" id="__lpform_ls_password_icon" height="16"></div></body></html>

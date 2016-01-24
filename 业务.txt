@@ -1,0 +1,26 @@
+金财。。
+<http://192.168.3.32:20010/common/login.page>
+
+登录用户：23_admin；密码：1
+
+
+地方预算综合管理系统
+http://192.168.3.32:20010/portal/homepage.page?tokenid=D9D2AB9A7BEEAA82398DAB1AAF5B621822575000#
+
+http://192.168.3.36:20000/
+87_sys_admin
+
+
+127.0.0.1:7001/common/login.page
+
+svn
+
+代码：   内网：  http://192.168.3.135:9966/svn/YFB-CODE
+	 外网：	 http://124.207.8.234:9966/svn/YFB-CODE
+
+文档：   内网：  http://192.168.3.135:9966/svn/YFB-DOC
+	 外网：	 http://124.207.8.234:9966/svn/YFB-DOC
+
+
+项目
+-Dfasp2.zkserver.startup=true    -Dfasp2.zkserver.address=192.168.5.148:22181     -Dfasp2.zkserver.dubboport=17011 -Dfasp2.zkserver.dubbohost=192.168.5.148

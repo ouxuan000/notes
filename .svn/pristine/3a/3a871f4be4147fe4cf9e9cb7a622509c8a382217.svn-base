@@ -1,0 +1,37 @@
+整合hibernate3
+1.导入相关jar包
+	导入spring的jar包：spring基本包，日志包，aop，dbcp
+	导入hibernate基本包，必须包，日志包
+	导入数据库驱动包
+2.创建beans.xml
+	2.1 创建DBCP创建dataSource
+	<!-- 创建数据库连接 -->
+    <bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	    <property name="driverClassName" value="${jdbc.driverClassName}"/>
+	    <property name="url" value="${jdbc.url}"/>
+	    <property name="username" value="${jdbc.username}"/>
+	    <property name="password" value="${jdbc.password}"/>
+	</bean>
+	2.2 创建SessionFactory
+	<!-- 创建spring的SessionFactory -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+	    <property name="dataSource" ref="myDataSource"/>
+	    <!-- 设置spring去哪个包中去查找实体类 -->
+	    <property name="packageToScan">
+	    	<value>com.sram.model</value>
+	    </property>
+	    <property name="hibernateProperties">
+	      <props>
+	      	<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+	      	<prop key="hibernate.show_sql">true</prop>
+	      	<prop key="hibernate.hbm2ddl.auto">update</prop>
+	      	<prop key="hibernate.format_sql">false</prop>
+	      </props>
+	    </property>
+	 </bean>
+3.为每个实体类添加hibernate的Annotation或者hbm文件
+4.创建基于hibernate的DAO
+	4.1 在相应的dao中注入相应的SessionFactory
+	4.2 如果通过spring管理sessionFactory,不再使用factory.openSession()开启session,而使用factory.getCurrentSeesion
+		来打开session,所以这个session就会被spring多管理,此时开发中就不用进行事务控制,也不需要关闭session,全部由spring管理
+	

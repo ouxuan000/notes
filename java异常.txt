@@ -1,0 +1,49 @@
+1、java.sql.SQLException: Before start of result set
+这个异常的原因是没有写rs.next();
+2、使用jdbc连接oracle
+    Io 异常: The Network Adapter could not establish the   connection
+   解决方法：需要开启oracle的oracleOraDb11g_home1TNSListener服务
+	Io 异常: Connection refused(DESCRIPTION=(TMP=)(VSNNUM=186646784)(ERR=12505)(ERROR_STACK=(ERROR=(CODE=12505)(EMFI=4))))
+	解决方法：连接字符串不对，注意sid名字大小写，此处应该写作小写orcl
+3、Duplicate entry '3' for key 'PRIMARY'
+			//args[]中是字符串，要插入数据库，如果数据库要求int类型，必须转成相同的类型（testDML2.java）
+
+4jsp异常
+	Attribute value is quoted with " which must be escaped when used within the value 问题解决 
+	1）：错误常发生的位置 value="<%=""+request.getAttribute("name")%>"  
+
+	2）：错误产生的原因，是因为tomcat版本升级后（6.0以后），对双引号的处理机制引起的，如果出现双引号包含双引号的情况，就可能会出现这个错误。
+
+	3）：解决办法有好多种，大多数网上的意见是改为value=‘<%=""+request.getAttribute("name")%>’  这样确实可以解决这个报错，可能无法完全解决问题，比如项目中有很多地方以前都用的是双引号，修改起来会非常麻烦，还容易出错。
+
+		 查看tomact文档有一段话这样描述的“If false the requirements for escaping quotes in JSP attributes will be relaxed so that an unescaped quote will not cause an error.
+
+	If not specified, the specification compliant default of true will be used.”    这个描述针对的是tomact的org.apache.jasper.compiler. Parser.STRICT_QUOTE_ESCAPING属性。
+
+	       如此一来，我们知道只要在tomcat启动时将这个属性设为false就可以解决这个问题。
+
+	       那么怎么将这个属性设置到tomcat的system属性中呢，有至少两个办法：
+
+	      一种是利用tomcat启动的执行脚本，在执行过程中调用setenv.sh，在其中设置环境变量，如：JAVA_OPTS=%JAVA_OPTS%: -Dorg.apache.jasper.compiler.Parser.STRICT_QUOTE_ESCAPING=false
+
+	     另一种是找到conf/catalina.properties文件，在最后添加org.apache.jasper.compiler.Parser.STRICT_QUOTE_ESCAPING=false 即可。
+
+5、聊天第九节处理的异常，EOFException end of file 文件结束了，处理这种异常要在把连接关闭（具体看视频，源码）
+
+6、No operations allowed after connection closed. 共享的connection关了就不能用了
+
+7、oa项目中异常javax.naming.NoInitialContextException: Need to specify class name in environment or system property, or as an applet parameter, or in an application resource file:  java.naming.factory.initial
+	解决方案http://blog.csdn.net/fax5201314/article/details/7050236
+	错误原因及解决办法：在使用hibernate 3.5.1的时候   报错，原因是 hibernate 配置文件中给sessionFactory 配置了name属性，把这个属性删掉，否则会去找jndi，但是运行环境中没有使用jndi所以会报这个错。
+
+8、No Hibernate Session bound to thread, and configuration does not allow
+	到这这种情况的发生有两种情况：
+
+	1）没有配置事物只要在Spring配置文件中添加如下代码：
+
+    <bean id="txManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+          <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="txManager"/>
+
+	2）然后在service程序前面加上@Transactional即可。网上有人说在dao层加入，但我的加dao曾没效果

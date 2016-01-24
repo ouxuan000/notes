@@ -1,0 +1,56 @@
+1、优酷，土豆，搜狐等视频网站的视频都是FLV格式，在上述网站打开需要下载的视频页面，并复制地址，接着打开http://www.flvcd.com，将地址粘贴进行解析即可下载。
+
+2、android平板直接播放电脑中的视频，可以到http://www.sjapk.xom/439.html下载Remote Desktop 然后再windows开启远程桌面连接。需要windows先建立wifi热点
+
+3.管理员命令提示符 powercfg /h off关闭系统休眠功能；
+
+4.controluserpassword2 -去掉使用本机用户必须输入用户名和密码的框框   就可以直接登陆不用每次输入密码
+
+5.QGIFER截取视频做表情的软件
+
+6.关闭win8自带的metro界面，修改注册表，hkey——current——user\software\microsoft\currentversion\exlorer在右侧新建dword类型键值RPEnabled设为0；
+
+7.apk文件汉化，使用工具androidResEdit完成，或者使用Apkdb及UltraEdit或者notepad++将apk文件反编译，该里面的字符串即可
+
+8.android使用sqllite editor 修改手机的setting.db文件，在system中找到airplane_mode_radios默认值位cell，bluetooth，wifi意思是飞行模式下关闭这三个，你删除了他就不会关闭了
+
+9、instapaper apk 让阅读变的更加简单  可以把网页抓取自动排版，离线阅读
+
+10.powercfg -a看windows是否支持睡眠功能  windows update更新系统驱动
+	powercfg -devicequery wake_armed选择可以唤醒睡眠的设备
+
+11、Glary Utilities 3.0 Free系统优化工具
+
+12、crack url wait code login自动登陆
+
+13、special link converter脚本 专业链接破解，转迅雷 旋风等
+
+14、share easy downloads helper 免积分下载百度文库 新浪爱问的东西
+
+15、常规的bios启动顺序是 首先完成计算机自检后讲MBR（硬盘主引导记录）调入内存，接着开始查找活动分区和朱引导扇区，然后将控制权交给引导程序，比如windows7/8系统分区目录下的bootmgr文件，最后bootmgr通过读取c：/boot\bcd配置文件列出操作系统
+
+	而UEFI启动首先是讲启动文件防止在一个FAT格式主分区，接着制定该分区下的启动文件进行启动，比如64位windows8只要指定FAT分区\EFI\BOOT\BOOTX64.EFI作为启动文件即可启动系统。
+
+16]、电脑爱好者03教怎么把普通系统uefi启动，前提系统是64位，而且主板支持uefi
+
+17、默认调用管理员执行程序，使用TweakUAC可以修改
+
+********************04
+1、文件管理器total commander简称TC
+
+2、GOOGLE搜索 书名 filetype:pdf就可以找到该书pdf格式的链接
+		查看某个网站的索引数量 site：www.xxx.com
+		有多少链接指向该网站 link：www.xxx.com
+
+3、以图搜图  Tineye google
+   搜视频 百度视频 360影视 腾讯视频等
+   搜网盘资源  网盘屋 http://www.wangpanwu.com
+
+4、人工智能计算器
+
+******************05
+1、win8直接进去，不需要输入密码  使用win+R 输入netplwiz去掉必须输入密码的钩
+
+*****************10
+1、回复软件Hexamob Recovery PRO  地址http://pan.baidu.com/s/1kTmeLEZ
+2、wifi信号增强器

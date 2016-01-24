@@ -1,0 +1,216 @@
+如果你还没有安装ubuntu系统或是感觉自己的ubuntu系统版本低，想换的话，请在分区时，把交换分区(swap)设定得大一些（最少4G）
+要不在安装oracle做前置条件检查时，他会提示交换空间不够，oracle要求swap最少为3.69G
+一、*oracle的安装前提：保证机器已安装jdk
+
+下面开始进入正题，安装oracle:
+二、.更新系统:
+  sudo apt-get update
+  sudo apt-get dist-upgrade
+三、安装依赖包，很重要的一步
+看一下自己的软件源,因为大多数情况要在上面增加源地址，所以用gedit不用cat
+sudo gedit /etc/apt/sources.list
+这样可以打开你现有的源列表。（注意是sources，不是source)
+为了能顺利安装32位兼容包ia32-libs，需要在源中增加这些行(说装了g++-multilib就不用考虑ia32-libs了，试过可以)：
+deb http://extras.ubuntu.com/ubuntu trusty main
+deb-src http://extras.ubuntu.com/ubuntu trusty main
+deb http://archive.ubuntu.com/ubuntu/ raring main restricted universe multiverse
+更新源文件后保存。
+
+四、下面就可以利用超级牛力执行依赖包的安装，下面的全部要装上，否则后头图形界面安装途中会报错，仔细一个一个查一遍，终端键入：
+(ps:可以做成批处理，全部执行)
+sudo apt-get install bzip2
+sudo apt-get install elfutils
+sudo apt-get install automake
+sudo apt-get install autotools-dev
+sudo apt-get install binutils
+sudo apt-get install expat
+sudo apt-get install gawk
+sudo apt-get install gcc
+sudo apt-get install gcc-multilib
+sudo apt-get install g++-multilib
+sudo apt-get install ia32-libs
+sudo apt-get install ksh
+sudo apt-get install less
+sudo apt-get install lesstif2
+sudo apt-get install lesstif2-dev
+sudo apt-get install lib32z1
+sudo apt-get install libaio1
+sudo apt-get install libaio-dev
+sudo apt-get install libc6-dev
+sudo apt-get install libc6-dev-i386
+sudo apt-get install libc6-i386
+sudo apt-get install libelf-dev
+sudo apt-get install libltdl-dev
+sudo apt-get install libmotif4
+sudo apt-get install libodbcinstq4-1 libodbcinstq4-1:i386
+sudo apt-get install libpth-dev
+sudo apt-get install libpthread-stubs0
+sudo apt-get install libpthread-stubs0-dev
+sudo apt-get install libstdc++5
+sudo apt-get install lsb-cxx
+sudo apt-get install make
+sudo apt-get install openssh-server
+sudo apt-get install pdksh
+sudo apt-get install rlwrap
+sudo apt-get install rpm
+sudo apt-get install sysstat
+sudo apt-get install unixodbc
+sudo apt-get install unixodbc-dev
+sudo apt-get install unzip
+sudo apt-get install x11-utils
+sudo apt-get install zlibc
+
+五、检查系统变量
+
+/sbin/sysctl -a | grep sem
+/sbin/sysctl -a | grep shm
+/sbin/sysctl -a | grep file-max
+/sbin/sysctl -a | grep aio-max
+/sbin/sysctl -a | grep ip_local_port_range
+/sbin/sysctl -a | grep rmem_default
+/sbin/sysctl -a | grep rmem_max
+/sbin/sysctl -a | grep wmem_default
+/sbin/sysctl -a | grep wmem_max
+
+然后根据上面命令中得到的参数值在/etc/sysctl.conf中增加对应数据(上面查完以后用笔记一下吧）
+sudo gedit /etc/sysctl.conf
+
+把sysctl.conf中的以下内容用查得的值填上
+
+fs.aio-max-nr = ？
+fs.file-max = ？
+kernel.shmall = ？
+kernel.shmmax = ？
+kernel.shmmni = ？
+kernel.sem = ？
+net.ipv4.ip_local_port_range = ？
+net.core.rmem_default = ？
+net.core.rmem_max = ？
+net.core.wmem_default = ？
+net.core.wmem_max = ？
+运行一下命令更新内核参数：
+sysctl –p
+六、添加对当前用户的内核限制在 /etc/security/limits.conf 文件中增加以下数据(XXX为你当前用户名)
+
+XXX         soft    nproc   2047
+
+XXX         hard    nproc   16384
+
+XXX         soft    nofile  1024
+
+XXX         hard    nofile  65536
+
+XXX         soft    stack   10240
+七、检查/etc/pam.d/login，增加以下行（有了就不用增加了）：
+session required pam_limits.so
+检查/etc/pam.d/su，没有以下行就自己加上：
+session required pam_limits.so
+八、oracle默认不支持ubuntu需要欺骗一下oracle安装程序（看不懂没关系，按着做就行了，我也不懂）：
+mkdir /usr/lib64
+ln -s /etc /etc/rc.d
+ln -s /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib64/
+ln -s /usr/bin/awk /bin/awk
+ln -s /usr/bin/basename /bin/basename
+ln -s /usr/bin/rpm /bin/rpm
+ln -s /usr/lib/x86_64-linux-gnu/libc_nonshared.a /usr/lib64/
+ln -s /usr/lib/x86_64-linux-gnu/libpthread_nonshared.a /usr/lib64/
+ln -s /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /lib64/
+ln -s /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib64/
+sudo echo ‘Red Hat Linux release 5′ > /etc/redhat-release
+九、配置oracle的环境变量
+sudo gedit ~/.profile
+(ps:这里我配置在了.bashrc里面，每次开启终端都会加载环境变量,内容如下)
+打开.profile文件，为文件中添加以下行：
+#Oracle
+#这个写你后头要安装的路径
+export ORACLE_BASE=/home/xxx/app/xxx
+export ORACLE_HOME=${ORACLE_BASE}/product/11.2.0/dbhome_1
+#数据库的sid
+export ORACLE_SID=orcl
+export ORACLE_UNQNAME=orcl
+#环境变量
+export PATH=$PATH:${ORACLE_HOME}/bin/;
+十、启动oracle安装程式开始安装
+我的安装程序解压在主目录oracle11g下面
+所以cd进去：cd /home/XXX/oracle11g
+为了不乱码，终端先export LANG=US一下
+再运行目录下面的runInstaller: ./runInstaller
+可进入图形化安装界面，接着根据安装向导提示做就行了
+先决条件检查会提示一堆fails，不用管它，直接把ignore All挑上，直接finish
+这里要提一句，如果你的swap空间不够的话，会提示交换空间不够，不能继续
+解决方式：
+可以另开一个终端用下面的命令临时提升交换空间，再去recheck一下，就行了：
+free -m
+mkdir /swapfile
+cd /swapfile
+sudo dd if=/dev/zero of=swap bs=1024 count=400000
+sudo mkswap -f swap
+sudo swapon swap
+十一、安装到68%时的错
+ins_ctx.mk的错误提示，直接contiue跳过去
+后面还回报错：
+make file '/......emagent.mk'出错
+解决方法：
+另开一个终端，键入命令行：
+sed -i 's/^\(\s*\$(MK_EMAGENT_NMECTL)\)\s*$/\1 -lnnz11/g' $ORACLE_HOME/sysman/lib/ins_emagent.mk
+注意：如果提示找不的文件，可以把修改的那个环境变量文件source 生效一下
+点击安装界面的retry,就可以继续了
+类似的后面还会提示四次，以下面的命令行如法炮制
+sed -i 's/^\(\$LD \$LD_RUNTIME\) \(\$LD_OPT\)/\1 -Wl,--no-as-needed \2/g' $ORACLE_HOME/bin/genorasdksh
+sed -i 's/^\(\s*\)\(\$(OCRLIBS_DEFAULT)\)/\1 -Wl,--no-as-needed \2/g' $ORACLE_HOME/srvm/lib/ins_srvm.mk
+sed -i 's/^\(TNSLSNR_LINKLINE.*\$(TNSLSNR_OFILES)\) \(\$(LINKTTLIBS)\)/\1 -Wl,--no-as-needed \2/g' $ORACLE_HOME/network/lib/env_network.mk
+sed -i 's/^\(ORACLE_LINKLINE.*\$(ORACLE_LINKER)\) \(\$(PL_FLAGS)\)/\1 -Wl,--no-as-needed \2/g' $ORACLE_HOME/rdbms/lib/env_rdbms.mk
+十二、安装完成会提示有两个sh文件需要运行：
+还是另开一个终端：
+sudo /home/xxx/app/xxx/oracle/oraInventory/orainstRoot.sh
+sudo /home/xxx/app/xxx/oracle/Oracle11gee/product/11.2.0/dbhome_1/root.sh
+安装完成！
+十三、运行sqlplus前测试一下oracle的环境变量
+echo $ORACLE_BASE
+echo $ORACLE_HOME
+echo $PATH
+看看是不是你配置的值，没问题继续向下
+十四、运行数据库前测一下监听状态
+如果监听没打开可以用lsnrctl start开启
+lsnrctl status
+正常情况会显示监听信息一陀
+这里如果没有输出，说明无监听，需要自己配置
+解决方法：
+运行 netca 可以创建监听,调出图形界面设置监听
+如果没有创建库此时可以dbca 创建数据库.
+(ps:我没弄。。)顺便运行以下代码修复 dbconsole
+emca -repos drop
+emca -repos create
+emca -config dbcontrol db
+emca start dbconsole
+到此数据库应该就可以跑起来了
+启动oracle数据库
+sqlpus /nolog
+conn / as sysdba
+startup
+此时会显示你创建的orcl实例已经正常加载。
+
+
+后面的暂时没用到：
+sqldeveloper连不上oracle的问题
+解决方法：使用netmgr命令
+打开后Oracle Net Configuration->Local->Listeners->LISTENER->Add Address添加地址，
+Protocal: TCP/IP       Host: oracle所在的IP地址      Port:1521
+但是在连接时可能又报下一个异常：
+ORA-12505, TNS:listener does not currently know of SID given in connect desc .
+无法识别数据库的SID
+此时进入/home/xxx/app/xxx/product/10.2.0/db_1/network/admin目录
+cd  /home/xxx/app/xxx/product/10.2.0/db_1/network/admin，修改下面的listener.ora：
+  SID_LIST_LISTENER =
+        (SID_LIST =
+             (SID_DESC =
+                   (ORACLE_HOME = /home/xxx/app/xxx/product/11.2.0/dbhome_1)
+                   (PROGRAM = extproc)
+             )
+上面的不用管只要是在这里添加蓝色的这段
+            (SID_DESC =
+                   (GLOBAL_DBNAME = ORCL)
+                   (ORACLE_HOME = /home/xxx/app/xxx/product/11.2.0/dbhome_1)
+                   (SID_NAME = ORCL)
+            )
+        ) 

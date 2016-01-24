@@ -1,0 +1,173 @@
+一、如何手动安装Mysql数据库
+
+1、配置环境变量打开Mysq数据库的安装目录，打开bin目录，把bin目录复制到path环境变量上。
+
+2、找到Mysql建data文件夹（隐藏已知文件扩展名）。在Mysq安装目录下，随便复制一个.ini文件，修改文件名为my.ini。打开该文件，新建两个标题
+
+datadir = data的安装目录
+
+basedir = mysql的安装目录
+
+3、在cmd 命令下，定位到Mysql目录下的bin目录，在命令行中输入mysql install回车，安装服务，通过mysql remove卸载服务。
+
+4、命令 net start mysql 回车(启动服务)
+
+ 如何删除服务  命令 ：mysql remove回车
+
+5、连接数据  mysql _u root _p 回车。如果有密码，直接输入密码回车
+
+6、输入 show databases；
+
+二、如何创建数据库
+ 
+1、create database database_name;
+
+2、如何使用数据库  use datab_name;
+
+3、查看数据库表 show tables；
+
+4、查看表结构 desc table_name;
+
+5、删除数据库 drop database database_name;
+
+三、数据库的设计与分析
+
+对于数据库来说，都是通过数据库表进行数据的存储
+
+每一张数据表多数情况下，对应一个类，类中的属性对应数据表中的一个字段
+
+对于数据表而言，都必须（大多数）有一个不能重复的字段作为主键，（建议将主键设置为一个没有意义的字段，通常会使用一个自动递增的一个id字段作为主键）
+
+对象与对象之间的关系 ，无法用数据表存储
+
+对象与对象之间的关系有一下几种：
+
+1、一对一的关系：外键可以存储在任意一个表中；
+
+2、一对多的关系：外键设置在多的一端
+
+3、多对多的关系： 建立中间表进行关联
+
+四、数据表的操作
+
+数据库常用类型
+
+1、int表示整型
+
+2、float表示浮点型
+
+3.varchar表示字符串类型
+
+4、text表示文本类型
+
+5、binary表示二进制类型（存储图片）
+
+6、date表示日期类型（指标是年与日不表示时分秒）
+
+7、time表示时间的时分秒
+
+8、datetime表示日期的时间类型
+
+五、如何创建一个表：
+
+1、创建表： t_表名（t_student）
+       创建普通表 ： t_表名；
+	中间表命名规则： temp_表名；
+	创建表： create TABLE t_user(
+			id int(10) PAIMARY KEY AUTO_INCREMENT,
+			username varchar(20),
+			password varchar(20),
+			nickname varchar(30)
+);(if not exists)
+
+2、删除表 ：drop table 表名；
+
+3、修改表结构： alter table 表名 add address varchar(100);
+
+
+
+
+六、导入数据库：source d:/*(名字).sql
+
+
+
+
+drop table if exists t_user;
+
+drop table if exists t_student;
+
+drop table if exists t_classRoom;
+
+
+
+create table   t_user(
+		id int(10) primary key auto_increment,
+		username varchar(20),
+		password varchar(20),
+		nickname varchar(50)
+);
+create table t_classRoom(
+		id int(10)primary key auto_increment,
+		name varchar(20),
+		grade varchar(10)
+);
+
+create table t_student(
+		id int(10) primary key auto_increment,
+		username varchar(20) not null,
+		password varchar(20),
+		cla_id int(10),
+		constraint foreign key (cla_id) references t_classRoom(id)
+);
+
+七、为用户授权
+
+grant all on inat_test.*to 'itat'@'localhost' identified by '123';
+
+以上语句完成了，创建一个itat用户，密码是123，可以对inat_test数据库中所有的表进行操作.
+
+修改root密码
+
+grant all on *_* to 'root@localhost'identfied by '123';
+
+
+
+八、数据库操作
+
+1、插入数据
+
+insert into t_user(username,password,nickname)value('zhangsan',123,'张三');
+
+insert into t_user value(null,'list','123','李四');
+
+2、查询所有的列
+
+select * from t_user 
+
+条件查询
+
+select * from t_user where id > 1;
+
+模糊查询
+
+select *from t_user where nickname like '李%';
+
+组合条件查询
+
+select * from t_user where id > 1 and nickname like '李%';
+
+3、修改
+
+update 表名 set 字段名 = 新的值 where条件;
+
+4、删除
+
+delete from t_user where id = 2;
+delete from t_user;
+
+5、清空表（把id还原）
+
+truncate table 表名；
+
+6、把一张表中的数据复制到另一张表
+INSERT INTO t_user(username,passwoed)SELECT username,password FROM t_student;
