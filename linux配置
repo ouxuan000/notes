@@ -106,7 +106,10 @@
     pdf阅读 foxitreader  下载forxitreaderxxx.run文件
 
     flux护眼小程序
-
+    
+    思维导图xmind
+	
+    beyondcompare
 
     为了使常用软件可以通过alt+f2打开，把常用软件加入到环境变量的路径下，可以把单个命令的软连接加入到/usr/local/bin/目录下，这个路径本本身就在环境变量中
 
@@ -194,6 +197,8 @@
 	第六步：重启vsftpd
 
 	sudo restart vsftpd
+	
+	fedora22下使用需要关闭防火墙 systemctl stop firewalld.service
 	
 	这时候直接用useradd的帐号登录ftp会530 login incorrect
 	解决方案
