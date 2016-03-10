@@ -1443,3 +1443,4 @@ unzip -P passwork filename.zip passwork是要解压的密码，这个不会有�
 
 
 1、firefox使用vimperator或者penpadactly插件，实现全键盘操作，windows的火狐开发版部支持这个插件
+２、linux切换标签页面 ctrl+pageup/pagedown
