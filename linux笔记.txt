@@ -1444,3 +1444,23 @@ unzip -P passwork filename.zip passwork是要解压的密码，这个不会有�
 
 1、firefox使用vimperator或者penpadactly插件，实现全键盘操作，windows的火狐开发版部支持这个插件
 ２、linux切换标签页面 ctrl+pageup/pagedown
+
+
+linux快捷键:
+	alt+f2快速执行一条命令
+	alt+tab  + super + 1旁边那个 `
+	ctrl+alt+tab切换键盘焦点
+	super+a显示所有的应用程序
+	super+pageup/pagedown 切换工作区
+	super+shift+pageup/pagedown移动到工作区
+	super+m 显示消息托盘
+	ctrl+alt+delete关机
+	    PRTSC (Print Screen) - 截屏
+	    Alt + PRTSC - 当前窗口截图
+	    Shift + PRTSC - 所选区域截图
+	这里还有一个比较特殊的按键，主要是为了大家可以更容易的制作视频教程的。
+	    CTRL + ALT + SHIFT + R - 录制视频
+	    CTRL + ALT + SHIFT + R 第二次按下时 - 停止录制
+
+
+
