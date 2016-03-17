@@ -173,3 +173,80 @@
 如：'<%=user.getUserName() %>' 
 
 19、javascript闭包和python闭包：貌似都是返回了带有所在位置环境变量的一个函数
+
+20、javascript正则表达式
+test：测试string是否包含有匹配结果，包含返回true，不包含返回false。 
+[javascript] view plain copy
+在CODE上查看代码片派生到我的代码片
+
+    <script type="text/javascript">  
+        var str = "bbs.byr.cn";  
+        var reg = /b/;  
+        var ret = reg.test(str);  
+        alert(ret); //true  
+    </script>  
+
+
+
+match：根据pattern进行正则匹配,如果匹配到,返回匹配结果,如匹配不到返回null
+[javascript] view plain copy
+在CODE上查看代码片派生到我的代码片
+
+    <script type="text/javascript">  
+        var str = "ThIS isn't me";   
+        var reg = /is/ig;  
+        var ret = str.match(reg);  
+        alert(ret); //IS, is  
+        console.log(ret); //["IS", "is"]   
+    </script>   
+
+
+
+search ：根据pattern进行正则匹配,如果匹配到一个结果,则返回它的索引数;否则返回-1 
+[javascript] view plain copy
+在CODE上查看代码片派生到我的代码片
+
+    <script type="text/javascript">  
+        var str = "This isn't me";  
+        var reg = /is/;  
+        var ret = str.search(reg);  
+        alert(ret);//2  
+    </script>  
+
+
+replace：根据pattern进行正则匹配,把匹配结果替换为replacement 
+[javascript] view plain copy
+在CODE上查看代码片派生到我的代码片
+
+    <script type="text/javascript">  
+        var str = "i love china!";  
+        var pattern = /i/g;  
+        var ret = str.replace(pattern, "I");  
+        alert(ret); //I love chIna!  
+    </script>  
+
+
+split：根据pattern进行正则分割,返回一个分割的数组
+[javascript] view plain copy
+在CODE上查看代码片派生到我的代码片
+
+    <script type="text/javascript">  
+        var  str = 'http://www.baidu.com/';  
+        var  reg = /\W/;  
+        var  ret = str.split(reg);  
+        console.log(ret); //["http", "", "", "www", "baidu", "com", ""]   
+    </script>  
+
+
+
+exec：对string进行正则处理,并返回匹配结果.array[0]为原字符串,array[i]为匹配在整个被搜索字符串中的位置。
+[javascript] view plain copy
+在CODE上查看代码片派生到我的代码片
+
+    <script type="text/javascript">  
+        var str = "i love china!";   
+        var reg = /i\B/g;   
+        var ret = reg.exec(str);   
+        alert(ret); // i  
+        console.log(ret); //["i", index: 9, input: "i love china!"]   
+    </script> 
