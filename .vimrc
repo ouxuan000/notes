@@ -434,35 +434,35 @@ endif
 filetype plugin indent on
 
 " 针对部分语言加减指定字符的单词属性
-au FileType clojure        set iskeyword-=.
-au FileType clojure        set iskeyword-=>
-au FileType perl,php       set iskeyword-=.
-au FileType perl,php       set iskeyword-=$
-au FileType perl,php       set iskeyword-=-
-au FileType ruby           set iskeyword+=!
-au FileType ruby           set iskeyword+=?
+""au FileType clojure        set iskeyword-=.
+""au FileType clojure        set iskeyword-=>
+""au FileType perl,php       set iskeyword-=.
+""au FileType perl,php       set iskeyword-=$
+""au FileType perl,php       set iskeyword-=-
+""au FileType ruby           set iskeyword+=!
+""au FileType ruby           set iskeyword+=?
 au FileType css,scss,less  set iskeyword+=.
 au FileType css,scss,less  set iskeyword+=#
 au FileType css,scss,less  set iskeyword+=-
-au FileType nginx          set iskeyword-=/
-au FileType nginx          set iskeyword-=.
+""au FileType nginx          set iskeyword-=/
+""au FileType nginx          set iskeyword-=.
 
 
 " 针对部分语言添加字典补全
 au FileType c          call AddCDict()
-au FileType cpp        call AddCPPDict()
+""au FileType cpp        call AddCPPDict()
 au FileType java       call AddJavaDict()
-au FileType lua        call AddLuaDict()
-au FileType perl       call AddPerlDict()
-au FileType php        call AddPHPDict()
+""au FileType lua        call AddLuaDict()
+""au FileType perl       call AddPerlDict()
+""au FileType php        call AddPHPDict()
 au FileType python     call AddPythonDict()
-au FileType ruby       call AddRubyDict()
+""au FileType ruby       call AddRubyDict()
 au FileType javascript call AddJavaScriptDict()
-au FileType coffee     call AddJavaScriptDict()
-au FileType typescript call AddJavaScriptDict()
+""au FileType coffee     call AddJavaScriptDict()
+""au FileType typescript call AddJavaScriptDict()
 au FileType css        call AddCSSDict()
-au FileType scss       call AddCSSDict()
-au FileType less       call AddCSSDict()
+""au FileType scss       call AddCSSDict()
+""au FileType less       call AddCSSDict()
 
 function AddCDict()
     if g:isWIN
@@ -605,25 +605,25 @@ let g:snipMate.snippet_version                  = 0
 " 设置补全项之间的继承关系，比如 C语言补全继承C++的补全
 let g:snipMate.scope_aliases                    = {}
 let g:snipMate.scope_aliases['c']               = 'cpp'
-let g:snipMate.scope_aliases['objc']            = 'cpp,objc'
-let g:snipMate.scope_aliases['racket']          = 'scheme,racket'
-let g:snipMate.scope_aliases['typescript']      = 'javascript,typescript'
+""let g:snipMate.scope_aliases['objc']            = 'cpp,objc'
+""let g:snipMate.scope_aliases['racket']          = 'scheme,racket'
+""let g:snipMate.scope_aliases['typescript']      = 'javascript,typescript'
 let g:snipMate.scope_aliases['javascript.jsx']  = 'javascript,jsx'
-let g:snipMate.scope_aliases['eelixir']         = 'html,eelixir'
-let g:snipMate.scope_aliases['smarty']          = 'html,smarty'
-let g:snipMate.scope_aliases['blade']           = 'html,blade'
-let g:snipMate.scope_aliases['volt']            = 'html,volt'
+""let g:snipMate.scope_aliases['eelixir']         = 'html,eelixir'
+""let g:snipMate.scope_aliases['smarty']          = 'html,smarty'
+""let g:snipMate.scope_aliases['blade']           = 'html,blade'
+""let g:snipMate.scope_aliases['volt']            = 'html,volt'
 let g:snipMate.scope_aliases['html.twig']       = 'html,twig'
-let g:snipMate.scope_aliases['jinja.twig']      = 'html,twig'
-let g:snipMate.scope_aliases['htmldjango.twig'] = 'html,twig'
-let g:snipMate.scope_aliases['htmldjango']      = 'html,htmldjango'
-let g:snipMate.scope_aliases['jinja']           = 'html,jinja'
-let g:snipMate.scope_aliases['eruby']           = 'html,eruby'
-let g:snipMate.scope_aliases['jst']             = 'html,jst'
-let g:snipMate.scope_aliases['mustache']        = 'html,mustache'
-let g:snipMate.scope_aliases['handlebars']      = 'html,mustache'
-let g:snipMate.scope_aliases['scss']            = 'css,scss'
-let g:snipMate.scope_aliases['less']            = 'css,less'
+""let g:snipMate.scope_aliases['jinja.twig']      = 'html,twig'
+""let g:snipMate.scope_aliases['htmldjango.twig'] = 'html,twig'
+""let g:snipMate.scope_aliases['htmldjango']      = 'html,htmldjango'
+""let g:snipMate.scope_aliases['jinja']           = 'html,jinja'
+""let g:snipMate.scope_aliases['eruby']           = 'html,eruby'
+""let g:snipMate.scope_aliases['jst']             = 'html,jst'
+""let g:snipMate.scope_aliases['mustache']        = 'html,mustache'
+""let g:snipMate.scope_aliases['handlebars']      = 'html,mustache'
+""let g:snipMate.scope_aliases['scss']            = 'css,scss'
+""let g:snipMate.scope_aliases['less']            = 'css,less'
 let g:snipMate.scope_aliases['xhtml']           = 'html'
 
 " NERDTree            树形文件浏览器
@@ -691,7 +691,8 @@ let g:used_javascript_libs = 'jquery,requirejs,underscore,backbone,angularjs,ang
 ""let g:php_cs_fixer_enable_default_mapping = 1  " 使用插件默认的快捷键
 ""let g:php_cs_fixer_dry_run = 0                 " 只提示需要格式化的位置，不执行格式化 [0为不开启]
 
-
+" ======= markdown ========"
+let g:vim_markdown_frontmatter=1
 " ======= 自定义快捷键 ======= "
 
 " Ctrl + ]            多选择跳转
