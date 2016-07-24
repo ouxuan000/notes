@@ -52,4 +52,6 @@ setopt pushdminus
 
 #shortcut
 alias note="cd ~/Documents/notes"
-alias ll="ls -l"
+alias ll="ls -al --color=auto"
+alias vi="vim"
+alias grep="grep --color=auto"
