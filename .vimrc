@@ -910,7 +910,7 @@ func! Compile_Run_Code()
     elseif &filetype == 'php'
         exec '!php %:t'
     elseif &filetype == 'python'
-        exec '!python3 %:t'
+        exec '!python %:t'
     elseif &filetype == 'ruby'
         exec '!ruby %:t'
     elseif &filetype == 'julia'
