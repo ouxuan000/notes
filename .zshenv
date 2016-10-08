@@ -11,13 +11,18 @@ export PATH=${JAVA_HOME}/bin:$PATH
 
 #Oracle
 #这个写你后头要安装的路径
-#export ORACLE_BASE=/home/tt/app/tt
-#export ORACLE_HOME=${ORACLE_BASE}/product/11.2.0/dbhome_1
+export ORACLE_BASE=/oracle
+export ORACLE_HOME=/oracle/product/db
 #数据库的sid
-#export ORACLE_SID=orcl
+export ORACLE_SID=orcl
+export ORACLE_INVENTORY=/oracle/inventory
+export ORACLE_BASE ORACLE_SID ORACLE_HOME
 #export ORACLE_UNQNAME=orcl
 #环境变量
-#export PATH=$PATH:${ORACLE_HOME}/bin/;
+export PATH=$ORACLE_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+export EDITOR=vim
+export VISUAL=vim
 
 #maven
 #export M2_HOME=/home/tt/applications/apache-maven
