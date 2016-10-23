@@ -37,4 +37,5 @@ export VISUAL=vim
 #export PATH=$PATH:${MAGICK_HOME}/bin;
 #export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$MAGICK_HOME/lib
 
-
+#sqldeveloper
+export PATH=/home/lx7ly/application/sqldeveloper:$PATH
