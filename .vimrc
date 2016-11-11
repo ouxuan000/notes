@@ -649,13 +649,13 @@ let g:airline_theme = 'badwolf'                " 设置主题
 "            \}                                 " 自定义命令行显示
 
 " GitGutter           Git辅助插件
-let g:gitgutter_enabled               = 0      " 默认不开启
-let g:gitgutter_signs                 = 0      " 默认不开启提示
-let g:gitgutter_highlight_lines       = 0      " 默认不高亮行
-let g:gitgutter_sign_added            = '+'    " 自定义新增指示符
-let g:gitgutter_sign_modified         = '>'    " 自定义修改指示符
-let g:gitgutter_sign_removed          = '-'    " 自定义删除指示符
-let g:gitgutter_sign_modified_removed = '->'   " 自定义既修改又删除指示符
+"let g:gitgutter_enabled               = 0      " 默认不开启
+"let g:gitgutter_signs                 = 0      " 默认不开启提示
+"let g:gitgutter_highlight_lines       = 0      " 默认不高亮行
+"let g:gitgutter_sign_added            = '+'    " 自定义新增指示符
+"let g:gitgutter_sign_modified         = '>'    " 自定义修改指示符
+"let g:gitgutter_sign_removed          = '-'    " 自定义删除指示符
+"let g:gitgutter_sign_modified_removed = '->'   " 自定义既修改又删除指示符
 
 " Syntastic           语法检查
 let g:syntastic_check_on_open = 1              " 默认开启
@@ -692,7 +692,7 @@ let g:used_javascript_libs = 'jquery,requirejs,underscore,backbone,angularjs,ang
 ""let g:php_cs_fixer_dry_run = 0                 " 只提示需要格式化的位置，不执行格式化 [0为不开启]
 
 " ======= markdown ========"
-let g:vim_markdown_frontmatter=1
+"let g:vim_markdown_frontmatter=1
 " ======= 自定义快捷键 ======= "
 
 " Ctrl + ]            多选择跳转
