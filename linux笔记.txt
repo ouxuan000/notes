@@ -1070,7 +1070,7 @@ $ awk '{
     如果使用非chrome浏览器可以使用Ctrl+w进行视窗间的跳转
     分别在不同视窗的命令行模式下输入:q!退出多视窗编辑
 
-35、mkdir -vp shiyanlou/{lib/,bin/,doc/{info,product}}  //创建目录，好方法
+35、mkdir -vp shiyanlou/{lib/,bin/,doc/{info,product}}  //创建目录，好方法, 特别注意：逗号左右俩边不能有空格
 
 36、自定义回收站功能
 
