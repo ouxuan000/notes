@@ -3,7 +3,7 @@
 " -----------------    Date: 2015-11-27 18:51:45
 " -----------------   https://github.com/ruchee/vimrc
 
-
+let mapleader=","
 " ---------- Ctrl系按键 ----------
 "
 " Ctrl + H                   --光标移当前行行首       [插入模式]
@@ -577,8 +577,8 @@ endfunction
 "let g:python_highlight_all                = 1  " 开启Python的所有高亮
 
 " 设置部分语言插件的特性
-let g:smarty_left_delimiter  = '{{'            " 设置Smarty标签左界定符
-let g:smarty_right_delimiter = '}}'            " 设置Smarty标签右界定符
+""let g:smarty_left_delimiter  = '{{'            " 设置Smarty标签左界定符
+""let g:smarty_right_delimiter = '}}'            " 设置Smarty标签右界定符
 
 " BufExplorer         文件缓冲浏览器
 let g:bufExplorerSortBy = 'name'               " 按文件名排序
@@ -714,10 +714,10 @@ nmap <leader>v "+p
 vmap <leader>v "+p
 
 " \bb                 按=号对齐代码 [Tabular插件]
-nmap <leader>bb :Tab /=<cr>
+""nmap <leader>bb :Tab /=<cr>
 
 " \bn                 自定义对齐    [Tabular插件]
-nmap <leader>bn :Tab /
+""nmap <leader>bn :Tab /
 
 " <F5>                打开/关闭文件树窗口，在左侧栏显示 [NERDTree插件]
 nmap <F5> :NERDTree<cr>
@@ -729,7 +729,7 @@ nmap <F6> :TagbarToggle<cr><c-w><c-l>
 "nmap <leader>fe :FencView<cr>
 
 " \mp                 生成Promptline脚本文件，用于个性化终端操作 [Promptline插件 ]
-nmap <leader>mp :!rm ~/backup/.promptline<cr><esc>:PromptlineSnapshot ~/backup/.promptline airline<cr>
+""nmap <leader>mp :!rm ~/backup/.promptline<cr><esc>:PromptlineSnapshot ~/backup/.promptline airline<cr>
 
 " \gi                 开启或关闭GitGutter [GitGutter插件]
 "nmap <leader>gi :GitGutterToggle<cr>:GitGutterSignsToggle<cr>:GitGutterLineHighlightsToggle<cr>
