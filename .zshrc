@@ -56,5 +56,9 @@ alias ll="ls -al --color=auto"
 alias vi="vim"
 alias grep="grep --color=auto"
 alias code="cd ~/workspace"
-alias startw="nohup ./startWeblogic & tail -f nohup"
 #alias killdhcp="sudo kill -9 `ps -ef| grep dhcpcd | head -n 1 | awk '{print $2}'`"
+
+# 增加环境变量函数
+prepend(){
+    eval $1=$2:'$'$1 && export $1;
+}
