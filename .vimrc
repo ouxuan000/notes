@@ -723,7 +723,7 @@ vmap <leader>v "+p
 nmap <F5> :NERDTree<cr>
 
 " <F6>                打开/关闭Tags窗口，在右侧栏显示 [Tagbar插件]
-nmap <F6> :TagbarToggle<cr><c-w><c-l>
+"nmap <F6> :TagbarToggle<cr><c-w><c-l>
 
 " \fe                 打开文件编码窗口，在右侧栏显示 [FencView插件]
 "nmap <leader>fe :FencView<cr>
