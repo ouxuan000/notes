@@ -1,2 +1,0 @@
-document.write('<script type="text/javascript">/*468*60 Í¼Æ¬ ´´½¨ÓÚ 2014-12-17*/var cpro_id = "u1866085";</script>');
-document.write('<script src="http://cpro.baidustatic.com/cpro/ui/c.js" type="text/javascript"></script>');
