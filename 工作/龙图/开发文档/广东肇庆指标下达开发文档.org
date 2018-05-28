@@ -1,0 +1,25 @@
+* 指标接收
+    + 调用省厅接口获取数据
+    + 已经接收过的数据如何处理？ 如果指标唯一标识与接收类型一致不重复接收
+    + 根据哪个字段判断已经接收? (目前使用 budgetvouchid)
+    + 统一指标id下数据， 类型不一致的数据如何接收(1. 新增 2. 删除, 3:修改(金额修改后) 分别做什么处理, 如果做了支付业务应该如何操作)
+* 指标确认
+    + 确认目前只是根据实际业务对接收数据做了修改保存
+* 生成
+    + 根据当前选中数据， 从无来源到单位指标生成一主一明细的指标数据, 单位指标到新增状态， 需要业务走流程
+    + 生成后的数据可以取消生成
+    + 如果做了支付业务后如何取消生成? 做了支付业务需要业务系统先将业务数据处理， 才可以继续取消生成
+    + 单位指标是否可以对这些指标进行删除？ 需要级联删除
+* 挂接
+    + 一笔中央指标对多笔(没有挂接过)单位指标进行挂接
+    + 已经挂接的数据有余额可以重复挂接， 可以取消挂接， 挂接后有余额不可以进行生成指标，挂接和生成只能选一种操作
+* 涉及的业务表及关系
+    + 上级接收数据备份表 p#bdg_t_receivebdgdata, 只增不减
+    + 指标接收业务表，p#bdg_t_bdgreceive 上级接收数据会经过视图(BDG_V_CENTRALMAPLOCAL)转换， 保存到业务表中 
+    + 挂接关系表 p#BDG_T_CENTRALLOCALREL (centralid: 中央指标id (budgetvouchid), localid:单位指标id (bdgsub.guid))
+* 配置
+    + 需要SELECT * FROM BDG_T_THIRDSERVICECONFIG, 配置相关参数， 访问地址，参数列表等, 地址就是请求的webservice服务地址, 参数列表用json格式的形式, 需要填写的字段开发提供，现场只需要配置即可
+    + 需要配置dialetbean, 目前支持俩种 bdg.bdgreceive.impl.TestWebServiceImpl(公司测试使用),  bdg.bdgreceive.impl.GDWebServiceImpl(肇庆现场使用)
+* 问题记录
+    + 地址不通 用wget wsdl地址测试,  能下载才能保证通
+    + jar包冲突 http://www.voidcn.com/article/p-dhgfkvyl-bpb.html

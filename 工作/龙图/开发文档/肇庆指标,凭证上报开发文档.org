@@ -1,0 +1,27 @@
+* 报文规范
+    + 传入数据
+    #+BEGIN_SRC json
+    {"unitCode":"601"," unitName":"广州市"," vfCode ":"xxxxxx","list":[
+    { "parentVouId": "", "projectNo":"", "sprjId": "","sprjName":””……},
+    { "parentVouId": "", "projectNo":"", "sprjId": "","sprjName":””……},
+    { "parentVouId": "", "projectNo":"", "sprjId": "","sprjName":””……}...]}
+    #+END_SRC
+    + 返回数据
+    #+BEGIN_SRC json
+    [{
+    "businessId": "1001",
+    "code": 0,
+    "message": "成功"
+    }, {
+    "businessId": "1002",
+    "code": 1,
+    "message": "失败，单位编码错误"
+    }, ...
+    ]
+    #+END_SRC
+* 程序实现
+    + 指标和凭证业务表中加入reportstatus varchar2(1)字段, 作为上报标识（确认:1, 上报: 2）
+    + 页签分为待确认， 已确认， 已上报， 业务需要再单据定义中配置页签过滤条件，分别展示不通状态的数据
+    + 选中数据上报会通过视图将业务数据转换为省厅要求的上报数据字段， 视图名bdg_t_report_view, 需要扩展字段只需要修改视图，业务人员可自行调整, 上报接口调用成功后， 返回成功的业务数据id， 指标或凭证根据返回id更新业务数据上报状态 
+* 配置
+    + 肇庆现场需要修改 BDG_T_THIRDSERVICECONFIG表中标识为bdgreport的数据， 需要修改远程接口url， dialectbean修改为 bdg.bdgreport.impl.GDWebServiceImpl
