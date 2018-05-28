@@ -1,0 +1,38 @@
+* 业务需求
+  1. 对选中的业务数据切换来源， 支持修改核算要素
+* 配置及实现
+  1. 需要执行3020升级脚本
+    里面包含参数 MOULDREFTABLE(模板与业务表的对应关系, 目前是只修改明细， 如果需要修改多表, 需要添加对应的主表信息 例如{"mouldid": "主表,子表"}) 
+  2. 单据定义勾选是否更新下级
+    勾选后， 如果在单据定义配置了修改的核算要素， 对当前数据所做的修改， 会级联修改到下级业务数据中， 包括计划， 申请， 凭证
+    注: 只有当前业务单据会修改来源
+  3. 需要配置工作流， 及记账节点， 终审后进行数据更新
+  4. 重定来源明细数据会保存修改前及修改后的数据信息
+  5. 查询下级数据时，根据总帐link表进行递归， 交易令信息， 使用业务模板id统一查询（避免现场交易令不一致）
+  6. 总账实现
+    总帐提供三个接口， 
+    + adjustGlCtrlelement 调账接口需要根据业务循环调用， 所以需要保证原数据中vchtypeid当作核算要素， 用来区分业务, 明细账数据缺少vchtypeid需要补齐后进行操作, 调用接口后， 原额度应该还回并且占用新额度
+    + updateGlCtrlElement
+    + directAuditGLRecords 更新明细账要素， 总帐先删后插， 调用后修改的核算要素与业务应该一致
+* 测试校验
+#+BEGIN_SRC sql
+SELECT GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_SETPARM('','1500','2017','') FROM DUAL;
+--做到凭证的指标
+select t.bgtdocno, t.fromctrlid, t.toctrlid, t.amt, t.timestamps, t.wfstatus, t.creater from bdg_t_bdgsub t where t.toctrlid in (select indictrlid from pay_t_paysub t2 where t2.indictrlid is not null);
+
+select t.fromctrlid, t.expfuncguid, t.mainguid, t.timestamps, t.amt, t.adjustcols, t.businesssrc from bdg_T_bdgsub t where t.vchtypeid = '7789B5D279A916C3B0C6502E37916CE8';
+
+--查看总帐金额变化
+select (t.damt-t.camt) * dc - T.OCCUPYAMT - T.FROZENAMT, t2.businesssrc, t2.wfstatus from fasp_t_glctrl288000 t, bdg_t_bdgsub t2  where t.guid = t2.fromctrlid and t2.mainguid = '9A81BEBC049511A74E6EF310ABC093B4';
+
+--终审后查看要素是否修改
+select 'afterreset' as fx, t.guid, t.fromctrlid, t.expfuncguid, t.toctrlid, t.amt from bdg_T_bdgsub t where t.guid = '4F505810050D15475F1F3640AEBD5732' 
+union all
+select 'before' as fx, t.guid, t.fromctrlid, t.expfuncguid, t.toctrlid, t.amt from bdg_T_bdgsub t where T.BUSINESSSRC = 'beforereset' and T.ADJUSTCOLS like '%4F505810050D15475F1F3640AEBD5732%'  and t.vchtypeid = '7789B5D279A916C3B0C6502E37916CE8'  and rownum = 1;
+
+--查找做了下级的指标
+select t.guid, t.fromctrlid, t.expfuncguid, t.toctrlid, t.amt, t.bgtdocno, t.billcode  from bdg_t_bdgsub t where t.toctrlid in (select t2.fromctrlid from pay_t_plan t2);
+
+--补全数据的单据id
+update fasp_t_glrecord288000 t set t.vchtypeid = (select t.vchtypeid from bdg_t_bdgsub t where t.guid = 'FBD12859CC7EE50F60F0B7B3FC809A6E') where t.billguid in (select t.guid from bdg_t_bdgsub t where t.guid = 'FBD12859CC7EE50F60F0B7B3FC809A6E');
+#+END_SRC
