@@ -1,0 +1,126 @@
+* create a new repository on the command line
+#+BEGIN_EXAMPLE               
+echo "# ssm" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin git@github.com:offline7LY/ssm.git
+git push -u origin master
+#+END_EXAMPLE
+* push an existing repository from the command line
+#+BEGIN_EXAMPLE                  
+git remote add origin git@github.com:offline7LY/ssm.git
+git push -u origin master
+#+END_EXAMPLE
+* 如何安装git
+
+  1. 下载安装桌面端git。
+  linux: 各个发行版都有打包工具 (archlinux: pacman -S git) 
+  Windows请至：http://code.google.com/p/msysgit/
+  OSX可以在xcode中安装command line tools，或者brew install git
+
+  2. git的初始设置
+  git config --global user.name "Your Real Name"
+  git config --global user.email you@email.address
+
+  3. 建立仓库
+  在git bash里找到你的项目目录。（或直接用shell右键里的git bash here）
+  git init
+  这样在你的项目目录下就会有一个.git的隐藏目录（类似于.svn） 。
+
+  4. 初始化项目
+  git add .
+  留心后面的一个 "." ， 这是添加所有文件的情况，如果愿意，你也可以添加特定的几个文件，比如git add readme.txt等等。
+  之后就可以做我们的first commit到仓库里了。
+  git commit -m 'first commit'
+  -m 参数以及后面的字串是添加说明。
+
+  5.  注册github账号
+  下面就是与github有关的操作了。
+  首先到http://github.com/注册账号。注册之后可以看到这样的界面。选择第一项创建一个项目。
+  表单需要填写
+  Project Name（项目名称）
+  Description（描述）
+  Homepage URL（主页URL，一般就以项目名称命名好了）
+
+  6. 创建SSH密匙
+  这步工作应该是最麻烦的吧。回到桌面，打开git bash，输入以下命令。
+  ssh-keygen -C 'your@email.address' -t rsa
+  确认使用默认路径，然后输入两次你要是用的密码就行（一般直接敲几个回车不使用密码）。
+
+  7. 提交密匙
+  现在又要回到github的页面上，在右上方工具栏里找到Account Settings。在这个页面上有一个SSH Public Keys标签，选择Add another public key。Title随便取，Key是一段东西。
+  找到刚才创建密匙的那个目录下（默认是C:\Documents and Settings\你的windows用户名.ssh，OSX是~/.ssh）找到id_rsa.pub文件，把它打开可以看到一堆文字，拷贝下来黏贴到github页面key的空白处。然后Apply，就好了。
+  可以使用以下命令测试连接
+  ssh -v git@github.com
+  会要求输入你刚才设置的密码，如果成功的话可以看到这样的ERROR（orz，起码证明连接是成功了）
+  ERROR: Hi Arthraim! You've successfully authenticated, but GitHub does not provide shell access
+
+  8. 上传代码
+  最后就是上传你的代码了~ bash切换到你的项目目录下，输入以下命令。
+  git remote add origin git@github.com:你的github用户名/你的github项目名.git
+  git push origin master
+  现在再去http://github.com/你的github用户名/你的github项目 就可以看到你的项目了~ Good luck
+
+* 一些常用的命令
+  #+BEGIN_EXAMPLE
+  git config：配置相关信息
+  git clone：复制仓库
+  git init：初始化仓库
+  git add：添加更新内容到索引中
+  git diff：比较内容
+  git status：获取当前项目状况
+  git commit：提交
+  git branch：分支相关(有那些分支)
+  git checkout：切换分支(实际专业公司开发中都会有专门开发测试分支)
+  git merge：合并分支
+  git reset：恢复版本
+  git log：查看日志
+  #+END_EXAMPLE
+** 标签使用
+  1. 打标签
+  #+BEGIN_EXAMPLE
+  git tag -a V1.2 -m 'WebSite version 1.2'
+  #+END_EXAMPLE
+  2.显示所有tags
+  #+BEGIN_EXAMPLE
+  git tag
+  git show v1.0 --会显示注释信息
+  #+END_EXAMPLE
+  3. 标签同步远程
+  #+BEGIN_EXAMPLE
+  git push origin --tags
+  #+END_EXAMPLE
+  4. 获取指定标签版本
+  #+BEGIN_EXAMPLE
+  git fetch origin tag V1.2
+  #+END_EXAMPLE
+  5. 删除本地及远程标签
+  #+BEGIN_EXAMPLE
+  git tag -d V1.2 --删除本地
+  git push origin :refs/tags/V1.2 --删除远程
+  #+END_EXAMPLE
+
+* 小技巧走一波
+    1. alias使用
+    #+BEGIN_EXAMPLE
+    git config --global alias.ac '!git add -A && git commit'
+    git ac -m "message"
+    #+END_EXAMPLE
+    2. 坑爹的gwf, git设置代理访问
+    #+BEGIN_EXAMPLE
+    --利用了shawnsocks5做代理访问
+    #全局设置
+    git config --global http.proxy 'socks5://127.0.0.1:1080' 
+    git config --global https.proxy 'socks5://127.0.0.1:1080'
+    #如果不需要全局设置， 单独再git项目中使用不用--global
+    git config  http.proxy 'socks5://127.0.0.1:1080' 
+    git config  https.proxy 'socks5://127.0.0.1:1080'
+    #查看配置 
+    git config -l
+    #只对github.com
+    git config --global http.https://github.com.proxy socks5://127.0.0.1:1080
+    #取消代理
+    git config --global --unset http.https://github.com.proxy
+    #+END_EXAMPLE
+

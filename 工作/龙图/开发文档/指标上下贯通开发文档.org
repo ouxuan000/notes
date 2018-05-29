@@ -1,5 +1,53 @@
 * 指标下发(上级下发)
-    +
+    + 服务端操作
+      1. 综合操作页面，选中明细数据做下发, 通过转换视图(bdg_v_bdg2send),将数据转成codename形式保存到bdg_t_bdgsenddata中
+      2. 采用hessian协议,注册指标下发的service服务, 提供三个接口
+      #+BEGIN_SRC java
+          Map PushIndex(int pageNum) throws Exception ;
+          /**
+          * {"code": 0,"message": "成功","totalRow": "10","totalPage": "1"}
+          * 推送条数
+          * @return
+          * @throws Exception
+          */
+          Map pushIndexTotal() throws Exception;
+
+          /**
+          * 根据唯一主键 更新服务端接收状态
+          * @param guids
+          * @return
+          */
+          int updateReceiveStatus(List<String> guids);
+      #+END_SRC
+      3. webservice中注册service
+      #+BEGIN_QUOTE
+      	<!-- 外接系统的hession协议 (指标接收服务接口) START-->
+        <servlet>
+          <servlet-name>HessianPullBdg</servlet-name>
+          <servlet-class>com.caucho.hessian.server.HessianServlet</servlet-class>
+          <init-param>
+            <param-name>service-class</param-name>
+            <param-value>gov.mof.fasp2.bdg.common.service.bdgsend.BdgSendService</param-value>
+          </init-param>
+        </servlet>
+        <servlet-mapping>
+          <servlet-name>HessianPullBdg</servlet-name>
+          <url-pattern>/remoting/service/pullbdg</url-pattern>
+        </servlet-mapping>
+        <!-- 外界系统的hession协议 (指标接收服务接口) END-->
+      #+END_QUOTE
+
+* 下级接收
+    + 下级财政调用服务端提供的hessian接口接入数据, 接入后留一份原始数据保存到bdg_t_bdgreceivedata中， 然后通过转换视图(bdg_t_receive2bdg)将数据放入到接入业务表中
+    + 接收过程中对数据做唯一性校验
+    + 接收代码实现
+    #+BEGIN_SRC java
+      String url = "http://localhost:7002/remoting/service/pullbdg";
+      HessianProxyFactory factory = new HessianProxyFactory();
+      IBdgSendService service = (IBdgSendService) factory.create(IBdgSendService.class, url);
+      map = service.pushIndexTotal();
+    #+END_SRC
+    + 接收后可对数据进行生成指标或者挂接现有指标操作, 需要在单据定义配置要生成的单据
 * 测试
     + 清理数据
     #+BEGIN_SRC sql
