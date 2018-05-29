@@ -14,7 +14,7 @@
   + 设置一个用户名密码邮箱 搞定!
 * 安装插件
   + 下载Git Plugin和Maven Intergration Plugin插件
-  ![wpsF80.tmpdc595842-16a7-4051-8a95-b74690ae472e.jpg](jenkins_files/wpsF80.tmpdc595842-16a7-4051-8a95-b74690ae472e.jpg)
+  file:jenkins_files/wpsF80.tmpdc595842-16a7-4051-8a95-b74690ae472e.jpg
 * 配置maven和jdk
   + 在Global Tool Configuration中配置Maven和Jdk,按道理可以配置通过配置JAVA_HOME 和MAVEN_HOME，分别指向/usr/local/jdk,/usr/local/maven，但通过测试JAVA_HOME生效了，但MAVEN_HOME没成效,提示说没有找到maven,所以又通过自动化安装重新配置了maven
 
@@ -24,11 +24,11 @@
   3. 可以绑定 trigger
   4. build now
   5. scim pull :  配置H/5 * * * * 每五分钟检查构建
-  ![wpsF6E.tmpbbe11818-143d-458b-8bf4-1e95fff57b79.jpg](jenkins_files/wpsF6E.tmpbbe11818-143d-458b-8bf4-1e95fff57b79.jpg) 
-  ![wpsF7F.tmp9df4a64c-09ee-4974-b5e1-b60b3e51964b.jpg](jenkins_files/wpsF7F.tmp9df4a64c-09ee-4974-b5e1-b60b3e51964b.jpg) 
+  file:jenkins_files/wpsF6E.tmpbbe11818-143d-458b-8bf4-1e95fff57b79.jpg
+  file:jenkins_files/wpsF7F.tmp9df4a64c-09ee-4974-b5e1-b60b3e51964b.jpg
  
 * 创建job
-  i. ![wpsF81.tmpac518d13-f187-4fd0-9eee-b6d7e8910b4f.jpg](jenkins_files/wpsF81.tmpac518d13-f187-4fd0-9eee-b6d7e8910b4f.jpg)
-  ii. 发布 [https://www.jdev.it/deploying-your-war-file-from-jenkins-to-tomcat/](https://www.jdev.it/deploying-your-war-file-from-jenkins-to-tomcat/) 
-  ![wpsF82.tmpefc86967-bc0b-4630-bf9c-4e6fdb03694e.jpg](jenkins_files/wpsF82.tmpefc86967-bc0b-4630-bf9c-4e6fdb03694e.jpg) 
-  ![wpsF83.tmp06e83bb2-f789-4609-baf7-9830014b932f.jpg](jenkins_files/wpsF83.tmp06e83bb2-f789-4609-baf7-9830014b932f.jpg) 
+  file:jenkins_files/wpsF81.tmpac518d13-f187-4fd0-9eee-b6d7e8910b4f.jpg)
+  + 发布 [[https://www.jdev.it/deploying-your-war-file-from-jenkins-to-tomcat/][https://www.jdev.it/deploying-your-war-file-from-jenkins-to-tomcat/]]
+  file:jenkins_files/wpsF82.tmpefc86967-bc0b-4630-bf9c-4e6fdb03694e.jpg
+  file:jenkins_files/wpsF83.tmp06e83bb2-f789-4609-baf7-9830014b932f.jpg
