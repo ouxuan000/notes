@@ -1,0 +1,27 @@
+--指标字段不翻译更新, 确定值集有效
+--列表区
+update busfw_t_uicolumn t set t.issource = '1', t.format = '#code-#name', t.type = 'tree'
+where lower(t.columncode) = '要更新的字段小写' and t.key in
+      (select t2.uikey
+          from fasp_t_papage t2
+        where t2.MOULDID in (select t3.guid
+                                from fasp_t_pabusinessmould t3
+                              where t3.appid = 'bdg'));
+                              
+            
+--编辑区
+update busfw_t_uieditform t set t.type = 'tree'
+where lower(t.columncode) = '要更新的字段小写' and t.key in
+      (select t2.uikey
+          from fasp_t_papage t2
+        where t2.MOULDID in (select t3.guid
+                                from fasp_t_pabusinessmould t3
+                              where t3.appid = 'bdg'));
+--查询区
+update busfw_t_uiqueryform t set t.type = 'tree'
+where lower(t.columncode) = '要更新的字段小写' and t.key in
+      (select t2.uikey
+          from fasp_t_papage t2
+        where t2.MOULDID in (select t3.guid
+                                from fasp_t_pabusinessmould t3
+                              where t3.appid = 'bdg'));

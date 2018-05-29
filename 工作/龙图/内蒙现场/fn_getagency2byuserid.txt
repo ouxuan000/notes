@@ -1,0 +1,359 @@
+create or replace function FN_GETAgency2BYUSERID(elementcode varchar2,
+                                                menuguid    varchar2,
+                                                appid      varchar2)
+  return SECU_TAB_DIVTREE
+  pipelined as
+  id            varchar2(64);
+  aname          varchar2(200);
+  lvlid          varchar2(4);
+  superid        varchar2(64);
+  endflag        varchar2(4);
+  code_divid    SECU_REC_DIVTREE;
+  c_CURSOR      SYS_REFCURSOR;
+  v_sql          varchar2(3000);
+  v_ssql        varchar2(3000);
+  v_text        varchar2(3000);
+  i_count        number;
+  b              boolean;
+  isele          boolean;
+  v_tablename    varchar2(100);
+  v_csid        varchar2(100);
+  v_eletablename varchar2(100);
+  v_menuguid    varchar2(50);
+  v_useragency  varchar2(50);
+  PRAGMA AUTONOMOUS_TRANSACTION;
+begin
+  isele := true;
+  if elementcode is null or elementcode = '' then
+    isele := false;
+  end if;
+  if menuguid is null or menuguid = '' then
+    v_menuguid := 'rptdataright000';
+  else
+    v_menuguid := menuguid;
+  end if;
+  select agency
+    into v_useragency
+    from fasp_t_causer
+  where guid = global_multyear_cz.Secu_f_GLOBAL_PARM('USER');
+
+  if isele then
+    /*select m.param5
+      into v_tablename
+      from fasp_t_pubmenu m
+    where m.guid = v_menuguid;
+    select csid
+      into v_csid
+      from fasp_t_diccolumn c
+    where tablecode = v_tablename
+      and columncode = elementcode;
+    select tablecode
+      into v_eletablename
+      from (select tablecode
+              from fasp_t_dicds t
+            where t.guid = v_csid
+            union all
+            select t1.datasource
+              from fasp_t_dicdssource t1
+            where t1.guid = v_csid);*/
+  
+    if appid is not null then
+      v_eletablename := 'FASP_T_PUBAGENCY' || appid;
+    else
+      v_eletablename := 'fasp_v_age_level1province';
+    end if;
+    /*    获取要素的过滤条件
+    */
+    select count(1)
+      into i_count
+      from (select s.textvalue
+              from p#fasp_t_busrurulesub s
+            where s.ruleelement = elementcode
+              and exists
+            (select t.ruleid
+                      from p#fasp_t_dataright t
+                    where s.ruleguid = t.ruleid
+                      and exists
+                    (select 1
+                              from p#fasp_t_datarightrp rp
+                            where exists (select r.roleguid, r.userguid
+                                      from fasp_t_causerrole r
+                                    where r.userguid =
+                                          global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                                      and rp.userguid = r.userguid)
+                              and rp.menuid = v_menuguid
+                              and t.guid = rp.datarightid))
+            union all
+            select rp.datarightid
+              from p#fasp_t_datarightrp rp
+            where exists
+            (select r.roleguid, r.userguid
+                      from fasp_t_causerrole r
+                    where r.userguid =
+                          global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                      and rp.userguid = r.userguid)
+              and rp.menuid = v_menuguid
+              and rp.datarightid in
+                  ('loweragencydatarignt', 'localagencydatarignt'));
+    if i_count > 0 then
+      b := true;
+    end if;
+    if b then
+      open c_cursor for
+        select s.textvalue
+          from p#fasp_t_busrurulesub s
+        where s.ruleelement = elementcode
+          and exists
+        (select t.ruleid
+                  from p#fasp_t_dataright t
+                where s.ruleguid = t.ruleid
+                  and exists
+                (select 1
+                          from p#fasp_t_datarightrp rp
+                        where exists (select r.roleguid, r.userguid
+                                  from fasp_t_causerrole r
+                                where r.userguid =
+                                      global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                                  and rp.userguid = r.userguid)
+                          and rp.menuid = v_menuguid
+                          and t.guid = rp.datarightid))
+        union all
+        select rp.datarightid
+          from p#fasp_t_datarightrp rp
+        where exists
+        (select r.roleguid, r.userguid
+                  from fasp_t_causerrole r
+                where r.userguid =
+                      global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                  and rp.userguid = r.userguid)
+          and rp.menuid = v_menuguid
+          and rp.datarightid in
+              ('loweragencydatarignt', 'localagencydatarignt');
+    else
+      open c_cursor for
+        select s.textvalue
+          from p#fasp_t_busrurulesub s
+        where s.ruleelement = elementcode
+          and exists
+        (select t.ruleid
+                  from p#fasp_t_dataright t
+                where s.ruleguid = t.ruleid
+                  and exists
+                (select 1
+                          from p#fasp_t_datarightrp rp
+                        where exists (select r.roleguid, r.userguid
+                                  from fasp_t_causerrole r
+                                where r.userguid =
+                                      global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                                  and rp.roleid = r.roleguid)
+                          and rp.menuid = v_menuguid
+                          and t.guid = rp.datarightid))
+        union all
+        select rp.datarightid
+          from p#fasp_t_datarightrp rp
+        where exists
+        (select r.roleguid, r.userguid
+                  from fasp_t_causerrole r
+                where r.userguid =
+                      global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                  and rp.roleid = r.roleguid)
+          and rp.menuid = v_menuguid
+          and rp.datarightid in
+              ('loweragencydatarignt', 'localagencydatarignt');
+    
+    end if;
+    LOOP
+      FETCH c_cursor
+        INTO v_text;
+      EXIT WHEN c_cursor%NOTFOUND;
+      IF length(v_sql) > 0 THEN
+        if v_text = 'localagencydatarignt' then
+          v_sql := v_sql || ' UNION ALL SELECT guid FROM ' ||
+                  v_eletablename || ' WHERE GUID =''' || v_useragency || '''';
+        elsif v_text = 'loweragencydatarignt' then
+          v_sql := v_sql || ' UNION ALL SELECT guid FROM ' ||
+                  v_eletablename || ' start with guid = ''' ||
+                  v_useragency || ''' connect by prior guid = superguid ';
+        else
+          v_sql := v_sql || ' UNION ALL SELECT guid FROM ' ||
+                  v_eletablename || ' WHERE GUID IN (' || v_text || ')';
+        end if;
+      ELSE
+        if v_text = 'localagencydatarignt' then
+          v_sql := 'SELECT guid FROM ' || v_eletablename ||
+                  ' WHERE GUID =''' || v_useragency || '''';
+        elsif v_text = 'loweragencydatarignt' then
+          v_sql := 'SELECT guid FROM ' || v_eletablename ||
+                  ' start with guid = ''' || v_useragency ||
+                  ''' connect by prior guid = superguid ';
+        else
+          v_sql := 'SELECT guid FROM ' || v_eletablename ||
+                  ' WHERE GUID IN (' || v_text || ')';
+        end if;
+      END IF;
+    END LOOP;
+    CLOSE c_cursor;
+    if v_sql is null then
+      v_sql := 'SELECT guid FROM ' || v_eletablename || ' where 1=0';
+    end if;
+  
+  else
+    /*    不根据要素进行获取权限，这样认为是过滤业务数据的
+    */
+    select count(1)
+      into i_count
+      from (select s.wheresql
+              from p#fasp_t_busrurule s
+            where exists
+            (select t.ruleid
+                      from p#fasp_t_dataright t
+                    where s.guid = t.ruleid
+                      and exists
+                    (select 1
+                              from p#fasp_t_datarightrp rp
+                            where exists (select r.roleguid, r.userguid
+                                      from fasp_t_causerrole r
+                                    where r.userguid =
+                                          global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                                      and rp.userguid = r.userguid)
+                              and rp.menuid = v_menuguid
+                              and t.guid = rp.datarightid))
+            union all
+            select rp.datarightid
+              from p#fasp_t_datarightrp rp
+            where exists
+            (select r.roleguid, r.userguid
+                      from fasp_t_causerrole r
+                    where r.userguid =
+                          global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                      and rp.userguid = r.userguid)
+              and rp.menuid = v_menuguid
+              and rp.datarightid in
+                  ('loweragencydatarignt', 'localagencydatarignt'));
+    /*    该用户设置了自己的权限
+    */
+    if i_count > 0 then
+      open c_cursor for
+        select s.wheresql
+          from p#fasp_t_busrurule s
+        where exists (select t.ruleid
+                  from p#fasp_t_dataright t
+                where s.guid = t.ruleid
+                  and exists
+                (select 1
+                          from p#fasp_t_datarightrp rp
+                        where exists (select r.roleguid, r.userguid
+                                  from fasp_t_causerrole r
+                                where r.userguid =
+                                      global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                                  and rp.userguid = r.userguid)
+                          and rp.menuid = v_menuguid
+                          and t.guid = rp.datarightid))
+        union all
+        select rp.datarightid
+          from p#fasp_t_datarightrp rp
+        where exists
+        (select r.roleguid, r.userguid
+                  from fasp_t_causerrole r
+                where r.userguid =
+                      global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                  and rp.userguid = r.userguid)
+          and rp.menuid = v_menuguid
+          and rp.datarightid in
+              ('loweragencydatarignt', 'localagencydatarignt');
+    else
+      /*使用角色权限*/
+      open c_cursor for
+        select s.wheresql
+          from p#fasp_t_busrurule s
+        where exists (select t.ruleid
+                  from p#fasp_t_dataright t
+                where s.guid = t.ruleid
+                  and exists
+                (select 1
+                          from p#fasp_t_datarightrp rp
+                        where exists (select r.roleguid, r.userguid
+                                  from fasp_t_causerrole r
+                                where r.userguid =
+                                      global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                                  and rp.roleid = r.roleguid)
+                          and rp.menuid = v_menuguid
+                          and t.guid = rp.datarightid))
+        union all
+        select rp.datarightid
+          from p#fasp_t_datarightrp rp
+        where exists
+        (select r.roleguid, r.userguid
+                  from fasp_t_causerrole r
+                where r.userguid =
+                      global_multyear_cz.Secu_f_GLOBAL_PARM('USER')
+                  and rp.roleid = r.roleguid)
+          and rp.menuid = v_menuguid
+          and rp.datarightid in
+              ('loweragencydatarignt', 'localagencydatarignt');
+    end if;
+    LOOP
+      FETCH c_cursor
+        INTO v_text;
+      EXIT WHEN c_cursor%NOTFOUND;
+      IF length(v_sql) > 0 THEN
+        if v_text = 'localagencydatarignt' then
+          v_sql := v_sql || ' or agencyguid = ''' || v_useragency || '''';
+        elsif v_text = 'loweragencydatarignt' then
+          v_sql := v_sql || ' or agencyguid IN ( SELECT guid FROM ' ||
+                  v_eletablename || ' start with guid = ''' ||
+                  v_useragency || ''' connect by prior guid = superguid) ';
+        else
+          v_sql := v_sql || ' or (' || v_text || ')';
+        end if;
+      ELSE
+        if v_text = 'localagencydatarignt' then
+          v_sql := '  agencyguid = ''' || v_useragency || '''';
+        elsif v_text = 'loweragencydatarignt' then
+          v_sql := ' (agencyguid IN ( SELECT guid FROM ' || v_eletablename ||
+                  ' start with guid = ''' || v_useragency ||
+                  ''' connect by prior guid = superguid)) ';
+        else
+          v_sql := '(' || v_text || ')';
+        end if;
+      END IF;
+    END LOOP;
+    CLOSE c_cursor;
+  end if;
+
+  IF length(v_sql) > 0 THEN
+    /* v_ssql := 'select a.GUID,NAME,LEVELNO,nvl(b.guid,''#'') SUPERGUID,ISLEAF from (
+    select * from '|| v_eletablename || ' where guid in('
+    || v_sql||') order by code) a,(
+    select guid from '|| v_eletablename || ' where guid in('
+    || v_sql||')) b where a.superGUID = b.guid (+) '; CODE || NAME*/
+  
+    /*    这里后期如果需要，可以在加一个参数，用来表示显示的级次，需要把superid变为#的就是级次 加1
+    */
+    v_sql := 'select GUID,CODE||'' ''||NAME,LEVELNO,case when length(code) = ''3'' then ''#''  when length(code) = ''2'' then ''#''  else superguid end,ISLEAF from ' || v_eletablename || ' a where a.guid in (select t.guid
+  from ' || v_eletablename || ' t
+start with exists (select 1
+              from (SELECT *
+                      FROM ' || v_eletablename || '
+                      WHERE GUID IN
+                            (' || v_sql ||
+            ')) t2
+              where t2.guid = t.guid)
+connect by t.guid = prior t.superguid) and levelno > 0 order by code asc';
+  else
+    return;
+  end if;
+
+  open c_cursor for v_sql;
+  LOOP
+    FETCH c_cursor
+      INTO id, aname, lvlid, superid, endflag;
+    EXIT WHEN c_cursor%NOTFOUND;
+    code_divid := SECU_REC_DIVTREE(id,
+                                  aname,
+                                  lvlid,
+                                  regexp_replace(superid, '^0$', '#'),
+                                  endflag);
+    pipe row(code_divid);
+  end loop;
+end FN_GETAgency2BYUSERID;

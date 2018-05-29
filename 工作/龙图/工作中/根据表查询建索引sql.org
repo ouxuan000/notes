@@ -1,0 +1,24 @@
+```
+declare
+begin
+  dbms_output.enable(1000000);
+  for tn in (select index_name, table_name
+               from user_indexes t
+              where t.table_name in
+                    (select t.table_name
+                       from user_tables t
+                      where regexp_like(t.TABLE_NAME,
+                                        '^P#(PAY)|(BANK)_T_.*[^_(LOG)]$'))) loop
+    begin
+      dbms_output.put_line(dbms_metadata.get_ddl(object_type => 'INDEX',
+                                                 name        => tn.index_name));
+    exception
+      when others then
+        dbms_output.put_line('exception:' || tn.table_name || ' ' ||
+                             tn.index_name);
+    end;
+  end loop;
+  /*  dbms_output.disable;
+  */
+end;
+```

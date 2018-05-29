@@ -1,0 +1,73 @@
+create or replace trigger bdgsub_update_workflag
+  before insert on p#bdg_t_bdgsub
+  for each row
+
+declare
+  srcexpfuncguid varchar(32);
+  /*srcxjzcgnfl varchar(32);--转移支付科目（内蒙）*/
+  srcproguid      varchar(32);
+  srcremark        varchar(32);
+  srczfysjjflbz    varchar(32);
+  srcagencyguid    varchar(32);
+  srcpaytypeguid  varchar(32);
+  srcbzjg          varchar(32);
+  srcdwzbly        varchar(32);
+  srcagencyexpguid varchar(32);
+  srcexpecoguid    varchar(32);
+  i                integer;
+begin
+  if :new.vchtypeid = '6D7C5E1CB8BEEEA746CC48DA1A453D7D' and :new.amt > 0 then
+    
+    select count(1)
+      into i
+      from bdg_t_bdgsub
+    where toctrlid = :new.fromctrlid;
+    if i > 0 then
+      select expfuncguid,
+            proguid,
+            remark,
+            zfysjjflbz,
+            agencyguid,
+            paytypeguid,
+            bzjg,
+            dwzbly,
+            agencyexpguid,
+            expecoguid
+        into srcexpfuncguid,
+            srcproguid,
+            srcremark,
+            srczfysjjflbz,
+            srcagencyguid,
+            srcpaytypeguid,
+            srcbzjg,
+            srcdwzbly,
+            srcagencyexpguid,
+            srcexpecoguid
+        from bdg_t_bdgsub
+      where toctrlid = :new.fromctrlid;
+    end if;
+    select count(1)
+      into i
+      from (/*select *
+              from fasp_t_pubexpeco t
+            where t.guid = srcexpecoguid
+            union all*/
+            select * from fasp_t_pubexpeco t where t.guid = :new.expecoguid) t2
+    where t2.code not in
+          ('30212', '30215', '30216', '30217', '30231', '30913', '31013');
+
+    insert into test values (i);
+  
+    /*如果来源或去向部门经济科目都不属于上面的code， 并且只修改了部门经济科目*/
+    if i > 0 and  srcexpecoguid <> :new.expecoguid and srcexpfuncguid = :new.expfuncguid and
+      :new.proguid = srcproguid and :new.remark = srcremark and
+      :new.zfysjjflbz = srczfysjjflbz and :new.agencyguid = srcagencyguid and
+      :new.paytypeguid = srcpaytypeguid and :new.bzjg = srcbzjg and
+      :new.dwzbly = srcdwzbly and :new.agencyexpguid = srcagencyexpguid then
+      update bdg_t_bdgmain set workflag = '1' where guid = :new.mainguid;
+    else
+      update bdg_t_bdgmain set workflag = '2' where guid = :new.mainguid;
+    end if;
+  end if;
+end;
+/

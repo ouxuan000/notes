@@ -1,0 +1,244 @@
+#####  验证是否满足条件
+```
+/**
+ * 验证是否满足条件, 将数据组织成类似表结果集数据，校验
+ * @param data 业务数据
+ * @param condition　条件
+ * @return　是否满足条件
+ */
+private boolean isValidCondition(Map data,String condition){
+    String sql  = null;
+    StringBuilder tablenamebuf = new StringBuilder(1000);
+    for (Iterator it = data.keySet().iterator(); it.hasNext();) {
+        String column = (String) it.next();
+        String value = String.valueOf(data.get(column));
+        if(tablenamebuf.length()>0){
+            tablenamebuf.append(",");
+        }
+        tablenamebuf.append("'"+value+"' as ").append(column);
+    }
+    sql = "SELECT count(1) as count from (select "+tablenamebuf.toString()+" from dual) t where "+condition;
+    int count = this.queryForInt(sql);
+    return count>0;
+}
+
+```
+#### 并发锁, 与使用static作为全局静态变量效果， 这个使用volatile感觉起来更专业
+```
+/**
+ * @author Administrator
+ *对需要控制线程并发并非阻塞式的控制锁
+ */
+public final class LockStore{
+   // volatile保证所有线程看到的锁相同  
+    private static volatile Map<String, Date> locks = new HashMap<String, Date>();  
+  
+    private LockStore() {
+  
+    }
+    /** 
+     * 根据锁名获取锁 
+     *  
+     * @param lockName 
+     *            锁名 
+     * @return 是否锁定成功 
+     */  
+    public synchronized static Boolean getLock(String lockName) {  
+        Boolean locked = false;  
+  
+        if (lockName == null || lockName.equals("")) {  
+            throw new RuntimeException("Lock name can't be empty");  
+        }  
+  
+        Date lockDate = locks.get(lockName);  
+        if (lockDate == null) {  
+            locks.put(lockName, new Date());  
+            locked = true;  
+        }  
+        return locked;  
+    }  
+  
+    /** 
+     * 根据锁名释放锁 
+     *  
+     * @param lockName 
+     *            锁名 
+     */  
+    public synchronized static void releaseLock(String lockName) {  
+       if (lockName == null || lockName.equals("")) {  
+            throw new RuntimeException("Lock name can't be empty");  
+        }  
+        Date lockDate = locks.get(lockName);  
+        if (lockDate != null) {  
+            locks.remove(lockName);  
+        }  
+    }  
+  
+    /** 
+     * 获取上次成功锁定的时间 
+     *  
+     * @param lockName 
+     *            锁名 
+     * @return 如果还没有锁定返回NULL 
+     */  
+    public synchronized static Date getLockDate(String lockName) {  
+       if (lockName == null || lockName.equals("")) {  
+            throw new RuntimeException("Lock name can't be empty");  
+        }  
+        Date lockDate = locks.get(lockName);  
+        return lockDate;  
+    }  
+    
+    
+}
+
+```
+#### aop指定切面方法， 公司业务框架实现方式
+```
+    <bean id="buscommon.dr.DataRightRuleServiceNoLog" class="gov.mof.fasp2.buscommon.dataright.rule.DataRightRuleService"></bean>
+    
+    <bean id="buscommon.rulelog.datarightloginterceptor" class="gov.mof.fasp2.buscommon.rulelog.interceptor.LogInterceptor">
+        <property name="ruleLog" ref="buscommon.rulelog.datarightrulelogimpl"></property>
+    </bean>
+    <bean id="buscommon.dr.DataRightRuleService" class="org.springframework.aop.framework.ProxyFactoryBean">  
+        <property name="target">  
+            <!--要被aop的class-->
+            <ref local="buscommon.dr.DataRightRuleServiceNoLog" />  
+        </property>  
+        <property name="interceptorNames">  
+            <list>  
+                <!--使用的切面工具， 因为它的内部处理， 可以不用切所有的方法-->
+                <value>buscommon.rulelog.datarightloginterceptor</value>  
+            </list>  
+        </property>
+        <!--使用proxyTargetClass的方式会用cglib形式处理-->
+        <property name="proxyTargetClass">
+        <value>true</value>
+        </property>
+    </bean>
+    同时可参考： http://uule.iteye.com/blog/869309
+
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
+public class LogInterceptor implements MethodInterceptor {
+
+    private RuleLogCommonService logCommonService;
+
+    private IRuleLog ruleLog;
+
+    /*
+    * (non-Javadoc)
+    * 
+    * @see
+    * org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept
+    * .MethodInvocation)
+    */
+    @Override
+    public Object invoke(MethodInvocation arg0) throws Throwable {
+        Object result = null;
+        String methodname = "runFunction".equalsIgnoreCase(arg0.getMethod()
+                .getName()) ? arg0.getArguments()[0].toString() : arg0
+                .getMethod().getName();
+        Object[] args = "runFunction".equalsIgnoreCase(arg0.getMethod()
+                .getName()) ?(Object[])arg0.getArguments()[1]:arg0.getArguments();
+        // 判断此次调用会不会引起规则的变化，根据方法名之类（此方法必须由每种业务自己定义获取方法）
+        System.out.println("调用方法" + methodname);
+        //
+        boolean needDeal = getRuleLog().needDeal(methodname,args);
+
+        if (needDeal) {
+            long time1 = Calendar.getInstance().getTimeInMillis();
+            // 本次操作的guid
+            String guid = new RandomGUID().createGUID();
+            Date starttime = Calendar.getInstance().getTime();
+            // 根据sql将数据库中的数据转存一张表tmp中
+            try {
+                // 执行业务
+                result = arg0.proceed();
+                time3 = Calendar.getInstance().getTimeInMillis();
+                System.out.println("业务操作用时：" + (time3 - time2) + "毫秒");
+            } catch (Throwable t) {
+                // 删除临时表
+                deleteTmpTable(sqlsToTable);
+                throw t;
+            }
+            return result;
+        } else {// 直接执行业务方法
+            return arg0.proceed();
+        }
+    }
+
+}
+
+/**
+*
+*代码实现 类似上面xml注册拦截器方式,  这个类就是个代理类
+*/
+public class BusGTXTransactionBeanDefinitionParser extends BaseBeanDefinitionParser {
+
+    /**
+     * 全局事务的拦截器
+     */
+    private static final String INTERCEPTERNAME = "gtx.intercepter";
+
+    /**
+     * 初始化bean.
+     * <p>
+     * Title: doParse
+     * </p>
+     * <p>
+     * Description:
+     * </p>
+     * @param element
+     * @param parserContext
+     * @param builder
+     * @see org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser#doParse(org.w3c.dom.Element,
+     *      org.springframework.beans.factory.xml.ParserContext,
+     *      org.springframework.beans.factory.support.BeanDefinitionBuilder)
+     */
+    protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+        String id = element.getAttribute("id");
+        String refbeanid = element.getAttribute("refbeanid");
+        // 设置需要代理的bean id
+        builder.addPropertyReference("target", refbeanid);
+        // 设置intercepter
+        List<String> intercepters = new ArrayList<String>();
+        intercepters.add(INTERCEPTERNAME);
+        builder.addPropertyValue("interceptorNames", intercepters);
+        //增加对非接口的支持
+        builder.addPropertyValue("proxyTargetClass", "true");
+        // parserContext.getRegistry().registerBeanDefinition(beanid, builder);
+
+    }
+
+    protected Class getBeanClass(Element element) {
+        return org.springframework.aop.framework.ProxyFactoryBean.class;
+    }
+
+}
+
+```
+
+#### 如何大批量执行sql语句, sql分割, 美一百条执行一次
+```
+public void batchSingleUpdate(List sqls) {
+    int loop = sqls.size();
+    if (loop != 0) {
+        String[] sql = null;
+        sql = new String[loop > 100 ? 100 : loop];
+
+        for(int i = 0; i < loop; ++i) {
+            if (i % 100 == 0 && i > 0) {
+                this.batchUpdate(sql);
+                sql = new String[loop - i > 100 ? 100 : loop - i];
+            }
+
+            sql[i % 100] = sqls.get(i).toString();
+        }
+
+        this.batchUpdate(sql);
+    }
+}
+```
