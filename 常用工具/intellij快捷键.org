@@ -1,6 +1,4 @@
-1、生成代码test，navigate->test,快捷键不详
-
-* -----------自动代码--------
+* 自动代码
 
   常用的有fori/sout/psvm+Tab即可生成循环、System.out、main方法等boilerplate样板代码
   例如要输入for(User user : users)只需输入user.for+Tab
@@ -26,10 +24,10 @@
   CTRL+ALT+SPACE  类名或接口名提示
   CTRL+P  方法参数提示
   CTRL+Q，可以看到当前方法的声明
-  Shift+F6  重构-重命名 (包、类、方法、变量、甚至注释等)
+  Shift+F6  重构重命名 (包、类、方法、变量、甚至注释等)
   Ctrl+Alt+V 提取变量
 
-* -----------查询快捷键--------
+* 查询快捷键
   Ctrl＋Shift＋Backspace可以跳转到上次编辑的地
   CTRL+ALT+ left/right 前后导航编辑过的地方
   ALT+7  靠左窗口显示当前文件的结构
@@ -80,7 +78,7 @@
   Ctrl＋Shift＋Backspace可以跳转到上次编辑的地
   Alt+6    查找TODO
 
-* ---------------------其他快捷键-------------------
+* 其他快捷键
   SHIFT+ENTER 另起一行
   CTRL+Z  倒退(撤销)
   CTRL+SHIFT+Z  向前(取消撤销)
@@ -91,12 +89,12 @@
   Ctrl+Alt+V，可以引入变量。例如：new String(); 自动导入变量定义
   Ctrl+~，快速切换方案（界面外观、代码风格、快捷键映射等菜单）
 
-* --------------svn快捷键---------------
+* svn快捷键
 
   ctrl+k 提交代码到SVN
   ctrl+t 更新代码
 
-* --------------调试快捷键---------------
+* 调试快捷键
 
   其实常用的 就是F8 F7 F9 最值得一提的 就是Drop Frame  可以让运行过的代码从头再来
   alt+F8          debug时选中查看值
@@ -117,7 +115,7 @@
   F9，恢复程序
   Alt+F10，定位到断点
 
-* --------------重构---------------
+* 重构
   Ctrl+Alt+Shift+T，弹出重构菜单
   Shift+F6，重命名
   F6，移动
@@ -128,7 +126,7 @@
 * 十大Intellij IDEA快捷键
 
   Intellij IDEA中有很多快捷键让人爱不释手，stackoverflow上也有一些有趣的讨论。每个人都有自己的最爱，想排出个理想的榜单还真是困难。
-  以前也整理过Intellij的快捷键，这次就按照我日常开发时的使用频率，简单分类列一下我最喜欢的十大快捷-神-键吧。
+  以前也整理过Intellij的快捷键，这次就按照我日常开发时的使用频率，简单分类列一下我最喜欢的十大快捷神键吧。
 
 
   1. 智能提示:
@@ -138,7 +136,7 @@
 
 
   2. 重构:
-  Intellij重构是另一完爆Eclipse的功能，其智能程度令人瞠目结舌，比如提取变量时自动检查到所有匹配同时提取成一个变量等。尤其看过《重构-改善既有代码设计》之后，有了Intellij的配合简直是令人大呼过瘾！也正是强大的智能和重构功能，使Intellij下的TDD开发非常顺畅。
+  Intellij重构是另一完爆Eclipse的功能，其智能程度令人瞠目结舌，比如提取变量时自动检查到所有匹配同时提取成一个变量等。尤其看过《重构改善既有代码设计》之后，有了Intellij的配合简直是令人大呼过瘾！也正是强大的智能和重构功能，使Intellij下的TDD开发非常顺畅。
   切入正题，先说一个无敌的重构功能大汇总快捷键Ctrl+Shift+Alt+T，叫做Refactor This。按法有点复杂，但也符合Intellij的风格，很多快捷键都要双手完成，而不像Eclipse不少最有用的快捷键可以潇洒地单手完成(不知道算不算Eclipse的一大优点)，但各位用过Emacs的话就会觉得也没什么了(非Emacs黑)。此外，还有些最常用的重构技巧，因为太常用了，若每次都在Refactor This菜单里选的话效率有些低。比如Shift+F6直接就是改名，Ctrl+Alt+V则是提取变量。
 
   3. 代码生成：
@@ -147,8 +145,7 @@
 
   4 编辑：
   编辑中不得不说的一大神键就是能够自动按语法选中代码的Ctrl+W以及反向的Ctrl+Shift+W了。此外，Ctrl+Left/Right移动光标到前/后单词，Ctrl+[/]移动到前/后代码块，这些类Vim风格的光标移动也是一大亮点。以上Ctrl+Left/Right/[]加上Shift的话就能选中跳跃范围内的代码。Alt+Forward/Backward移动到前/后方法。还有些非常普通的像Ctrl+Y删除行、Ctrl+D复制行、Ctrl+</>折叠代码就不多说了。
-  关于光标移动再多扩展一点，除了Intellij本身已提供的功能外，我们还可以安装ideaVim或者emacsIDEAs享受到Vim的快速移动和Emacs的AceJump功能(超爽！)。另外，Intellij的书签功能也是不错的，用Ctrl+Shift+Num定义1-10书签(再次按这组快捷键则是删除书签)，然后通过Ctrl+Num跳转。这避免了多次使用前/下一编辑位置Ctrl+Left/Right来回跳转的麻烦，而且此快捷键默认与Windows热键冲突(默认多了Alt，与Windows改变显示器显示方向冲突，一不小心显示器就变成倒着显式的了，冏啊)。
-
+  关于光标移动再多扩展一点，除了Intellij本身已提供的功能外，我们还可以安装ideaVim或者emacsIDEAs享受到Vim的快速移动和Emacs的AceJump功能(超爽！)。另外，Intellij的书签功能也是不错的，用Ctrl+Shift+Num定义110书签(再次按这组快捷键则是删除书签)，然后通过Ctrl+Num跳转。这避免了多次使用前/下一编辑位置Ctrl+Left/Right来回跳转的麻烦，而且此快捷键默认与Windows热键冲突(默认多了Alt，与Windows改变显示器显示方向冲突，一不小心显示器就变成倒着显式的了，冏啊)。
 
   5 查找打开：
 
@@ -165,7 +162,7 @@
   + 命令：Ctrl+Shift+A可以查找所有Intellij的命令，并且每个命令后面还有其快捷键。所以它不仅是一大神键，也是查找学习快捷键的工具。
   + 新建：Alt+Insert可以新建类、方法等任何东西。
   + 格式化代码：格式化import列表Ctrl+Alt+O，格式化代码Ctrl+Alt+L。
-  + 切换窗口：Alt+Num，常用的有1-项目结构，3-搜索结果，4/5-运行调试。Ctrl+Tab切换标签页，Ctrl+E/Ctrl+Shift+E打开最近打开过的或编辑过的文件。
+  + 切换窗口：Alt+Num，常用的有1项目结构，3搜索结果，4/5运行调试。Ctrl+Tab切换标签页，Ctrl+E/Ctrl+Shift+E打开最近打开过的或编辑过的文件。
   + 单元测试：Ctrl+Alt+T创建单元测试用例。
   + 运行：Alt+Shift+F10运行程序，Shift+F9启动调试，Ctrl+F2停止。
   + 调试：F7/F8/F9分别对应Step into，Step over，Continue。
@@ -188,4 +185,5 @@
 
   CTRL+ALT+ left/right 前后导航编辑过的地方
   Ctrl＋Shift＋Backspace可以跳转到上次编辑的地
+  生成代码test，navigate>test,快捷键不详
 

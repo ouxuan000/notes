@@ -2,4 +2,4 @@
 1. 手机安装了蓝灯软件， 这个小东西忘记从哪来的了， 可以科学上网
 2. 访问搬瓦工购买网站， 购买29美元一年的vps， 默认centos6, 激活shadowsock
 3. 从github大神处下载apk， 及ss-gui软件， 连接shadowsock
-4. google浏览器使用插件 代理 （https://github.com/FelisCatus/SwitchyOmega/wiki/GFWList）
+4. google浏览器使用插件 代理 https://github.com/FelisCatus/SwitchyOmega/wiki/GFWList
