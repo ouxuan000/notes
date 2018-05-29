@@ -1,0 +1,13 @@
+#### 工具搭建
++ 安装emacs (ivy)
++ git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
+#### 常用功能按键
++ 帮助文档文档 spac h spac
++ 从space(空格键开始)
++ 修改配置文件 spac f e d， 修改后刷新缓存:spac f e R
++ splits a window vertically:  spac w /
++ splits a window horizontally spac w -
++ 打开project左侧树: spac p t
++ 找文件: spac p f
++ 找文本: spac / 利用了ag
++ 参考地址: https://scarletsky.github.io/2016/01/22/spacemacs-usage/

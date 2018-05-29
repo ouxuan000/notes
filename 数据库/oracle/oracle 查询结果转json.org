@@ -1,0 +1,87 @@
+#+BEGIN_EXAMPLE
+执行这个过程， 得到sql语句, 执行sql获取的数据就是json格式
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_count        NUMBER;
+    v_table_name   VARCHAR2(100) := 'T_RECEIVEBDGDATA'; --表名
+    v_sql          CLOB;
+    v_i            NUMBER := 0;
+BEGIN
+    SELECT
+        COUNT(*)
+    INTO
+        v_count
+    FROM
+        user_tab_cols
+    WHERE
+        table_name = v_table_name;
+
+    v_sql := 'select  ''{';
+    FOR col_cur IN (
+        SELECT
+            column_name,
+            data_type,
+            data_length
+        FROM
+            user_tab_cols
+        WHERE
+            table_name = v_table_name
+    ) LOOP
+        IF
+            ( col_cur.data_type = 'DATE' )
+        THEN
+            v_sql := v_sql
+             || '"'
+             || col_cur.column_name
+             || ' ":"'' || TO_CHAR('
+             || col_cur.column_name
+             || ',''yyyy-mm-dd HH24:mi:ss'') || ''"''';
+        ELSIF ( col_cur.data_type = 'VARCHAR2' ) THEN
+            v_sql := v_sql
+             || '"'
+             || col_cur.column_name
+             || '":"''||'
+             || col_cur.column_name
+             || '|| ''"''';
+        ELSIF ( col_cur.data_type = 'NUMBER' ) THEN
+
+--格式化数字
+            v_sql := v_sql
+             || '"'
+             || col_cur.column_name
+             || '":''|| nvl(RTRIM(to_char('
+             || col_cur.column_name
+             || ',''fm9999999990.99999''),''.''),''""'')';
+        END IF;
+
+        v_i := v_i + 1;
+        IF
+            ( v_i < v_count )
+        THEN
+            v_sql := v_sql || '|| '',';
+        END IF;
+
+--如果拼接的sql字符串太长，50个字段拼接为1列
+        IF
+            ( v_i MOD 50 = 0 )
+        THEN
+            dbms_output.put_line(v_i);
+            v_sql := v_sql || ''',''';
+        END IF;
+
+        IF
+            ( v_i = v_count )
+        THEN
+            v_sql := v_sql || ' || '' } ''';
+        END IF;
+
+--VARCHAR2
+
+--NUMBER
+    END LOOP;
+
+    v_sql := v_sql || ' from ' || v_table_name;
+    dbms_output.put_line(v_sql);
+END;
+#+END_EXAMPLE

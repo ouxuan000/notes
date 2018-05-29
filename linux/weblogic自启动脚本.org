@@ -1,0 +1,59 @@
+1. 启动服务报错 WebLogic启动异常weblogic.security.SecurityInitializationException: Authentication for user denied 
+   > 处理; 1. 在domain中建立security文件 里面建立boot.properties 加入weblogic的帐号密码
+   >          2. startWebLogic.sh，增加以下配置，再启动就可以了 :  WLS_USER=weblogic   WLS_PW=weblogic  
+2. &> 和 > 的区别（待验证）： &> 相当与2>& ,    1 >相当与>&1
+3. 平台启动脚本
+   #+BEGIN_EXAMPLE
+       #!/bin/sh
+    i=0
+    for x in `ps -ef | grep java | grep faspServer|awk '{print $2}'`
+    do
+    kill -9 "$x"
+    let "i++"
+    done
+    if [ $i -eq 0 ]; then
+    echo "No Running WebLogic Instance Found!"
+    else
+    echo "Weblogic already shutdown successfully!"
+    fi
+    #rm -rf ../app/pay.war
+    #cp pay.war ../app/pay.war
+    #
+    cd /home/lx7ly/Oracle/Middleware/user_projects/domains/fasp_domain/servers/faspServer
+    rm -rf cache logs tmp data
+    cd ../../
+    #
+    nohup ./startWebLogic.sh &>7001.out & tail -f 7001.out
+
+   #+BEGIN_EXAMPLE
+4. 调用所有域的脚本
+   #+BEGIN_EXAMPLE
+     #!/bin/sh
+    #启动平台
+    #gnome-terminal --window --title= "fasp7001" -x /home/lx7ly/Oracle/Middleware/user_projects/domains/fasp_domain/restart.sh &
+    urxvt -name "fasp7001" -e /home/lx7ly/Oracle/Middleware/user_projects/domains/fasp_domain/restart.sh &
+    #gnome-terminal --window --title= "update bdg Code" -x svn update /home/lx7ly/Oracle/Middleware/user_projects/app/3.0/
+    #启动fportal
+    sleep 15s
+    urxvt -name "fportal7002" -e /home/lx7ly/Oracle/Middleware/user_projects/domains/fportal_domain/restart.sh &
+   #+BEGIN_EXAMPLE
+5. 3.58环境启动全部服务（需要实际路径调整）
+    #+BEGIN_EXAMPLE
+       #!/bin/sh
+       #启动平台
+       cd /home/lx7ly/Oracle/Middleware/user_projects/domains/fasp_domain
+       ./restart.sh &
+       cd ../
+
+       #启动oa
+       sleep 5s
+       cd /home/lx7ly/Oracle/Middleware/user_projects/domains/oa_domain
+       ./restart.sh & 
+       cd ../
+
+       #启动支付
+       #cd /home/lx7ly/Oracle/Middleware/user_projects/domains/pay_domain
+       #urxvt -name "pay7002" -e ./restart.sh &
+       #cd ../
+
+    #+BEGIN_EXAMPLE

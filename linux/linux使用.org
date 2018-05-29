@@ -1,0 +1,13 @@
+1. gnome3切换工作区，alt+ctrl+shift+上/下 把应用放到某个工作区，alt+tab切换应用就会自动切换工作区
+2. urxvt的复制：鼠标左键直接选中即可。
+> 粘贴： 鼠标中键。        
+> 从urxvt复制到其他地方：在rxvt中选中，到要粘贴的地方鼠标中键。在vim下有其他设置。
+> 从其他地方复制到urxvt：ctrl+c复制，鼠标中键在urxvt粘贴。或者shift+insert组合键。
+3. 修改分辨率 xrandr命令
+4. host 
+# Localhost (DO NOT REMOVE)
+127.0.0.1 localhost.localdomain  	localhost arch
+::1	localhost.localdomain  		localhost arch
+
+### idea
+0.0.0.0 account.jetbrains.com

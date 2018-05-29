@@ -1,0 +1,14 @@
+1. 启动mongodb服务
+  sudo service mongodb start
+2. 启动mongodb
+  mongo
+3. 查看简历的db
+  db || show dbs
+4. 选择db，没有会新建
+  use mydb
+5. 删除db
+  db.dropDatabase()
+6.  help
+7. 创建collection
+ db.createCollection("collectionName", option)
+8. db.collectionName.drop()

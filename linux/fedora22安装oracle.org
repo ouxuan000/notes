@@ -1,0 +1,173 @@
+
+设置Kernel参数undefined
+在“/etc/sysctl.conf”文件中添加或修改以下行。 
+fs.aio-max-nr
+
+= 1048576
+fs.file-max
+
+= 396362
+kernel.shmall
+
+= 268435456
+kernel.shmmax
+
+= 4294967295
+kernel.shmmni
+
+= 4096
+kernel.sem
+
+= 32000 1024000000 500 32000
+net.ipv4.ip_local_port_range
+
+= 32768 61000
+net.core.rmem_default
+
+= 212992
+net.core.rmem_max
+
+= 212992
+net.core.wmem_default
+
+= 212992
+net.core.wmem_max
+
+= 212992
+运行下面的命令来改变当前内核参数。 
+/sbin/sysctl -p
+在“/etc/security/limits.conf”文件中添加以下行。 
+xxx              soft    nproc   2047
+xxx              hard    nproc   16384
+xxx            
+
+ soft    nofile  1024
+xxx
+
+            hard    nofile  65536
+如果 “/etc/pam.d/login”文件中不存在，添加以下行
+session    required     pam_limits.so
+检查/etc/pam.d/su，没有以下行就自己加上：
+session
+
+required pam_limits.so
+ 
+启动防火墙管理对话框（“系统>管理”>防火墙）。 点击“禁用”按钮，其次是应用工具栏上的按钮，然后关闭对话框。 
+
+停用SELinux
+
+编辑/etc/selinux/config 文件，并确保SELinux的标志设置如下。 
+SELINUX=disabled
+另外，以上改变可以通过使用GUI工具（应用程序>“系统设置”>安全级别）。 单击SELinux选项卡并禁用该功能。禁用SELinux后，服务器需要重新启动才能更改生效。 
+
+安装undefined
+如果您已经安装了在安装过程中建议包，那必要的包大部分已经被安装。 下面列出必须的包，也包括一些32位版本的。 
+yum install binutils
+yum install compat-libstdc++-33   //这是我的系统所缺少的 
+yum install compat-libstdc++-33.i686  //同上
+yum install gcc
+yum install gcc-c++
+yum install glibc
+yum install glibc.i686
+yum install glibc-common
+yum install glibc-devel
+yum install glibc-devel.i686
+yum install glibc-headers   
+
+yum install libaio
+yum install libaio.i686
+yum install libaio-devel
+yum install libaio-devel.i686
+yum install libgcc
+yum install libgcc.i686
+yum install libstdc++
+yum install libstdc++.i686
+yum install libstdc++-devel
+yum install make
+yum install numactl-devel
+yum install sysstat
+yum install unixODBC
+yum install unixODBC.i686
+yum install unixODBC-devel
+yum install unixODBC-devel.i686 
+最后如果安装过程中提示：没有缺少pdksh-5.2.14 则安装pdksh-5.2.14-37.el5_8.1.i386.rpm包的过程中，发现此包和ksh包冲突，卸载ksh包(sudo rpm -ivh ksh)，再安装完pdksh-5.2.14-37.el5_8.1.i386.rpm包后，安装正常进行。
+     如果你安装[Fedora](http://www.linuxidc.com/topicnews.aspx?tid=5)的时候选择了完全安装，那么大部分oracle依赖的软件包已经安装了，还需要安装的就只有下列这些软件包了，如果在oracle安装前的检查过程中提示还缺少包，[可以](http://action.utops.cc/click.jsp?adsId=429&adsLeagueId=5&adsUserId=1&siteId=657&siteLeagueId=5&siteUserId=564&scId=2&adsType=98&prices=1.51&checkCode=6b3e52634bc09c3c1f36978fb0d463eb_122.226.213.17&click=1&url=http://www.totole.com.cn&v=0&keyword=%25u53EF%25u4EE5&s=http://www.linuxidc.com/Linux/2010-04/25487p2.htm&rn=417241---2010-5-25-10:22:46)yum
+
+安装，如果源里面没有，可以到rpmfind.net等网站去搜索，自己下载rpm包安装 （发现rpm包下载的好地方：http://rpm.pbone.net/）
+             代码:yum
+
+install binutils
+yum install libaio libaio-devel
+          yum
+
+install sysstat
+ yum
+
+install unixODBC unixODBC-devel
+
+            yum
+
+install compat-libstdc++-33
+创建新的组和用户。
+groupadd oinstall
+groupadd dba
+groupadd oper
+groupadd asmadmin
+
+useradd -g oinstall -G dba,oper,asmadmin oracle
+passwd oracle
+
+//这里我只有新建了oracle用户和oinstall用户组（数据库实例名：orcl  数据库密码：1234）
+注. 我们不打算使用“asmadmin”组，因为这个安装不会使用ASM。 
+ 
+创建Oracle软件安装目录。 
+mkdir -p /u01/app/oracle/product/11.2.0/db_1
+chown -R oracle:oinstall /u01
+chmod -R 775 /u01
+以root用户登录，执行以下命令。 
+xhost +<machine-name>
+编辑"/etc/redhat-release"文件当前版本的信息“Fedora
+
+release 14 (Laughlin)” 替换成以下内容
+redhat release 5  (Fedora release 20 (Heisenbug))
+以oracle用户登录，在bash_profile文件末尾添加以下行。 
+# Oracle Settings
+TMP=/tmp; export TMP         //如果安装过程中提示/tmp空间不足，则删除/tmp下的临时文件（谨慎操作）
+TMPDIR=$TMP; export TMPDIR
+
+ORACLE_HOSTNAME=linux-pc; export ORACLE_HOSTNAME
+ORACLE_UNQNAME=orcl; export ORACLE_UNQNAME
+ORACLE_BASE=/home/oracle/app/oracle; export ORACLE_BASE
+ORACLE_HOME=$ORACLE_BASE/product/11.2.0/db_1; export ORACLE_HOME
+ORACLE_SID=orcl; export ORACLE_SID
+ORACLE_TERM=xterm; export ORACLE_TERM
+PATH=/usr/sbin:$PATH; export PATH
+PATH=$ORACLE_HOME/bin:$PATH; export PATH
+
+LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr/lib; export LD_LIBRARY_PATH
+CLASSPATH=$ORACLE_HOME/JRE:$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib; export CLASSPATH
+
+if [ $USER = "oracle" ]; then
+if [ $SHELL = "/bin/ksh" ]; then
+ulimit -p 16384
+ulimit -n 65536
+else
+ulimit -u 16384 -n 65536
+fi
+fi
+
+安装undefined
+登录到oracle用户。 如果你是使用X
+
+emulation然后设置DISPLAY环境变量。 
+DISPLAY=<machine-name>:0.0; export DISPLAY
+在database文件夹中执行以下命令，开启Oracle
+
+Universal Installer (OUI)
+./runInstaller
+继续与您选择的安装。
+
+安装图解地址：[http://wenku.baidu.com/link?url=oQOlaxYVoteNM7rqHpqL_hcNWY7hiMipp0kWOPJvjGMRuq9iRXJbgFDE3pzCFFjEeOKp1s-oLDzEkQHs5VQ6WkuEZKcg1ZJT9l8DTDRJt_C](http://wenku.baidu.com/link?url=oQOlaxYVoteNM7rqHpqL_hcNWY7hiMipp0kWOPJvjGMRuq9iRXJbgFDE3pzCFFjEeOKp1s-oLDzEkQHs5VQ6WkuEZKcg1ZJT9l8DTDRJt_C)
+
+安装完成后，会提示执行下面两个脚本软件： /home/oracle/app/oraInventory/orainstRoot.sh
+/home/oracle/app/oracle/product/11.2.0/db_1/root.sh

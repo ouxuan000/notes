@@ -1,0 +1,871 @@
+如何用脚本实现分割文件
+
+#!/bin/bash
+
+if
+
+[ $# -ne 2 ]; then
+echo
+
+'Usage: split file size(in bytes)'
+exit
+fi
+
+file=$1
+size=$2
+
+if
+
+[ ! -f $file ]; then
+echo
+
+"$file doesn't exist"
+exit
+fi
+
+#TODO:
+
+test if $size is a valid integer
+
+filesize=`/bin/ls
+
+-l $file | awk '{print $5}'`
+echo
+
+filesize: $filesize
+
+let
+
+pieces=$filesize/$size
+let
+
+remain=$filesize-$pieces*$size
+if
+
+[ $remain -gt 0 ]; then
+let
+
+pieces=$pieces+1
+fi
+echo
+
+pieces: $pieces
+
+i=0
+while
+
+[ $i -lt $pieces ];
+do
+echo
+
+split: $file.$i:
+dd
+
+if=$file of=$file.$i bs=$size count=1 skip=$i
+let
+
+i=$i+1
+done
+
+echo
+
+"#!/bin/bash" >; merge
+
+echo
+
+"i=0" >;>; merge
+echo
+
+"while [ $i -lt $pieces ];" >;>; merge
+echo
+
+"do" >;>; merge
+echo
+
+" echo merge: $file.$i" >;>; merge
+echo
+
+" if [ ! -f $file.$i ]; then" >;>; merge
+echo
+
+" echo merge: $file.$i missed" >;>; merge
+echo
+
+" rm -f $file.merged" >;>; merge
+echo
+
+" exit" >;>; merge
+echo
+
+" fi" >;>; merge
+echo
+
+" dd if=$file.$i of=$file.merged bs=$size count=1 seek=$i"
+
+>;>; merge
+echo
+
+" let i=$i+1" >;>; merge
+echo
+
+"done" >;>; merge
+chmod
+
+u+x merge'
+如何查找日期为某一天的文件
+#!/bin/sh
+
+#
+
+The right of usage, distribution and modification is here by granted
+
+by the author.
+#
+
+The author deny any responsibilities and liabilities related to the
+
+code.
+#
+
+OK=0
+
+A=`find
+
+$1 -print`
+if
+
+expr $3 == 1 >;/dev/null ; then M=Jan ; OK=1 ; fi
+if
+
+expr $3 == 2 >;/dev/null ; then M=Feb ; OK=1 ; fi
+if
+
+expr $3 == 3 >;/dev/null ; then M=Mar ; OK=1 ; fi
+if
+
+expr $3 == 4 >;/dev/null ; then M=Apr ; OK=1 ; fi
+if
+
+expr $3 == 5 >;/dev/null ; then M=May ; OK=1 ; fi
+if
+
+expr $3 == 6 >;/dev/null ; then M=Jun ; OK=1 ; fi
+if
+
+expr $3 == 7 >;/dev/null ; then M=Jul ; OK=1 ; fi
+if
+
+expr $3 == 8 >;/dev/null ; then M=Aug ; OK=1 ; fi
+if
+
+expr $3 == 9 >;/dev/null ; then M=Sep ; OK=1 ; fi
+if
+
+expr $3 == 10 >;/dev/null ; then M=Oct ; OK=1 ; fi
+if
+
+expr $3 == 11 >;/dev/null ; then M=Nov ; OK=1 ; fi
+if
+
+expr $3 == 12 >;/dev/null ; then M=Dec ; OK=1 ; fi
+if
+
+expr $3 == 1 >;/dev/null ; then M=Jan ; OK=1 ; fi
+if
+
+expr $OK == 1 >; /dev/null ; then
+ls
+
+-l --full-time $A 2>;/dev/null | grep "$M $4" | grep $2
+
+;
+else
+
+echo
+
+Usage: $0 path Year Month Day;
+echo
+
+Example: $0 ~ 1998 6 30;
+fi
+如何计算当前目录下的文件数和目录数
+#
+
+ls -l * |grep "^-"|wc -l ---- to count files
+#
+
+ls -l * |grep "^d"|wc -l ----- to count dir
+如何只列子目录？
+ls
+
+-F | grep /$ 或者alias
+
+sub = "ls -F | grep /$"(linux)
+
+ls
+
+-l | grep "^d" 或者ls
+
+-lL | grep "^d" (Solaris)
+如何实现取出文件中特定的行内容
+如果你只想看文件的前5行，可以使用head命令，
+如：head
+
+-5 /etc/passwd
+
+如果你想查看文件的后10行，可以使用tail命令，
+如：tail
+
+-10 /etc/passwd
+
+你知道怎么查看文件中间一段吗？你可以使用sed命令
+如:
+
+sed -n '5,10p' /etc/passwd 这样你就可以只查看文件的第5行到第10行。
+如何查找含特定字符串的文件
+例如查找当前目录下含有"the
+
+string you want find..."字符串的文件：
+　　$find
+
+. -type f -exec grep “the string you want find...” {} ; -print
+如何列出目录树
+下面的短小的shell程序可以列出目录树,
+
+充分利用了sed强大的模式匹配能力.
+
+　　目录树形式如下:
+
+　　.
+
+　　`----shellp
+
+　　`----updates
+
+　　`----wu-ftpd-2.4
+
+　　|
+
+`----doc
+　　|
+
+| `----examples
+　　|
+
+`----src
+　　|
+
+| `----config
+　　|
+
+| `----makefiles
+　　|
+
+`----support
+　　|
+
+| `----makefiles
+　　|
+
+| `----man
+　　|
+
+`----util
+　　脚本如下：
+　　#!/bin/sh
+
+　　#
+
+dtree: Usage: dtree [any directory]
+　　dir=${1:-.}
+
+　　(cd
+
+$dir; pwd)
+　　find
+
+$dir -type d -print | sort -f | sed -e "s,^$1,," -e "/^$/d"
+
+-e "s,[^/]*/([^/]*)$,`----1," -e "s,[^/]*/,| ,g"
+如何实现取出文件中特定的列内容
+我们经常会遇到需要取出分字段的文件的某些特定字段，例如/etc/password就是通过“:”分隔各个字段的。可以通过cut命令来实现。例如，我们希望将系统账号名保存到特定的文件，就可以：
+　　cut
+
+-d: -f 1 /etc/passwd >; /tmp/users
+-d用来定义分隔符，默认为tab键，-f表示需要取得哪个字段。
+
+　　当然也可以通过cut取得文件中每行中特定的几个字符，例如：
+　　cut
+
+-c3-5 /etc/passwd
+
+　　就是输出/etc/passwd文件中每行的第三到第五个字符。
+　　-c
+
+和－f
+
+参数可以跟以下子参数：
+　　N
+
+第N个字符或字段
+　　N-
+
+从第一个字符或字段到文件结束
+　　N-M
+
+从第N个到第M个字符或字段
+　　-M
+
+从第一个到第N个字符或字段
+在vim中实现批量加密
+
+密码中还是不能带空格，不管了，能加密就好，先这么用着。
+
+============================================================
+#!/bin/bash
+#
+
+Encrypt file with vim
+
+if
+
+(test $# -lt 2) then
+echo
+
+Usage: decrypt password filename
+else
+vim
+
+-e -s -c ":set key=$1" -c ':wq' $2
+echo
+
+"$2 encrypted."
+fi
+============================================================
+[weeder@SMTH
+
+weeder]$ for file in *.txt ; do encrypt test $file ; done
+test2.txt
+
+encrypted.
+test4.txt
+
+encrypted.
+test9.txt
+
+encrypted.
+kick.txt
+
+encrypted.
+echo
+
+"$2 encrypted."
+fi
+[weeder@SMTH
+
+weeder]$ for file in *.txt ; do encrypt test $file ; done
+test2.txt
+
+encrypted.
+test4.txt
+
+encrypted.
+test9.txt
+
+encrypted.
+kick.txt
+
+encrypted.
+too_old.txt
+
+encrypted.
+too_old_again.txt
+
+encrypted.
+bg5.txt
+
+encrypted.
+[weeder@SMTH
+
+weeder]$
+$@等特定shell变量的含义
+在shell脚本的实际编写中，有一些特殊的变量十分有用：
+$#
+
+传递到脚本的参数个数
+
+$*
+
+以一个单字符串显示所有向脚本传递的参数。与位置变量不同，此选项参数可超过9个
+
+$$
+
+脚本运行的当前进程ID号
+
+$!
+
+后台运行的最后一个进程的进程ID号
+
+$@
+
+与$#相同，但是使用时加引号，并在引号中返回每个参数
+
+$-
+
+显示shell使用的当前选项，与set命令功能相同
+
+$?
+
+显示最后命令的退出状态。0表示没有错误，其他任何值表明有错误。
+如何使程序的执行结果同时定向到屏幕和文件
+
+program_name
+
+|tee logfile
+
+这样程序执行期间的显示都记录到logfile同时显示到标准输出（屏幕）。
+如何用sendmail给系统所有用户送信
+首先在aliases文件里面建立一个alias：
+alluser:
+
+:include:/etc/mail/allusers
+
+并执行newaliases使之生效，然后在/etc/mail/allusers里面列出所有用户，可以使用下面的命令：
+awk
+
+-F: '$3 >; 100 { print $1 }' /etc/passwd >; /etc/mail/allusers
+如何查找某条命令的相关库文件
+在制作自己的发行版时经常需要判断某条命令需要哪些库文件的支持，以确保指定的命令在独立的系统内可以可靠的运行。
+
+在Linux环境下通过ldd命令即可实现，在控制台执行：
+ldd
+
+/bin/ls
+即可得到/bin/ls命令的相关库文件列表。
+如何使用host命令获得更多信息
+Host能够用来查询域名，然而它可以得到更多的信息。host
+
+-t mx linux.com可以查询出Linux.com的MX记录，以及处理Mail的Host的名字。Host
+
+-l linux.com会返回所有注册在linux.com下的域名。host
+
+-a linux.com则会显示这个主机的所有域名信息。
+如何停止终端多个进程
+
+以下是脚本：
+　　echo
+
+"系统当前用户"
+　　echo
+
+"---------------"
+　　who
+
+| awk '{print $2}'
+　　echo
+
+"---------------"
+　　echo
+
+"输入要杀死终端的终端号:"
+　　read
+
+$TTY
+　　kill
+
+-9 ${K}=`ps -t $TTY | grep [0-9] | awk '{print $1}'`
+如何转存用户bash_history文件
+
+#把以下代码添加到/etc/profile文件内
+
+export
+
+HISTTIMEFORMAT="%F %T "
+
+USER_IP=`who
+
+-u am i 2>/dev/null| awk '{print $NF}'|sed -e 's/[()]//g'`
+
+LOCAL_name=`hostname`
+
+
+HISTDIR=/var/log/.hist/${LOCAL_name}_`date
+
++%Y%m%d`_auditlog
+
+#判断$USER_IP是否为空,如果为空则使用hostname记录.
+
+
+if
+
+[ -z $USER_IP ]
+
+then
+
+
+USER_IP=`hostname`
+
+
+fi
+
+
+if
+
+[ ! -d $HISTDIR ]
+
+then
+
+
+mkdir
+
+-p $HISTDIR
+
+#为$HISTDIR赋值权限,让所有用户都可以访问.
+
+
+chmod
+
+777 $HISTDIR
+
+fi
+
+
+if
+
+[ ! -d $HISTDIR/${LOGNAME} ]
+
+then
+
+
+mkdir
+
+-p $HISTDIR/${LOGNAME}
+
+chmod
+
+300 $HISTDIR/${LOGNAME}
+
+fi
+
+
+export
+
+HISTSIZE=4096
+
+DT=`date
+
++%Y%m%d"_"%T`
+
+export
+
+HISTFILE="$HISTDIR/${LOGNAME}/${USER_IP}_${LOGNAME}_$DT"
+
+chmod
+
+600 $HISTDIR/${LOGNAME}/*.hist* 2>/dev/null
+
+
+
+
+1、查看主机网卡流量
+
+
+#!/bin/bash
+
+#network
+
+#Mike.Xu
+
+while
+
+: ; do
+
+time='date
+
++%m"-"%d" "%k":"%M'
+
+day='date
+
++%m"-"%d'
+
+rx_before='ifconfig
+
+eth0|sed -n "8"p|awk '{print $2}'|cut -c7-'
+
+tx_before='ifconfig
+
+eth0|sed -n "8"p|awk '{print $6}'|cut -c7-'
+
+sleep
+
+2
+
+rx_after='ifconfig
+
+eth0|sed -n "8"p|awk '{print $2}'|cut -c7-'
+
+tx_after='ifconfig
+
+eth0|sed -n "8"p|awk '{print $6}'|cut -c7-'
+
+rx_result=$[(rx_after-rx_before)/256]
+
+tx_result=$[(tx_after-tx_before)/256]
+
+echo
+
+"$time Now_In_Speed: "$rx_result"kbps Now_OUt_Speed:
+
+"$tx_result"kbps"
+
+sleep
+
+2
+
+done
+
+
+
+2、系统状况监控
+
+
+#!/bin/sh
+
+#systemstat.sh
+
+#Mike.Xu
+
+IP=192.168.1.227
+
+top
+
+-n 2| grep "Cpu" >>./temp/cpu.txt
+
+free
+
+-m | grep "Mem" >> ./temp/mem.txt
+
+df
+
+-k | grep "sda1" >> ./temp/drive_sda1.txt
+
+#df
+
+-k | grep sda2 >> ./temp/drive_sda2.txt
+
+df
+
+-k | grep "/mnt/storage_0" >>
+
+./temp/mnt_storage_0.txt
+
+df
+
+-k | grep "/mnt/storage_pic" >>
+
+./temp/mnt_storage_pic.txt
+
+time=`date
+
++%m"."%d" "%k":"%M`
+
+connect=`netstat
+
+-na | grep "219.238.148.30:80" | wc -l`
+
+echo
+
+"$time $connect" >> ./temp/connect_count.txt
+
+
+
+
+3、监控主机的磁盘空间,当使用空间超过90％就通过发mail来发警告
+
+
+#!/bin/bash
+
+#monitor
+
+available disk space
+
+SPACE='df
+
+| sed -n '/ \ / $ / p' | gawk '{print $5}' | sed 's/%//'
+
+if
+
+[ $SPACE -ge 90 ]
+
+then
+
+
+fty89@163.com
+
+fi
+
+
+4、监控CPU和内存的使用情况
+
+
+#!/bin/bash
+
+#script
+
+to capture system statistics
+
+OUTFILE=/home/xu/capstats.csv
+
+DATE='date
+
++%m/%d/%Y'
+
+TIME='date
+
++%k:%m:%s'
+
+TIMEOUT='uptime'
+
+VMOUT='vmstat
+
+1 2'
+
+USERS='echo
+
+$TIMEOUT | gawk '{print $4}' '
+
+LOAD='echo
+
+$TIMEOUT | gawk '{print $9}' | sed "s/,//' '
+
+FREE='echo
+
+$VMOUT | sed -n '/[0-9]/p' | sed -n '2p' | gawk '{print $4} ' '
+
+IDLE='echo
+
+$VMOUT | sed -n '/[0-9]/p' | sed -n '2p' |gawk '{print $15}' '
+
+echo
+
+"$DATE,$TIME,$USERS,$LOAD,$FREE,$IDLE" >> $OUTFILE
+
+
+
+5、全方位监控主机
+
+
+#!/bin/bash
+
+#
+
+check_xu.sh
+
+#
+
+0 * * * * /home/check_xu.sh
+
+
+DAT="`date
+
++%Y%m%d`"
+
+HOUR="`date
+
++%H`"
+
+DIR="/home/oslog/host_${DAT}/${HOUR}"
+
+DELAY=60
+
+COUNT=60
+
+#
+
+whether the responsible directory exist
+
+if
+
+! test -d ${DIR}
+
+then
+
+/bin/mkdir
+
+-p ${DIR}
+
+fi
+
+#
+
+general check
+
+export
+
+TERM=linux
+
+/usr/bin/top
+
+-b -d ${DELAY} -n ${COUNT} > ${DIR}/top_${DAT}.log 2>&1 &
+
+#
+
+cpu check
+
+/usr/bin/sar
+
+-u ${DELAY} ${COUNT} > ${DIR}/cpu_${DAT}.log 2>&1 &
+
+#/usr/bin/mpstat
+
+-P 0 ${DELAY} ${COUNT} > ${DIR}/cpu_0_${DAT}.log 2>&1 &
+
+#/usr/bin/mpstat
+
+-P 1 ${DELAY} ${COUNT} > ${DIR}/cpu_1_${DAT}.log 2>&1 &
+
+#
+
+memory check
+
+/usr/bin/vmstat
+
+${DELAY} ${COUNT} > ${DIR}/vmstat_${DAT}.log 2>&1 &
+
+#
+
+I/O check
+
+/usr/bin/iostat
+
+${DELAY} ${COUNT} > ${DIR}/iostat_${DAT}.log 2>&1 &
+
+#
+
+network check
+
+/usr/bin/sar
+
+-n DEV ${DELAY} ${COUNT} > ${DIR}/net_${DAT}.log 2>&1 &
+
+#/usr/bin/sar
+
+-n EDEV ${DELAY} ${COUNT} > ${DIR}/net_edev_${DAT}.log 2>&1
+
+&
+
+
+
+放在crontab里每小时自动执行：
+
+0
+
+* * * * /home/check_xu.sh
+
+
+
+这样会在/home/oslog/host_yyyymmdd/hh目录下生成各小时cpu、内存、网络，IO的统计数据。
+
+
+
+如果某个时间段产生问题了，就可以去看对应的日志信息，看看当时的主机性能如何。

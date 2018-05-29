@@ -1,0 +1,248 @@
+* 一、oracle编译存储过程提示表或视图不存在的问题分析
+
+    存储过程编译报错，提示表或视图不存在。存储过程中调用的那个表t是另一个用户b的表。但是当前用户a已经拥有dba角色了，为什么访问不到用户b的表t呢？另一同事说，只要给用户a分配操作用户b的表t的权限就可以了。他的解释是用户即便拥有dba的角色也不一定能操作别的用户的对象。很明显这个解释是错误的。dba角色是数据库管理员的角色，肯定能操作数据库中所有用户的对象。
+     存储过程可以定义为定义者权限（DEFINER）或者调用者权限（CURRENT_USER）。默认情况下是定义者权限。定义者权限将会禁止调用者的所有role权限。这也就解释了上面案例中为什么用户a拥有了dba的角色，却不能在存储过程中调用用户b的表t。调用者权限不会禁止调用者所获得的所有role权限。但是，不管是定义者权限还是调用者权限，存储过程在编译的时候，都不会判断role角色的权限，所以如果没有给用户a分配操作用户b的表t的权限的话，使用静态sql是无法编译通过的。只能使用动态sql（编译的时候不判断，执行的时候判断）。
+下面我将写两个测试的存储过程分别定义为定义者权限和调用者权限：
++ 定义者权限
+  #+BEGIN_EXAMPLE
+        CREATE OR REPLACE PROCEDURE test1 AUTHID DEFINER AS
+        v_sql varchar2(2000) := '';
+        BEGIN
+              v_sql := 'update b.t set pydm =''LM1'' where yhid =''162''';
+              EXECUTE IMMEDIATE v_sql;
+        END test1;
+  #+END_EXAMPLE
++ 调用者权限
+  #+BEGIN_EXAMPLE
+          CREATE OR REPLACE PROCEDURE test2 AUTHID CURRENT_USER AS 
+          v_sql varchar2(2000) := '';
+          BEGIN
+              v_sql := 'update b.t set pydm =''LM1'' where yhid =''162''';
+              EXECUTE IMMEDIATE v_sql;
+          END test2;
+  #+END_EXAMPLE
+    经过测试发现，在不给用户a分配操作用户b的表t的权限的情况下，如果用户a拥有dba角色，exec test1 会提示表或视图不存在的错误，而exec test2 会执行成功。
+
+*  二、Oracle 删除表中记录 如何释放表及表空间大小
++ 查看一个表所占的空间大小：
+  SELECT bytes/1024/1024 ||'MB' TABLE_SIZE ,u.* FROM USER_SEGMENTS U WHERE U.SEGMENT_NAME='JK_TEST';
++ 查看一个表空间所占的实际大小：
+  SELECT SUM(BYTES) / 1024 / 1024 ||'MB' FROM USER_SEGMENTS U  WHERE TABLESPACE_NAME = 'DATA01';
++ 查看一个表空间对应的数据文件：
+  SELECT * FROM DBA_DATA_FILES D WHERE D.TABLESPACE_NAME = 'DATA01';
++ 查看表空间的使用情况：
+  #+BEGIN_EXAMPLE
+  SELECT A.TABLESPACE_NAME,      
+        FILENUM,   
+        TOTAL "TOTAL (MB)",  
+        F.FREE "FREE (MB)",
+        TO_CHAR(ROUND(FREE * 100 / TOTAL, 2), '990.00') "FREE%", 
+        TO_CHAR(ROUND((TOTAL - FREE) * 100 / TOTAL, 2), '990.00') "USED%",    
+        ROUND(MAXSIZES, 2) "MAX (MB)"
+    FROM (SELECT TABLESPACE_NAME,          
+                COUNT(FILE_ID) FILENUM,        
+                SUM(BYTES / (1024 * 1024)) TOTAL,          
+                SUM(MAXBYTES) / 1024 / 1024 MAXSIZES      
+            FROM DBA_DATA_FILES       
+          GROUP BY TABLESPACE_NAME) A,     
+        (SELECT TABLESPACE_NAME, ROUND(SUM(BYTES / (1024 * 1024))) FREE     
+            FROM DBA_FREE_SPACE      
+          GROUP BY TABLESPACE_NAME) F
+  WHERE A.TABLESPACE_NAME = F.TABLESPACE_NAME
+  #+END_EXAMPLE
++ 查看数据文件的实际使用情况：
+  #+BEGIN_EXAMPLE
+  SELECT CEIL(MAX_BLOCK * BLOCK_SIZE / 1024)
+    FROM (SELECT MAX(BLOCK_ID) MAX_BLOCK
+            FROM DBA_EXTENTS
+          WHERE FILE_ID IN (SELECT FILE_ID
+                              FROM DBA_DATA_FILES D
+                              WHERE D.TABLESPACE_NAME = 'USERS')) M,
+        (SELECT VALUE / 1024 BLOCK_SIZE
+            FROM V$PARAMETER
+          WHERE NAME = 'db_block_size') B
+  #+END_EXAMPLE
++ 释放表空间
+创建一个有十万条记录的测试表jk_test ，查看其所占空间大小3873M
+delete jk_test。再次查看大小不会变，此时执行select * from jk_test会发现速度超极慢，查询结果却是空，查看其COST，发现是10万多。很难理解吧，其实是其所占空间没有释放的缘故。
+执行alter table jk_test move 或 alter table jk_test move storage(initial 64k)或alter table jk_test deallocate unused或 alter table jk_test shrink space.
+注意：因为alter table jk_test move 是通过消除行迁移，清除空间碎片，删除空闲空间，实现缩小所占的空间，但会导致此表上的索引无效（因为ROWID变了，无法找到），所以执行 move 就需要重建索引。
+找到表对应的索引。
+select index_name,table_name,tablespace_name,index_type,status  from dba_indexes  where table_owner='SCOTT' ;
+根据status 的值，重建无效的就行了。
+sql='alter index '||index_name||' rebuild'; 使用存储过程执行，稍微安慰。
+还要注意alter table move过程中会产生锁，应该避免在业务高峰期操作！
+再次查看其所占空间大小，发现已经很小了，再一次执行查询，很快了吧。
+另外说明：truncate table jk_test 会执行的更快，而且其所占的空间也会释放，我想应该是truncate 语句执行后是不会进入oracle回收站（recylebin）的缘故。如果drop 一个表加上purge 也不会进回收站(在此里面的数据可以通过flashback找回)。
+不管是delete还是truncate 相应数据文件的大小并不会改变，如果想改变数据文件所占空间大小可执行如下语句：alter database datafile 'filename' resize 8g重定义数据文件的大小（不能小于该数据文件已用空间的大小）。
++  另补充一些PURGE知识
+Purge操作：
++  Purge tablespace tablespace_name : 用于清空表空间的Recycle Bin
++  Purge tablespace tablespace_name user user_name: 清空指定表空间的Recycle Bin中指定用户的对象
++  Purge recyclebin: 删除当前用户的Recycle Bin中的对象
++  Purge dba_recyclebin: 删除所有用户的Recycle Bin中的对象，该命令要sysdba权限
++  Drop table table_name purge:  删除对象并且不放在Recycle Bin中，即永久的删除，不能用Flashback恢复。
++  Purge index recycle_bin_object_name： 当想释放Recycle bin的空间，又想能恢复表时，可以通过释放该对象的index所占用的    空间来缓解空间压力。 因为索引是可以重建的。
++ 如果某些表占用了数据文件的最后一些块，则需要先将该表导出或移动到其他的表空间中，然后删除表，再进行收缩。不过如果是移动到其他的表空间，需要重建其索引。
++ alter table t_obj move tablespace t_tbs1;   ---移动表到其它表空间
++ 也可以直接使用exp和imp来进行
++ 2）SQL>alter owner.index_name rebuild;     --重建索引
++ 3）删除原来的表空间
++ 对表分析之后也可以优化（本人没有试过）
+analyze table ysgl_compile_reqsub 
+compute statistics for all indexes;
+也要看情况，不是什么情况都可以优化，等下次有机会再测试一下。
+
+
+* 三、删除用户时提示:无法删除当前已连接的用户,则表明当前用户在数据库session中有连接，可以查询出来并kill掉这些连接
+  select username, sid, serial# from v$session where username="用户名";
+  结果：
+  username    sid       serial#
+  用户名      151        51
+  alter system kill session '151, 51';
+  #+BEGIN_EXAMPLE
+  SELECT
+    'alter system kill session ''' || s.sid || ',' || s.serial# || ''';' AS killpid,
+    object_name,
+    machine,
+    s.sid,
+    s.serial#
+  FROM gv$locked_object l, dba_objects o, gv$session s
+  WHERE l.object_id　= o.object_id
+  AND l.session_id = s.sid;
+  #+END_EXAMPLE
+* 四、oracle误删数据恢复
++ alter table students enable row
+
+movement
+  + 使用flashback table恢复表数据到先前时间点
+  + flashback table students
+
+to timestamp to_timestamp('2011-07-14 16:02:25','YYYY-MM-DD
+
+HH24:MI:SS');
++ 通过scn恢复删除且已提交的数据
+　　1. 获得当前数据库的scn号
+　　　　select current_scn from v$database; (切换到sys用户或system用户查询) 
+　　　　查询到的scn号为：1499223
+　　2. 查询当前scn号之前的scn
+　　　　select * from 表名 as of scn 1499220; (确定删除的数据是否存在，如果存在，则恢复数据；如果不是，则继续缩小scn号)
+　　3. 恢复删除且已提交的数据
+　　　　flashback table 表名 to scn 1499220;
++ 通过时间恢复删除且已提交的数据
+　　1. 查询当前系统时间
+　　　　select to_char(sysdate,'yyyy-mm-dd hh24:mi:ss') from dual;
+　　2. 查询删除数据的时间点的数据
+　　　　select * from 表名 as of timestamp to_timestamp('2013-05-29 15:29:00','yyyy-mm-dd hh24:mi:ss');  (如果不是，则继续缩小范围)
+　　3. 恢复删除且已提交的数据
+　　　　flashback table 表名 to timestamp to_timestamp('2013-05-29 15:29:00','yyyy-mm-dd hh24:mi:ss');
+　　　　注意：如果在执行上面的语句，出现错误。可以尝试执行 alter table 表名 enable row movement; //允许更改时间戳
+来源： http://www.cnblogs.com/kangxuebin/archive/2013/05/29/3106183.html
+* 五、EXPDP和IMPDP使用 ORA-39087
+  + 今天要把一个方案导出到另一个电脑上，使用Expdp逻辑导出，首先在DBA用户下创建路径
+  + create directory dump_dir as 'D:\backup'; 然后运行命令：
+  + expdp geobase/geobase directory=dump_dir dumpfile=geobase.dmp logfile=geobase.log schemas=geobase
+  + 结果报错：
+  + ORA-39002: 操作无效
+  + ORA-39070: 无法打开日志文件。
+  + ORA-39087: 目录名 DUMP_DIR 无效
+  + 使用SELECT * FROM dba_directories;查看发现DUMP_DIR确实存在啊。
+  + 继续在网上搜了搜，发现“目录名 DUMP_DIR 无效”是因为对Geobase来说，他看不到DUMP_DIR的存在，只要运行下面的命令就可以了：
+  + GRANT READ,WRITE ON DIRECTORY DUMP_DIR to geobase;
+  + 然后在另一台电脑上，首先创建相应的表空间和用户[仍然是geobase]，然后运行
+  + impdp system/admin directory=DUMP_DIR dumpfile=geobase.dmp logfile=impgeobase.log schemas=geobase
+
+*  oracle select into nodata deal
+  #+BEGIN_EXAMPLE
+  create   or   replace   procedure   p_test 
+      as 
+      v_G   VARCHAR2(10); 
+      begin 
+      begin 
+      select   name   into   v_G   from   test   where   id   =1; 
+      exception 
+      when   no_data_found   then 
+      v_G:= 'hhh '; 
+    end; 
+    dbms_output.put_line(v_G); 
+    END; 
+  #+END_EXAMPLE
+*  ORA-01779: 无法修改与非键值保存表对应的列"问题
+  经过排查发现是系统通过一个view修改一张表的时候出现这个错误，该view是通过三张表t1，t2，t3关联而成的：
+  select a.id,a.c1,a.c2,a.c3.a.c4,a.c5,b.vv,c.gh
+  from t1 a,t2 b,t3 c
+  where a.moid=b.moid and a.cdid=c.cdid
+  造成这个错误的原因是更新的列不是事实表的列，而是维度表的列。换句话说，如果view是几张表关联而成的，在关联中关联字段是主键的表是维度表，维度表形成的列是不能进行更新的，如上的vv和gh列，如果更新语句涉及了这些列，就会出现ORA-01799错误；而关联字段不是表主键的表就是事实表，事实表形成的列就是可更新的。如果是两张表的主键字段进行关联，那么无论通过view都可以更新这2张表的字段。
+  进过排查，发现上面的view中的where语句里面cdid既不是a的主键也不是c的主键，造成a表的所有字段都不是可以进行跟新的，程序的原意是要通过view跟新a表的，因此将a.cdid=c.cdid更改成c表的主键bid就行了：
+  a.bid=c.bid
+  总结：在通过view修改基表的情况一定要注意生成view的语句关联字段的书写, 被插入表的关联字段可以不是主键，但是关联表的关联字段必须是主键，如果后面关联的是视图，那就没救了。。
+  测试如下:
+    #+BEGIN_EXAMPLE
+    create table p#test3 (guid varchar2(15), billcode varchar2(15));
+    create or replace view test3 as select t1.* from p#test3 t1 left join p#test3_1 t2 on (t1.guid = t2.guid);
+    create table p#test3_1 (guid varchar2(15), billcode varchar2(15));
+    alter table p#test3
+      add constraint PK_p#test3 primary key (guid, billcode)
+      using index;
+    alter table p#test3_1
+      add constraint PK_p#test3_1 primary key (guid)
+      using index;
+    create or replace view test3_1 as select * from p#test3_1;
+    --如果关联了视图，物理表的主键也没用
+    create or replace view test3 as select t1.* from p#test3 t1 left join test3_1 t2 on (t1.guid = t2.guid);
+    insert into test3 values ('11', '22'); 
+    #+END_EXAMPLE 
+* ora 12541 tns连接失败
+  1. 首先关闭windows服务器上的防火墙，或者放开1521端口
+  2. 用oracle自带的管理工具Net
+
+Configuration Assistant, 配置实例额ip地址为实际的ip地址
+* ORA-06502: PL/SQL: 数字或值错误 
+  + 我写了一个过程，执行动态的SQL并把游标循环放到一个已声明的变量里，如下：
+  + v_temp   varchar2(50);---声明的变量
+  + fetch v_cursor into v_temp; 取游标值放进变量里
+  + 测试了下一走到fetch v_cursor into v_temp;就报错：ORA-06502: PL/SQL: 数字或值错误。我就真以为是数据有误，用排除法搞> 了几个小时，最终查资料
+  + 获得错误的潜在含义是：字符串缓冲区太小。
+  + 顿时明白原来是取得的游标里的值过大，而v_temp值规定的过小，我试了试，把50改成1000成功了不再报错！
+
+* oracle锁表查看
+  #+BEGIN_EXAMPLE
+  SELECT
+    SUBSTR(NVL(s.USERNAME,'sys'),1) "用户名",
+    NVL(s.TERMINAL,'None') "终端",
+    DECODE(l.LMODE, 1,'No Lock', 2,'Row Share', 3,'Row Exclusive', 4,'Share', 5,
+    'Share Row Exclusive', 6,'Exclusive', NULL) "持有锁",
+    DECODE(l.REQUEST, 1,'No Lock', 2,'Row Share', 3,'Row Exclusive', 4,'Share', 5
+    ,'Share Row Exclusive', 6,'Exclusive', NULL) "申请锁",
+    SUBSTR(T1.NAME,1) "表名",
+    SUBSTR(l.SID
+    ||','
+    ||s.SERIAL#,1,10) "SID.SERIAL"
+  FROM
+    V$LOCK L,
+    V$SESSION S,
+    SYS.USER$ U1,
+    SYS.OBJ$ T1
+  WHERE
+    l.sid      =s.sid
+  AND t1.obj#  =DECODE(l.id2,0,l.id1,l.id2)
+  AND u1.user# =t1.owner#
+  AND U1.NAME != 'SYS'
+  AND S.TYPE  != 'BACKGROUND'
+  ORDER BY
+    1,2,5; 
+  #+END_EXAMPLE
+* 统计一个用户下所有表的行数：
+  #+BEGIN_EXAMPLE
+      1.exec dbms_stats.gather_schema_stats(owner=>'用户名');
+      2.select sum(num_rows) from user_tables;
+  #+END_EXAMPLE
+* 统计全库所有表的行数：
+  #+BEGIN_EXAMPLE
+      1.exec dbms_stats.gather_database_stats(ESTIMATE_PERCENT=>'30');
+      2.select sum(num_rows) from dba_tables;
+  #+END_EXAMPLE
+* oracle自动断开连接处理
+  sqldeveloper上， 可以工具-->监视会话， 然后让它一直自动刷新， 这样就不会被断开了
+* oracle设置触发器以后, ora04019
+  检查下是否再逻辑中对触发的表做了查询操作, 比如create trigger on test, 那么处理逻辑中不能出现select* from test

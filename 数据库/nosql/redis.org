@@ -1,0 +1,26 @@
+* 安装redis
+1. linux下直接下载编译即可
+* redis操作
+  1. 启动redisserver
+    + redis-server
+  2. 启动redis-client
+    + redis-cli
+  3. 可以使用SET和GET命令来创建和检索strings
+    + 创建变量
+    + set mykey somevalue
+    + get mykey
+    + set mykey newval nx (如果有这个变量，会返回false)
+    + string 运算
+    + counter是string类型也可以执行加法运算
+    + set counter 100
+    + incr counter //increment  +1
+    + incr counter
+    + incrby counter 50 //+50
+    + 减法  DECR and DECRBY
+    +  可以用mget mset 设置查询多个变量 
+    +  mset a 10 b 20 c 30
+    +  mget a b c
+* redis use
+应用Redis实现数据的读写，同时利用队列处理器定时将数据写入mysql。
+同时要注意避免冲突，在redis启动时去mysql读取所有表键值存入redis中，往redis写数据时，对redis主键自增并进行读取，若mysql更新失败，则需要及时清除缓存及同步redis主键。
+这样处理，主要是实时读写redis，而mysql数据则通过队列异步处理，缓解mysql压力，不过这种方法应用场景主要基于高并发，而且redis的高可用集群架构相对更复杂，一般不是很推荐。

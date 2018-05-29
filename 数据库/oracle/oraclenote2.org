@@ -1,0 +1,26 @@
+oracle表连接
+在左外连接和右外连接时都会以一张表为基表，该表的内容会全部显示，然后加上两张表匹配的内容(所以，显示的记录数可能比原来左表的记录条数更多)。 如果基表的数据在另一张表没有记录。 那么在相关联的结果集行中列显示为空值（NULL）。
+对于外连接， 也可以使用“(+) ”来表示。 关于使用（+）的一些注意事项：
+
+        1. （+）操作符只能出现在where子句中，并且不能与outer join语法同时使用。
+
+        2.  当使用（+）操作符执行外连接时，如果在where子句中包含有多个条件，则必须在所有条件中都包含（+）操作符
+
+        3. （+）操作符只适用于列，而不能用在表达式上。
+
+        4. （+）操作符不能与or和in操作符一起使用。
+
+        5. （+）操作符只能用于实现左外连接和右外连接，而不能用于实现完全外连接。
+
++ oracle 表复制语句
++ INSERT INTO SELECT语句
+    + Insert into Table2(field1,field2,...) select value1,value2,... from Table1
++ SELECT INTO FROM语句
+    +  SELECT vale1, value2 into Table2 from Table1
+
+标准SQL修改字段类型和长度语句：
+ALTER TABLE tableName modify column columnName 类型;
+例如Mysql的修改字段类型语句：
+alter table test modify column name varchar(255);
+Oracle修改字段类型和长度语句：
+ALTER TABLE tableName modify(columnName 类型);
