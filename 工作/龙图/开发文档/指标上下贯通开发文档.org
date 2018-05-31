@@ -1,41 +1,67 @@
+* 服务构建
+    1. 采用hessian协议,注册指标下发的service服务, 提供三个接口
+    #+BEGIN_SRC java
+      Map pullIndex(int pageNum) throws Exception ;
+
+      /**
+      * {"code": 0,"message": "成功","totalRow": "10","totalPage": "1"}
+      * 下级接收条数
+      * @return
+      * @throws Exception
+      */
+      Map pullIndexTotal() throws Exception;
+
+      /**
+      * 根据唯一主键 更新服务端接收状态
+      * @param guids
+      * @return
+      */
+      int updateReceiveStatus(List<String> guids) throws Exception;
+
+      /**
+      * 下发数据上传到中间服务
+      * @param datas
+      * @return
+      * @throws Exception
+      */
+      Map pushIndex(List datas) throws Exception;
+    #+END_SRC
+    2. webservice中注册service
+    #+BEGIN_QUOTE
+      <!-- 外接系统的hession协议 (指标接收服务接口) START-->
+      <servlet>
+        <servlet-name>HessianPullBdg</servlet-name>
+        <servlet-class>com.caucho.hessian.server.HessianServlet</servlet-class>
+        <init-param>
+          <param-name>service-class</param-name>
+          <param-value>gov.mof.fasp2.bdg.common.service.bdgsend.BdgSendService</param-value>
+        </init-param>
+      </servlet>
+      <servlet-mapping>
+        <servlet-name>HessianPullBdg</servlet-name>
+        <url-pattern>/remoting/service/pullbdg</url-pattern>
+      </servlet-mapping>
+      <!-- 外界系统的hession协议 (指标接收服务接口) END-->
+    #+END_QUOTE
 * 指标下发(上级下发)
     + 服务端操作
-      1. 综合操作页面，选中明细数据做下发, 通过转换视图(bdg_v_bdg2send),将数据转成codename形式保存到bdg_t_bdgsenddata中
-      2. 采用hessian协议,注册指标下发的service服务, 提供三个接口
+      1. 综合操作页面，选中明细数据做下发, 通过转换视图(bdg_v_bdg2send),将数据转成codename形式调用hession接口保存到bdg_t_bdgsenddata中
+      2. 下发调用hessian部分逻辑实现
       #+BEGIN_SRC java
-          Map PushIndex(int pageNum) throws Exception ;
-          /**
-          * {"code": 0,"message": "成功","totalRow": "10","totalPage": "1"}
-          * 推送条数
-          * @return
-          * @throws Exception
-          */
-          Map pushIndexTotal() throws Exception;
+        Map configMap = (Map) ((List) o2).get(0);
+        String serverurl = String.valueOf(configMap.get("targetaddrsurl"));
 
-          /**
-          * 根据唯一主键 更新服务端接收状态
-          * @param guids
-          * @return
-          */
-          int updateReceiveStatus(List<String> guids);
+        HessianProxyFactory factory = new HessianProxyFactory();
+        IBdgSendService service = null;
+        try {
+            service = (IBdgSendService) factory.create(IBdgSendService.class, serverurl);
+            service.pushIndex(list);
+        } catch (MalformedURLException e) {
+            throw new AppException(e.getMessage());
+        } catch (Exception e) {
+            throw new AppException(e.getMessage());
+        }
       #+END_SRC
-      3. webservice中注册service
-      #+BEGIN_QUOTE
-      	<!-- 外接系统的hession协议 (指标接收服务接口) START-->
-        <servlet>
-          <servlet-name>HessianPullBdg</servlet-name>
-          <servlet-class>com.caucho.hessian.server.HessianServlet</servlet-class>
-          <init-param>
-            <param-name>service-class</param-name>
-            <param-value>gov.mof.fasp2.bdg.common.service.bdgsend.BdgSendService</param-value>
-          </init-param>
-        </servlet>
-        <servlet-mapping>
-          <servlet-name>HessianPullBdg</servlet-name>
-          <url-pattern>/remoting/service/pullbdg</url-pattern>
-        </servlet-mapping>
-        <!-- 外界系统的hession协议 (指标接收服务接口) END-->
-      #+END_QUOTE
 
 * 下级接收
     + 下级财政调用服务端提供的hessian接口接入数据, 接入后留一份原始数据保存到bdg_t_bdgreceivedata中， 然后通过转换视图(bdg_t_receive2bdg)将数据放入到接入业务表中
@@ -53,4 +79,15 @@
     #+BEGIN_SRC sql
     truncate table p#bdg_t_bdgreceive;
     truncate table p#BDG_T_BDGRECEIVEDATA;
+    truncate table p#BDG_T_BDGSENDDATA;
     #+END_SRC
+    + 配置数据库访问地址, 一般只需要更改url
+    #+BEGIN_EXAMPLE
+      delete from BDG_T_THIRDSERVICECONFIG t where t.bustype in ('bdgreceive', 'bdgreceivetotal');
+      Insert into BDG_T_THIRDSERVICECONFIG (BUSTYPE,BUSTYPENAME,BUSBEANID,MAINTABLECODE,MAINVIEWCODE,SUBTABLECODE,SUBVIEWCODE,TARGETADDRSURL,OPERATIONNAME,PARAMS,APPID,PROVINCE,YEAR,TIMEOUT,DIALECTBEAN) values ('bdgreceive','指标接收','bdg.bdgreceive.BdgReceiveService','BDG_T_BDGRECEIVEDATA','BDG_V_RECEIVE2BDG',null,null,'http://localhost:7003/remoting/service/pullbdg','PushIndex','{"unitCode":"001", "unitName":"002", "startTime":"2018-01-01 00:00:00", "vfCode":"xxx"}','bdg','1500','2018','1000','bdg.bdgreceive.impl.HessianImpl');
+      Insert into BDG_T_THIRDSERVICECONFIG (BUSTYPE,BUSTYPENAME,BUSBEANID,MAINTABLECODE,MAINVIEWCODE,SUBTABLECODE,SUBVIEWCODE,TARGETADDRSURL,OPERATIONNAME,PARAMS,APPID,PROVINCE,YEAR,TIMEOUT,DIALECTBEAN) values ('bdgreceivetotal','指标接收记录总数','bdg.bdgreceive.BdgReceiveService','BDG_T_BDGRECEIVEDATA','BDG_V_RECEIVE2BDG',null,null,'http://localhost:7003/remoting/service/pullbdg','PushIndexTotal','{"unitCode":"001", "unitName":"002", "startTime":"2018-01-01 00:00:00", "vfCode":"xxx"}','bdg','1500','2018','1000','bdg.bdgreceive.impl.HessianImpl');
+    #+END_EXAMPLE
+    + 财政区划由上级进行控制
+    #+BEGIN_EXAMPLE
+    
+    #+END_EXAMPLE
