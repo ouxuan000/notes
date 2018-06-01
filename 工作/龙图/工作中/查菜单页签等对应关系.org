@@ -1,0 +1,39 @@
+```
+SELECT
+  pm.url,
+  mm.guid,
+  t.uikey,
+  t.type,
+  t.uitype,
+  m.appid,
+  mm.menuurl,
+  t.mouldid,
+  t.vchtypeid,
+  mc.busbo,
+  m.tablecode,
+  bus.config,
+  bus.code,
+  bus.filter
+FROM
+  fasp_t_pubmenu pm,
+  fasp_t_papage t,
+  fasp_t_pabusinessmould m,
+  fasp_t_pabusinessmodelmenu mm,
+  fasp_t_pabusinessmouldconfig mc,
+  busfw_t_uitabpage bus
+WHERE
+  pm.param3 = t.vchtypeid
+  and
+  t.mouldid = m.guid
+      AND t.menutype = mm.guid
+      AND t.mouldid = mc.mouldid
+      AND t.uikey = bus.key
+      AND t.isbus = '0'
+      AND t.uitype = 'tabpage'
+      AND m.appid = 'pay'
+      AND bus.code IN ('beback', 'willbuild', 'willaudit')
+     -- AND bus.filter IS NOT NULL
+      and pm.guid in (select t.menuguid from FASP_T_CAROLEMENU t where t.roleguid in (
+select t.roleguid from FASP_T_CAUSERROLE t where t.userguid in(
+select t.userguid from FASP_T_CAUSER t)))
+```

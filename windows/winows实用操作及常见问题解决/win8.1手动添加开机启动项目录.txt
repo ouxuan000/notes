@@ -1,0 +1,3 @@
+C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp
+
+后面几个显示为开始菜单 程序 启动

@@ -1,5 +1,0 @@
-Android起步模拟器出现PANIC: Could not open:解决方案
-(突然发现就可以了)
-
-ANDROID_SDK_HOME到你的安装安装目录（注：我的环境变量是设置在了/etc/profile文件中）然后重启电脑。使用的是在sdk目录中sudo ./android
-

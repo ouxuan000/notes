@@ -1,0 +1,38 @@
+```
+set serveroutput on
+declare
+ v_columncode varchar2(1000);
+ v_value1     varchar2(500);
+ v_value2     varchar2(500);
+ type  refcursor is  ref cursor;
+ o_result1_cur refcursor;
+ o_result2_cur refcursor;
+ v_sql1      varchar2(1000);
+ v_sql2      varchar2(1000);
+
+BEGIN
+  v_sql1 := 'select t2.columncode from fasp_t_glctrlrulemain t1,fasp_t_glctrlrulesub t2 where t1.ACCOUNT = ''1CB671FA099082497008E23DB6629549'' and t1.guid = t2.RULEGUID';
+  
+  open o_result1_cur for v_sql1;
+  loop
+    fetch o_result1_cur into v_columncode;
+    exit WHEN o_result1_cur% notfound;
+    
+    v_sql2 := 'select t1.' || v_columncode || ' col1,t2.' || v_columncode ||
+           ' col2 from pay_t_plan t1,fasp_t_glctrl288000 t2
+       where t1.TOCTRLID = t2.guid';
+       
+      open o_result2_cur for v_sql2;
+      loop
+         fetch o_result2_cur into v_value1,v_value2;
+         exit WHEN o_result2_cur% notfound;
+        
+       IF v_value1 != v_value2 THEN
+           DBMS_OUTPUT.PUT_LINE(v_columncode);
+        end if;
+      end loop;
+       close o_result2_cur;
+   end loop;
+   CLOSE o_result1_cur;
+end;
+```

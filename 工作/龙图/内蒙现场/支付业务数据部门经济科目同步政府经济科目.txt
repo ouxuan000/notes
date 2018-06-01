@@ -1,0 +1,73 @@
+
+select global_multyear_cz.Secu_f_Global_Setparm('','1500','2017','') from dual;
+                                
+update pay_t_plan t
+   set t.ZFYSJJFLBZ =
+       (select t3.guid
+          from acct_t_jjkmdz        t4,
+               FASP_T_PUBEXPECO     t2,
+               FASP_T_PUBZFYSJJFLKM t3
+         where t4.zfcode = t3.code(+)
+           and t4.bmcode = t2.code(+)
+           and t4.bmcode is not null
+           and t2.guid = t.EXPECOGUID)
+ where t.ZFYSJJFLBZ is null
+  and t.EXPECOGUID is not null;
+
+
+
+
+update pay_t_request t
+   set t.ZFYSJJFLBZ =
+       (select t3.guid
+          from acct_t_jjkmdz        t4,
+               FASP_T_PUBEXPECO     t2,
+               FASP_T_PUBZFYSJJFLKM t3
+         where t4.zfcode = t3.code(+)
+           and t4.bmcode = t2.code(+)
+           and t4.bmcode is not null
+           and t2.guid = t.EXPECOGUID)
+ where t.ZFYSJJFLBZ is null
+ and t.EXPECOGUID is not null;
+
+
+
+update pay_t_requestsub t
+   set t.ZFYSJJFLBZ =
+       (select t3.guid
+          from acct_t_jjkmdz        t4,
+               FASP_T_PUBEXPECO     t2,
+               FASP_T_PUBZFYSJJFLKM t3
+         where t4.zfcode = t3.code(+)
+           and t4.bmcode = t2.code(+)
+           and t4.bmcode is not null
+           and t2.guid = t.EXPECOGUID)
+ where t.ZFYSJJFLBZ is null
+  and t.EXPECOGUID is not null;
+
+
+update pay_t_paymain t
+   set t.ZFYSJJFLBZ =
+       (select t3.guid
+          from acct_t_jjkmdz        t4,
+               FASP_T_PUBEXPECO     t2,
+               FASP_T_PUBZFYSJJFLKM t3
+         where t4.zfcode = t3.code(+)
+           and t4.bmcode = t2.code(+)
+           and t4.bmcode is not null
+           and t2.guid = t.EXPECOGUID)
+ where t.ZFYSJJFLBZ is null
+  and t.EXPECOGUID is not null;
+  
+  update pay_t_paysub t
+   set t.ZFYSJJFLBZ =
+       (select t3.guid
+          from acct_t_jjkmdz        t4,
+               FASP_T_PUBEXPECO     t2,
+               FASP_T_PUBZFYSJJFLKM t3
+         where t4.zfcode = t3.code(+)
+           and t4.bmcode = t2.code(+)
+           and t4.bmcode is not null
+           and t2.guid = t.EXPECOGUID)
+ where t.ZFYSJJFLBZ is null
+  and t.EXPECOGUID is not null;

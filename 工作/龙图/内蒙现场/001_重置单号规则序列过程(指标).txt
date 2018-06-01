@@ -1,0 +1,30 @@
+declare 
+ TYPE ref_cursor_type IS REF CURSOR;
+ seq_names ref_cursor_type;
+ v_sql varchar2(200);
+ vseq_name varchar2(50);
+n number(10);
+begin
+  open seq_names for select distinct t.serialvalue as seq_name from p#fasp_t_paserialruleitem t where exists (select 1 from p#fasp_t_paserialrule a where 
+  a.guid = t.serialruleid and a.appid = 'bdg') and t.serialtype = 5 and t.serialvalue is not null;
+  loop
+    begin
+    fetch seq_names into vseq_name;
+    exit when seq_names%notfound;
+    execute immediate 'drop sequence '  || vseq_name;
+    execute immediate 'create sequence ' || vseq_name || ' minvalue 1 maxvalue 999999999 start with 1 increment by 1 nocache order';
+    exception when others then continue;
+    end;
+  end loop;
+  open seq_names for select distinct t.squencename from p#fasp_t_paruleseqdtl t where exists (select 1 from p#fasp_t_parule a where a.guid = t.ruleid and a.appid = 'bdg') 
+  and t.colcode in ('BILLCODE', 'BGTDOCNO');
+  loop
+    begin
+    fetch seq_names into vseq_name;
+    exit when seq_names%notfound;
+    execute immediate 'drop sequence ' || vseq_name;
+    execute immediate 'create sequence ' || vseq_name || ' minvalue 1 maxvalue 999999999 start with 1 increment by 1 nocache order';
+    exception when others then continue;
+    end;
+  end loop;
+end;
