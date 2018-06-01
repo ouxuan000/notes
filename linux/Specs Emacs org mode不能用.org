@@ -1,1 +1,0 @@
-Specs Emacs org mode不能用，报错 orgproject  cd. .emacs.d el org project file.  Gitfetch 
