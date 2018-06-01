@@ -27,6 +27,10 @@
   10. rescue time 有兴趣可以看看， 这个是记录你一天在干嘛的软件, 后台运行 nohut rescuetime &(会在当前文件夹下生成nohup.out文件)
   11. 跨平台文件传输 feige url:http://www.feige360.com/ipmsg/download.html
   12. 锁屏 yaourt -S xlockmore
+  13. create_ap github下的一个项目， 共享热点必备
+      #+BEGIN_EXAMPLE
+      配置启动: nohup sudo create_ap wlp2s0 enp0s20u2u4 archer 1234567890 > /tmp/create_ap.log & tail -f /tmp/create_ap.log
+      #+END_EXAMPLE
 
 * 问题处理
   1. 网易云音乐白板 : rm `locate netease |grep cache` 删掉缓存即可

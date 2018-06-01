@@ -1,5 +1,5 @@
 * 全局属性
-  1. background no：是否嵌入桌面，“no”表示不嵌入；“yes”表示嵌入。
+  1. background no：是否嵌入桌面，“no”表示不嵌入；“yes”表示嵌入。xx
 
   2. out_to_console no：是否输出结果到终端，主要在判断Conky在哪里出错时使用，一般情况下为“no”即可。
 
