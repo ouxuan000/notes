@@ -30,6 +30,8 @@ target/
 *.diff
 *.patch
 *.tmp
+*.odt
+*.html
 
 # system ignore
 .DS_Store
