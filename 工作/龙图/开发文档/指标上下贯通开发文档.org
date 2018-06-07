@@ -77,9 +77,9 @@
 * 测试
     + 清理数据
     #+BEGIN_SRC sql
-    truncate table p#bdg_t_bdgreceive;
-    truncate table p#BDG_T_BDGRECEIVEDATA;
-    truncate table p#BDG_T_BDGSENDDATA;
+      truncate table p#bdg_t_bdgreceive;
+      truncate table p#BDG_T_BDGRECEIVEDATA;
+      truncate table p#BDG_T_BDGSENDDATA;
     #+END_SRC
     + 配置数据库访问地址, 一般只需要更改url
     #+BEGIN_EXAMPLE
@@ -89,5 +89,8 @@
     #+END_EXAMPLE
     + 财政区划由上级进行控制
     #+BEGIN_EXAMPLE
-    
+      delete from pay_t_systemset t where t.appid = 'bdg' and t.code = 'bdgrecreport';
+      Insert into PAY_T_SYSTEMSET (CODE,PARAMNAME,PARAMOPTION,VALUE,REMARK,ISUSED,DATATYPE,DISPENSABLE,EDITABLE,DATALENGTH,EDITMASK,SYSTEMTYPE,EDITTYPE,ELEMENTCODE,APPID) values ('bdgrecreport','指标下发接收财政年度',null,'{"province":"1500","year":"2018","userid":"844463533D391D932801CA8806F60516"}',null,1,null,1,1,10,null,null,1,null,'bdg');
     #+END_EXAMPLE
+* bug
+  + 建表amt 精度（16,2）， 否则可能会出现精度丢失问题
