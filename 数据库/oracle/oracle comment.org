@@ -86,3 +86,19 @@
           t.csid IS NOT NULL
           and t2.tablecode is not null;
   #+END_EXAMPLE
+* 指标导出业务表信息
+  #+BEGIN_EXAMPLE
+  --先给物理表加上字段注释信息
+  select 'comment on column p#' || t.tablecode || '.' || t.columncode ||
+        ' is ''' || t.name || ''';',
+        t.*
+    from fasp_t_diccolumn t
+  where t.tablecode = 'BDG_T_BDGSUB';
+
+  --导出注释及字段信息
+  select t.column_name, t2.comments, t.data_type || '(' || t.data_length || ')', t.data_length
+    from user_tab_cols t, user_col_comments t2
+  where t.table_name = t2.table_name(+)
+    and t.column_name = t2.column_name(+)
+    and t.table_name = 'P#BDG_T_BDGSUB';
+  #+END_EXAMPLE
