@@ -5,7 +5,6 @@
 + 程序运行过程中，并发性操作是很常见的。比如同一个分布式系统中的多个节点，同时访问一个共享资源。数据库、分布式存储
 ** 无序性
 + 进程之间的消息通信，会出现顺序不一致问题
-
 * 分布式环境下面临的问题
 ** 网络通信
 + 网络本身的不可靠性，因此会涉及到一些网络通信问题
@@ -72,9 +71,9 @@ zookeeper集群, 包含三种角色: leader / follower /observer
 3. 在zoo.cfg里面增加
 peerType=observer
   #+BEGIN_EXAMPLE
-    server.1=192.168.11.129:2181:3181:observer
-    server.2=192.168.11.131:2181:3181
-    server.3=192.168.11.135:2181:3181
+  server.1=192.168.140.128:2888:3888:observer
+  server.2=192.168.140.129:2888:3888
+  server.3=192.168.140.130:2888:3888
   #+END_EXAMPLE
 *** zookeeper服务配置启动
 + 修改配置文件
@@ -88,6 +87,7 @@ peerType=observer
   server.2=192.168.140.129:2888:3888
   server.3=192.168.140.130:2888:3888
   #3888表示leader选举的端口
+  #2888表示服务器通信端口
   #+END_EXAMPLE
 + 创建myid
   #+BEGIN_EXAMPLE
@@ -140,3 +140,53 @@ peerType=observer
   + 启动后查看status发现启动不成功, 查看bin目录下的zookeeper.out文件进行分析
     + connect timeout: 关闭防火墙: systemctl stop firewalld.service； 清理原 /tmp/zookeeper/下除myid的文件； 有些网友发现可能还与hosts文件中127.0.0.1有关，注释掉即可(需要测试, 我这里是注释掉了)
     + 端口占用: ps -aux |grep zookeeper  杀掉所有进程重新启动
+* java API的使用
+  + 导入jar包
+    #+BEGIN_EXAMPLE
+      <dependency>
+          <groupId>org.apache.zookeeper</groupId>
+          <artifactId>zookeeper</artifactId>
+          <version>3.4.8</version>
+      </dependency>
+    #+END_EXAMPLE
+  + 创建一个api的zookeeper连接
+    #+BEGIN_SRC java
+      /**
+          * 获取连接
+          * @return
+          * @throws IOException
+          * @throws InterruptedException
+          */
+          public static ZooKeeper getInstance() throws IOException, InterruptedException {
+              final CountDownLatch countDownLatch = new CountDownLatch(1);
+              ZooKeeper zooKeeper=new ZooKeeper(CONNECTSTRING, sessionTimeout, new Watcher() {
+                  public void process(WatchedEvent event) {
+                      if(event.getState()== Event.KeeperState.SyncConnected){
+                          switch (event.getType()) {
+                              case None:
+                                  //第一次进入
+                                  System.out.println("连接成功---------" + event);
+                                  //使用countDown保证连接成功，连接也需要时间, 只有判断连接上了， 才会释放锁
+                                  conectStatus.countDown();
+                                  break;
+                          }
+                      }
+                  }
+              });
+              countDownLatch.await();
+              return zooKeeper;
+          }
+    #+END_SRC
+  + api实现增删改查
+    #+BEGIN_SRC java
+        zooKeeper = getInstance();
+        // 增删改查, 临时节点
+        zooKeeper.create("/xxtt", "xxx".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+        //注册对这个节点的监听事件
+        zooKeeper.getData("/xxtt", new ZookeeperWatcher(), new Stat());
+
+        zooKeeper.setData("/xxtt", "i love you".getBytes(), -1);
+        //delete 和create 临时节点没有触发watch事件
+        zooKeeper.delete("/xxtt", -1);
+    #+END_SRC
+  + 完整代码见: https://github.com/offline7LY/demo/blob/master/zookeeper/src/main/java/com/lx/demo/javaapi/ZookeeperClient.java 

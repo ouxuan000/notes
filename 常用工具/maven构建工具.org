@@ -1,7 +1,7 @@
 * maven简单使用
   1. 安装配置JAVA环境
   2. 下载安装maven (http://maven.apache.org/)，配置环境变量M2_HOME
-  3. 生成项目骨架: mvn archetype:generate -DgroupId=com.lx.app -DartifactId=helloworld
+  3. 生成项目骨架: mvn archetype:generate -DgroupId=com.lx.app -DartifactId=helloworld -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
   4. 创建HelloWorld.java
     #+BEGIN_SRC java
     package com.lx.app;
