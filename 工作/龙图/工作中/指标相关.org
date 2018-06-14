@@ -1,81 +1,76 @@
-```
-//与选中明细相同颜色改为相同, 先清除原来所有选中， 再将fromcrlid匹配的选中
-var recordSet = datatable.getRecordSet();
-var datatableAllData = recordSet.query();
-if (datatableAllData.length > 0) {
-    for(var i = 0; i < datatableAllData.length; i++){
-        datatableAllData[i].check = 0;
+* 与选中明细相同颜色改为相同, 先清除原来所有选中， 再将fromcrlid匹配的选中
+  #+BEGIN_SRC javascript
+    //与选中明细相同颜色改为相同, 先清除原来所有选中， 再将fromcrlid匹配的选中
+    var recordSet = datatable.getRecordSet();
+    var datatableAllData = recordSet.query();
+    if (datatableAllData.length > 0) {
+        for(var i = 0; i < datatableAllData.length; i++){
+            datatableAllData[i].check = 0;
+        }
     }
-}
-var datatableSelRow = recordSet.query({fromctrlid: d.fromctrlid});
-if (datatableSelRow.length > 0) {
-    for(var i = 0; i < datatableSelRow.length; i++){
-        datatableSelRow[i].check = 1;
+    var datatableSelRow = recordSet.query({fromctrlid: d.fromctrlid});
+    if (datatableSelRow.length > 0) {
+        for(var i = 0; i < datatableSelRow.length; i++){
+            datatableSelRow[i].check = 1;
+        }
     }
-}
-datatable.reflash();
+    datatable.reflash();
+  #+END_SRC
 ```
-8. 导出 找不到queryMap的值,  修改js中返回的table
-```
-protected Map getQueryConfigMap(Map pageobj) {
-    Map queryMap = new HashMap();
-    try {
-        queryMap = (Map) pageobj.get("queryMap");
-    } catch (Exception e) {
-        logger.error(" 请不要前台传递SQL语句！", e);
+* 导出 找不到queryMap的值,  修改js中返回的table
+  #+BEGIN_SRC javascript
+    protected Map getQueryConfigMap(Map pageobj) {
+        Map queryMap = new HashMap();
+        try {
+            queryMap = (Map) pageobj.get("queryMap");
+        } catch (Exception e) {
+            logger.error(" 请不要前台传递SQL语句！", e);
+        }
+        return queryMap;
     }
-    return queryMap;
-}
 
-Ext.lt.pay.getDataTableObj = function () {
-    return maindatatable;
-}
-```
-9. 新门户待办配置
-+  配置接口
-+  在表BUSPROTAL_T_BINIDSET中加入指标系统待办调用bean接口
-
-10. 根据实际key更新模板顺序
-```
-UPDATE
-  busfw_T_uicolumn t
-SET
-  T.ORDERNUM =
-  (
-    SELECT
-      t3.ordernum
-    FROM
-      busfw_t_uicolumn t3
+    Ext.lt.pay.getDataTableObj = function () {
+        return maindatatable;
+    }
+  #+END_SRC
+* 新门户待办配置
+  +  配置接口
+  +  在表BUSPROTAL_T_BINIDSET中加入指标系统待办调用bean接口
+* 根据实际key更新模板顺序
+  #+BEGIN_EXAMPLE
+    UPDATE
+      busfw_T_uicolumn t
+    SET
+      T.ORDERNUM =
+      (
+        SELECT
+          t3.ordernum
+        FROM
+          busfw_t_uicolumn t3
+        WHERE
+          t3.key                = 'CB6A99CABDB5C1A9F20DB88DB1BB5932'
+        AND lower(T.COLUMNCODE) = lower(T3.COLUMNCODE)
+      )
     WHERE
-      t3.key                = 'CB6A99CABDB5C1A9F20DB88DB1BB5932'
-    AND lower(T.COLUMNCODE) = lower(T3.COLUMNCODE)
-  )
-WHERE
-  t.key                  = '/bdg/bdgloading/edit/maindatatable'
-AND lower(T.COLUMNCODE) IN
-  (
-    SELECT
-      lower(T2.COLUMNCODE)
-    FROM
-      BUSFW_T_UICOLUMN t2
-    WHERE
-      t2.key = 'CB6A99CABDB5C1A9F20DB88DB1BB5932'
-  );
-```
-
-##### 创建备份表， 与要添加字段的表做比较
-```
+      t.key                  = '/bdg/bdgloading/edit/maindatatable'
+    AND lower(T.COLUMNCODE) IN
+      (
+        SELECT
+          lower(T2.COLUMNCODE)
+        FROM
+          BUSFW_T_UICOLUMN t2
+        WHERE
+          t2.key = 'CB6A99CABDB5C1A9F20DB88DB1BB5932'
+      );
+  #+END_EXAMPLE
+* 创建备份表， 与要添加字段的表做比较
+#+BEGIN_EXAMPLE
 insert into fasp_t_diccolumn select * from fasp_t_diccolumn_bak t where T.COLUMNCODE not in (select t2.columncode from fasp_t_diccolumn t2 where T2.TABLECODE = 'BDG_T_BDGSUB');
 
-```
-
-```
 select 'alter table P#BDG_T_BDGSUB add ' || T.COLUMN_NAME || ' '||t.data_type || '(' || T.DATA_LENGTH || ');' ,T.COLUMN_NAME, t.* from USER_TAB_COLS t where T.TABLE_NAME = 'P#BDG_T_BDGSUB_CHENGDU' and T.COLUMN_NAME not in (select T2.COLUMN_NAME from USER_TAB_COLS t2 where T2.TABLE_NAME = 'P#BDG_T_BDGSUB');
-
-```
-
-#####成都字段修改
-```
+#+END_EXAMPLE
+* 成都字段修改
+#+BEGIN_EXAMPLE
 alter table P#BDG_T_BDGMAIN rename column   INCOMEEXPMANAGE to  LOCEXPSTRGUID ;
 alter table P#BDG_T_BDGSUB rename column   INCOMEEXPMANAGE to  LOCEXPSTRGUID ;
 
@@ -87,85 +82,73 @@ update BUSFW_T_UIQUERYFORM T set T.COLUMNCODE = ' LOCEXPSTRGUID' where T.TABLECO
 
 update busfw_t_uicolumn T set T.COLUMNCODE = ' LOCEXPSTRGUID' where t.key in (select T2.key from busfw_T_uitable t2 where  T2.TABLECODE in ('BDG_T_BDGMAIN', 'BDG_T_BDGSUB')) and COLUMNCODE = 'INCOMEEXPMANAGE';
 
-```
-
-#####项目空转
+#+END_EXAMPLE
+* 项目空转
 1. 指标中把支付中必要的要素录入，并且当作核算要素
 2. 项目空转自动根据支付方式区分直接授权
 3. 直接支付授权支付分别指定单据id{11:{planvch:xxx, reqvch:xxx, paymentvch:xxx, planwfstatus:xxx, reqwf:xxx, paymentwfstatus:xxx, paytypeguid:xxx}, 22:{}}, 如果在其中指定了key与业务数据key一致的数据，会覆盖业务数据(设置默认值)
 单据定义默认值配置: 
 defoption:'{"11":{"planvch":"6ABEACA411B7A9B7C190665ED482FDCC", "reqvch":"982D8D6D4576143642DF37FD7E1219E7", "paymentvch":"DF5FE54C4A0B8C8BAEE7E55F2FE3DB7D", "planwf":"910", "reqwf":"011", "paymentwf":"931"},"12":{"planvch":"6ABEACA411B7A9B7C190665ED482FDCC","reqvch":"8974B99DBC7B37EA034353F022A5637B", "paymentvch":"1BD5684AA28434C81183BC88BAFC9258", "planwf":"910", "reqwf":"011", "paymentwf":"931"}}'
-
-##### 追加市县功能
+* 追加市县功能
 1. 建立一张基础的表 (这个表跟追加市县页面明细区对应， )， 只有三个字段 agencyguid, agencyname, ordernum（后续字段各地实施自己扩展）
 2. 进去页面查询额度， 查询明细， 先根据上面建立的表查出所有单位，以及表中所有默认值， 然后根据选中额度覆盖， 明细区如果一个字段值修改， 所有选中行同步修改
 3. insert into p#BDG_T_COUNTRIES (AGENCYGUID, province, ordernum) select t.guid, '1500', SEQTEST.nextval from fasp_t_pubagency t where ROWNUM < 20;
 4. 追加市县功能点: 
-+ 明细有未录入的金额， 现在处理是只保存录入
-+ 明细未录入的值后台全部用总帐数据进行了覆盖， 以录入值为准
-+ 修改页面展示的余额需要根据保存数据规则 (都保存确定界面上余额的计算规则)
-+ 选中额度先同步到所有的明细
-+ 新增页面明细列表是配置表， 界面上可编辑字段必须是明细列表已经有的， 修改页面明细表是指标子表， 跟正常修改没区别， 可以根据配置修改所有字段
-##### 项目新增
+  + 明细有未录入的金额， 现在处理是只保存录入
+  + 明细未录入的值后台全部用总帐数据进行了覆盖， 以录入值为准
+  + 修改页面展示的余额需要根据保存数据规则 (都保存确定界面上余额的计算规则)
+  + 选中额度先同步到所有的明细
+  + 新增页面明细列表是配置表， 界面上可编辑字段必须是明细列表已经有的， 修改页面明细表是指标子表， 跟正常修改没区别， 可以根据配置修改所有字段
+* 项目新增
 1. 弹出项目需要 projectcode proname agency..,并且展示成列表级次关系， 需要参照1.0老系统 (用 +号分级次)
 2. 临时确定写入平台的项目表 pubproject中
 3. 其他类似与以前的项目
-##### 指标调帐
+* 指标调帐
 1. 类似支付调帐， 前面多一层， 根据单据定义配置确定从拿一级开始调帐
-##### 核销
+* 核销
 1. 调帐 + 在途数据处理
 2. 在途数据处理（凭证清算之前都算在途） 需要总帐提供 修改总帐要素方法
 3. 核销业务处理逻辑:
     a. 页面查询根据记账模版配置的来源数据， 上面展示临时指标， 选中临时指标后根据配置的匹配规则， 匹配正式指标
     b. 选中一笔临时指标多笔（一笔主单， 多笔明细）或者一笔正式指标后， 根据正式指标额度信息组织成指标的业务数据， 模拟正常做数据扣减额度 （fromctrlid是选中正式指标额度的guid， toctrlid是原选中临时指标的guid, 类似调剂， 把正式指标钱拨到临时指标上）， 保存业务数据， 并跟新数据为正式指标
     c. 终审记账时候调用总帐的过程， 处理原来临时指标和正式指标关系， 业务这边自己在过程中处理业务数据中要素， 以正式指标为准.
-##### 指标多级导入
+* 指标多级导入
 1. 根据配置数据从下到上进行组织数据
 2. 数据从上级到下级进行记账， 下级使用上级记账后的数据
 3. 主子单关系 待确认
 4. 级联控制规则调整
-##### 导入导出
-1. 后续做
-
-##### 添加字段
-```
+* 导入导出
+* 添加字段
+#+BEGIN_EXAMPLE
 --以单位为准出脚本
 select sys_guid() as GUID,KEY,'ZFYSJJFLBZ' as COLUMNCODE,'政府预算支出经济分类唯一标识' as NAME,ORDERNUM,ISVISIABLE,ISEDIT,TOTALTAG,SHOWLEVEL,REQUIREMENT,COLTYPE,HEAD,FORMAT,DEFAULTVALUE,LEVELCONTROL,'200' as COLWIDTH,ISSOURCE,TYPE,CONFIG,BOTTOMCONTRL from BUSFW_T_UICOLUMN t2 where t2.COLUMNCODE = 'AGENCYGUID' and t2.KEY in (select t.UIKEY from fasp_t_papage t where t.MOULDID in (select t3.guid from FASP_T_PABUSINESSMOULD t3 where t3.appid = 'bdg') and t.VCHTYPEID is null and t.uiTYPE = 'busuidatatable');
 
 DELETE FROM BUSFW_T_UICOLUMN t WHERE t.KEY IN ('/bdg/bdgmodify/add/maindatatable','/bdg/bdgmodify/edit/maindatatable','/bdg/bdgassign/modcountry/maindatatable','/bdg/bdgassign/addcountry/datatable','/bdg/general/query/expand/datatable','/bdg/general/query/expand/maindatatable','/bdg/bdgassign/addcountry/maindatatable','/bdg/bdgloading/edit/datatable','/bdg/bdgloading/edit/maindatatable','/bdg/bdgloading/mod/datatable','/bdg/commonmanage/audit/datatable','/bdg/bdgsub/query/expand/datatable','/bdg/bdgadjust/mod/expand/maindatatable','/bdg/bdgadjust/mod/expand/datatable','/bdg/bdgadjust/add/expand/maindatatable','/bdg/bdgadjust/add/expand/datatable','/bdg/bdgadjust/edit/expand/maindatatable','/bdg/bdgadjust/edit/expand/datatable','/bdg/bdgreduce/add/maindatatable','/bdg/bdgreduce/edit/datatable','/bdg/bdgreduce/edit/maindatatable','/bdg/bdgreduce/mod/maindatatable','/bdg/bdgassign/mod/datatable','/bdg/bdgassign/mod/maindatatable','/bdg/bdgassign/edit/datatable','/bdg/bdgassign/edit/maindatatable','/bdg/bdgassign/add/datatable','/bdg/bdgassign/add/maindatatable','/bdg/bdgmodify/edit/datatable','/bdg/bdgassign/modcountry/datatable','/bdg/preindi/checkoff/add/expand/maindatatable','/bdg/preindi/checkoff/add/expand/datatable','/bdg/preindi/checkoff/edit/expand/datatable','/bdg/preindi/checkoff/edit/expand/maindatatable') AND t.columncode = 'ZFYSJJFLBZ';
 --删除的key
 SELECT WMSYS.WM_CONCAT(''''||t2.KEY||'''') FROM BUSFW_T_UICOLUMN t2 WHERE t2.COLUMNCODE = 'AGENCYGUID' AND t2.KEY IN (SELECT t.UIKEY FROM fasp_t_papage t WHERE t.MOULDID IN (SELECT t3.guid FROM FASP_T_PABUSINESSMOULD t3 WHERE t3.appid = 'bdg') AND t.VCHTYPEID IS NULL AND t.uiTYPE = 'busuidatatable');
-
-```
-
-###### 明细查询看不到审核情况
-```
+#+END_EXAMPLE
+* 明细查询看不到审核情况
+#+BEGIN_EXAMPLE
 update BUSFW_T_UITABLE T set T.TABLECODE = 'BDG_T_BDGSUB' WHERE T.KEY IN (
 select t.uikey from fasp_t_papage t where T.MOULDID = '54033228A90F27B7E0530603A8C0F167' and T.UITYPE = 'busuidatatable');
-```
-
-##### 添加字段
-```
+#+END_EXAMPLE
+* 添加字段
+#+BEGIN_EXAMPLE
 SELECT 'alter table P#BDG_T_BDGMAIN add ('|| t.column_name||' '|| T.DATA_TYPE ||'('|| T.DATA_LENGTH||'));' as sqlstr, t.* FROM USER_TAB_COLS T WHERE T.TABLE_NAME = 'P#PAY_T_REQUEST' AND T.COLUMN_NAME IN ('GATHERBANKACCTCODE', 'GATHERBANKACCTNAME', 'GATHERBANKNAME');
-
-```
-
-#####busimodelmenuGUID 
-```
+#+END_EXAMPLE
+* busimodelmenuGUID 
+#+BEGIN_EXAMPLE
 select t1.guid, t2.guid, 'update fasp_t_papage t set T.MENUTYPE = '''||t2.guid||''' where t.menutype = '''||t1.guid||''';', 'update FASP_T_PABUSINESSMODELMENU t set t.guid = '''||t2.guid||''' where t.guid ='''||t1.guid||''';' from FASP_T_PABUSINESSMODELMENU t1, FASP_T_PABUSINESSMODELMENUbak t2 where t1.mouldid in (select t.guid from fasp_t_pabusinessmould t where t.appid ='bdg') and t2.mouldid in (select t.guid from fasp_t_pabusinessmould t where t.appid ='bdg') and t1.menuurl = t2.menuurl;
-```
-##### 列表区不翻译
-```
+#+END_EXAMPLE
+* 列表区不翻译
+#+BEGIN_EXAMPLE
 update busfw_t_uicolumn t set T.FORMAT = '#code-#name', T.ISSOURCE = '1', T.TYPE = 'tree' where t.columncode = 'ISCONSTRUCT' and t.key in (select t2.key from busfw_t_uitable t2 where t2.tablecode = 'BDG_T_BDGSUB');
-```
-```
-select * from busfw_t_uicolumn t where ((t.type = 'tree' and (T.FORMAT is null or T.ISSOURCE <> '1')) or (T.FOrmat is not null and (t.type != 'tree' or T.ISSOURCE != '1')) or (T.ISSOURCE = '1' and (T.FORMAT is null or t.type != 'tree')) )and t.key in (select uikey from fasp_t_papage t where t.mouldid in (select guid from fasp_t_pabusinessmould where appid = 'bdg')) ;
-```
-```
-update bdg_t_bdgsub t set T.PREVUSERID = (select prevuserid from bdg_t_bdgmain t2 where t.mainguid = t2.guid) where T.PREVUSERID is null;
-```
 
-##### 内蒙部门经济科目分支触发器
+select * from busfw_t_uicolumn t where ((t.type = 'tree' and (T.FORMAT is null or T.ISSOURCE <> '1')) or (T.FOrmat is not null and (t.type != 'tree' or T.ISSOURCE != '1')) or (T.ISSOURCE = '1' and (T.FORMAT is null or t.type != 'tree')) )and t.key in (select uikey from fasp_t_papage t where t.mouldid in (select guid from fasp_t_pabusinessmould where appid = 'bdg')) ;
+
+update bdg_t_bdgsub t set T.PREVUSERID = (select prevuserid from bdg_t_bdgmain t2 where t.mainguid = t2.guid) where T.PREVUSERID is null;
+#+END_EXAMPLE
+* 内蒙部门经济科目分支触发器
 ```
 create or replace trigger bdgsub_update_workflag
   before insert on p#bdg_t_bdgsub
@@ -483,3 +466,29 @@ select
 ···
 select substr(regexp_substr(t.config, 'key:''[^'']*'),6) as uikey, t.* from Fw_t_Pageconsolecomconfig t ;
 ···
+
+* 指标模版和页面key对应关系
+  #+BEGIN_EXAMPLE
+    SELECT
+        t.name AS "模板名",
+        t.code AS "模版编码",
+        t2.menuurl AS "url地址",
+        regexp_substr(t3.config,'key:''[^'']*') AS "模版key",
+        regexp_substr(t3.config,'name:''[^'']*') AS "区域名"
+    FROM
+        fasp_t_pabusinessmould t,
+        fasp_t_pabusinessmodelmenu t2,
+        bus_t_pageconsolecomconfig t3
+    WHERE
+            t.guid = t2.mouldid
+        AND
+            t2.menuurl = t3.url
+        AND
+            t3.id NOT LIKE '%Service'
+        AND
+            t3.componentid NOT IN (
+                'busfw.dataexport','buslefttree','header'
+            )
+        AND
+            t.appid = 'bdg';
+  #+END_EXAMPLE

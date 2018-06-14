@@ -16,6 +16,7 @@
     + 一笔中央指标对多笔(没有挂接过)单位指标进行挂接
     + 已经挂接的数据有余额可以重复挂接， 可以取消挂接， 挂接后有余额不可以进行生成指标，挂接和生成只能选一种操作
     + 支持重复多次挂接, 重复挂接不走流程只扣减中央指标额度
+    + 支持多对多挂接， 挂接关系后台算法进行处理，保存中央指标和单位指标挂接关系到关联表中，并且保存每次挂接的金额, 后续上报会根据改记录进行金额拆分
 * 涉及的业务表及关系
     + 上级接收数据备份表 p#bdg_t_receivebdgdata, 只增不减
     + 指标接收业务表，p#bdg_t_bdgreceive 上级接收数据会经过视图(BDG_V_CENTRALMAPLOCAL)转换， 保存到业务表中 
@@ -23,6 +24,27 @@
 * 配置
     + 需要SELECT * FROM BDG_T_THIRDSERVICECONFIG, 配置相关参数， 访问地址，参数列表等, 地址就是请求的webservice服务地址, 参数列表用json格式的形式, 需要填写的字段开发提供，现场只需要配置即可
     + 需要配置dialetbean, 目前支持俩种 bdg.bdgreceive.impl.TestWebServiceImpl(公司测试使用),  bdg.bdgreceive.impl.GDWebServiceImpl(肇庆现场使用)
+    + 支持多对多后原有数据迁移
+      #+BEGIN_EXAMPLE
+        --更新关系表中金额
+        --指标
+        update bdg_t_centrallocalrel t set t.amt = (select t2.amt from bdg_t_bdgsub t2 where t2.guid = t.localid);
+        --凭证
+        update bdg_t_centrallocalrel t set t.amt = (select t2.amt from pay_t_paysub t2 where t2.guid = t.localid);
+        --实拨
+        update bdg_t_centrallocalrel t set t.amt = (select t2.amt from realpay_t_paysub t2 where t2.guid = t.localid);
+
+        select WMSYS.WM_CONCAT(t.column_name) as cols from user_tab_cols t where t.table_name = 'BDG_T_BDGSUB';
+        --数据同步到拆分表
+        select WMSYS.WM_CONCAT(t.column_name) as cols from user_tab_cols t where t.table_name = 'BDG_T_BDGSUB';
+        insert into bdg_t_report () select () from bdg_t_bdgsub t where t.guid in (select localid from bdg_t_centrallocalrel);
+
+        select WMSYS.WM_CONCAT(t.column_name) as cols from user_tab_cols t where t.table_name = 'PAY_T_PAYSUB';
+        insert into pay_t_paysub select * from pay_t_paysub t where t.guid in (select localid from bdg_t_centrallocalrel);
+
+        select WMSYS.WM_CONCAT(t.column_name) as cols from user_tab_cols t where t.table_name = 'REALPAY_T_PAYSUB';
+        insert into realpay_t_paysub select * from realpay_t_paysub t where t.guid in (select localid from bdg_t_centrallocalrel);
+      #+END_EXAMPLE
 * 问题记录
     + 地址不通 用wget wsdl地址测试,  能下载才能保证通
     + jar包冲突 http://www.voidcn.com/article/p-dhgfkvyl-bpb.html

@@ -1,0 +1,6 @@
+* 项目空转
+1. 指标中把支付中必要的要素录入，并且当作核算要素
+2. 项目空转自动根据支付方式区分直接授权
+3. 直接支付授权支付分别指定单据id{11:{planvch:xxx, reqvch:xxx, paymentvch:xxx, planwfstatus:xxx, reqwf:xxx, paymentwfstatus:xxx, paytypeguid:xxx}, 22:{}}, 如果在其中指定了key与业务数据key一致的数据，会覆盖业务数据(设置默认值)
+单据定义默认值配置: 
+defoption:'{"11":{"planvch":"6ABEACA411B7A9B7C190665ED482FDCC", "reqvch":"982D8D6D4576143642DF37FD7E1219E7", "paymentvch":"DF5FE54C4A0B8C8BAEE7E55F2FE3DB7D", "planwf":"910", "reqwf":"011", "paymentwf":"931"},"12":{"planvch":"6ABEACA411B7A9B7C190665ED482FDCC","reqvch":"8974B99DBC7B37EA034353F022A5637B", "paymentvch":"1BD5684AA28434C81183BC88BAFC9258", "planwf":"910", "reqwf":"011", "paymentwf":"931"}}'

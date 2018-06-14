@@ -77,9 +77,13 @@
 * 测试
     + 清理数据
     #+BEGIN_SRC sql
-      truncate table p#bdg_t_bdgreceive;
-      truncate table p#BDG_T_BDGRECEIVEDATA;
-      truncate table p#BDG_T_BDGSENDDATA;
+      TRUNCATE TABLE p#bdg_t_bdgreceive;
+      TRUNCATE TABLE p#bdg_t_bdgreceivedata;
+      TRUNCATE TABLE p#bdg_t_bdgsenddata;
+      TRUNCATE TABLE p#bdg_t_report;
+      TRUNCATE TABLE p#realpay_t_report;
+      TRUNCATE TABLE p#pay_t_report;
+      TRUNCATE TABLE p#bdg_t_centrallocalrel;
     #+END_SRC
     + 配置数据库访问地址, 一般只需要更改url
     #+BEGIN_EXAMPLE
