@@ -1,0 +1,111 @@
+* 啥事dubbo
+* 干啥用
+* 怎么用(参考gupao mic老湿)
+** 首先设计一个用户订单模块 
+   + order-api(提供给第三方调用的规范)
+   + order-provider(服务端具体实现)
+     + 引入dubbo.jar
+     + xml配置(点对点方式，不使用zookeeper的实现)
+       #+BEGIN_EXAMPLE
+           <!--服务唯一标识，类似于spring中的beanid-->
+          <dubbo:application name="demo-provider" owner="zhao"/>
+          <!--暴露的服务地址, dubbo也是基于tcp协议，相互之间交互也需要ip:端口-->
+          <dubbo:registry address="N/A"/>
+          <!--当前服务所依赖的协议， 协议名称不能写错webservice, hessian, thrift....-->
+          <dubbo:protocol name="dubbo" port="20880"/>
+
+          <!--进去正题， 服务暴露的接口， 及对应的实现-->
+          <dubbo:service interface="com.lx.demo.IOrderService" ref="orderService"/>
+          <bean id="orderService" class="com.lx.demo.OrderServiceImpl"/>
+       #+END_EXAMPLE
+     + 使用Main.main(args)启动, 输出一些必要信息,跟xml配置一致
+       #+BEGIN_EXAMPLE
+        信息:  [DUBBO] Export dubbo service com.lx.demo.IOrderService to url 
+        dubbo://192.168.122.1:20880/com.lx.demo.IOrderService?
+        anyhost=true&application=demo-provider&dubbo=2.5.3&
+        interface=com.lx.demo.IOrderService&methods=doOrder&owner=zhao&
+        pid=5092&side=provider&timestamp=1529292132937,
+        dubbo version: 2.5.3, current host: 127.0.0.1
+       #+END_EXAMPLE
+     + 结合zookeeper
+       + 引入zkclient的jar包
+       + 配置修改
+         #+BEGIN_EXAMPLE
+             <!--服务唯一标识，类似于spring中的beanid-->
+            <dubbo:application name="demo-provider" owner="zhao"/>
+            <!--暴露的服务地址, dubbo也是基于tcp协议，相互之间交互也需要ip:端口-->
+            <!--<dubbo:registry address="N/A"/>-->
+            <!-- 加入dubbo结合zookeeper后的配置-->
+            <dubbo:registry protocol="zookeeper" address="192.168.140.128:2181,192.168.140.129:2181,192.168.140.130:2181"/>
+            <!--当前服务所依赖的协议， 协议名称不能写错webservice, hessian, thrift....-->
+            <dubbo:protocol name="dubbo" port="20880"/>
+
+            <!--进去正题， 服务暴露的接口， 及对应的实现-->
+            <dubbo:service interface="com.lx.demo.IOrderService" ref="orderService"/>
+            <bean id="orderService" class="com.lx.demo.OrderServiceImpl"/>
+         #+END_EXAMPLE
+       + 正常启动服务后, zkcli.sh
+         #+BEGIN_EXAMPLE
+          ls /dubbo/com.lx.demo.IOrderService/configurators
+         #+END_EXAMPLE
+   + user(第三方调用模块)
+     + xml配置, 点对点方式(没有注册中心, 开发测试方便)
+       #+BEGIN_EXAMPLE
+           <dubbo:application name="order-consumer"/>
+          <!--不使用注册中心-->
+          <dubbo:registry address="N/A"/>
+          <!--生成远程服务调用代理,-->
+          <dubbo:reference id="orderService" interface="com.lx.demo.IOrderService"
+                          url="dubbo://192.168.122.1:20880/com.lx.demo.IOrderService"/>
+       #+END_EXAMPLE
+     + java代码调用实现
+       #+BEGIN_SRC java
+          ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+                  new String[]{"META-INF/spring/order-consumer.xml"});
+          context.start();
+          //访问到服务端提供的实现
+          IOrderService iOrderService = (IOrderService) context.getBean("orderService");
+          DoOrderRequest doOrderRequest = new DoOrderRequest();
+          doOrderRequest.setName("zhao");
+          DoOrderResponse doOrderResponse = iOrderService.doOrder(doOrderRequest);
+          System.out.println("客户端 user输出: ==== " + doOrderResponse);
+       #+END_SRC
+     + 引入zookeeper后xml
+       #+BEGIN_EXAMPLE
+           <dubbo:application name="order-consumer"/>
+          <!--不使用注册中心-->
+          <!--<dubbo:registry address="N/A"/>-->
+          <dubbo:registry protocol="zookeeper" address="192.168.140.128:2181,192.168.140.129:2181,192.168.140.130:2181"/>
+          <!--生成远程服务调用代理, 直连方式调用-->
+          <dubbo:reference id="orderService" interface="com.lx.demo.IOrderService"/>
+       #+END_EXAMPLE
+* 一些小问题
+** Main方法怎么启动的
+   + main方法里封装了获取配置文件及启动过程, 其实就是封装了官方文档中provicer启动逻辑
+     #+BEGIN_SRC java
+      ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+                new String[] {"META-INF/spring/dubbo-demo-provider.xml"});
+        context.start();
+        // press any key to exit
+        System.in.read();
+     #+END_SRC
+** 日志怎么集成
+   + 直接将log4j.properties放入到resource根目录下
+   + dubbo没有指定日志容器默认使用log4j, 源码中进行了处理
+** admin控制台的安装
+  1.下载dubbo的源码
+  2.找到dubbo-admin
+  3.修改webapp/WEB-INF/dubbo.properties
+  dubbo.registry.address=zookeeper的集群地址
+  控制中心是用来做服务治理的，比如控制服务的权重、服务的路由、。。。
+** simple监控中心
+  Monitor也是一个dubbo服务，所以也会有端口和url, 使用jetty进行启动
+  修改/conf目录下dubbo.properties /order-provider.xml
+  dubbo.registry.address=zookeeper://192.168.140.128:2181?backup=192.168.140.129:2181,192.168.140.130:2181
+  监控服务的调用次数、调用关系、响应事件
+** telnet命令
+   + 用来连接dubbo，可以做一些接口的测试访问
+     #+BEGIN_EXAMPLE
+      telnet  ip port 
+      ls、cd、pwd、clear、invoker
+     #+END_EXAMPLE

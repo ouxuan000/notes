@@ -100,6 +100,10 @@ git push -u origin master
   git tag -d V1.2 --删除本地
   git push origin :refs/tags/V1.2 --删除远程
   #+END_EXAMPLE
+  + 克隆指定分支
+    #+BEGIN_EXAMPLE
+      git clone -b 'dubbo-2.5.3' --single-branch --depth 1 git@github.com:apache/incubator-dubbo.git
+    #+END_EXAMPLE
 
 * 小技巧走一波
     + alias使用
