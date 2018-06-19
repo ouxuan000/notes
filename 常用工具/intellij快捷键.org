@@ -26,6 +26,16 @@
   CTRL+Q，可以看到当前方法的声明
   Shift+F6  重构重命名 (包、类、方法、变量、甚至注释等)
   Ctrl+Alt+V 提取变量
+  提取当前选择为变量（extract variable）：CTRL+ALT+V 
+  提取当前选择为属性（extract field）：CTRL+ALT+F 
+  提取当前选择为常量（extract constant）：CTRL+ALT+C 
+  提取当前选择为方法（extract method）：CTRL+ALT+M 
+  提取当前选择为方法参数（extract parameter）：CTRL+ALT+P 
+  重构类、方法（change signarture）：CTRL+F6 
+  提取代码块至if、try等结构中（surround with）：CTRL+ALT+T 
+  创建模块文件等（new）：CTRL+ALT+N 
+  创建测试用例（test）：CTRL+SHIFT+T 
+  重构菜单（refactor for this）：CTRL+T
 
 * 查询快捷键
   Ctrl＋Shift＋Backspace可以跳转到上次编辑的地
@@ -38,7 +48,7 @@
   双击SHIFT 在项目的所有目录查找文件
   Ctrl+N  查找类
   Ctrl+Shift+N 查找文件
-  CTRL+G  定位行
+  // CTRL+G  定位行
   CTRL+F  在当前窗口查找文本
   CTRL+SHIFT+F  在指定窗口查找文本
   CTRL+R  在 当前窗口替换文本
@@ -50,9 +60,9 @@
   选中文本，按Alt+F3 ，高亮相同文本，F3逐个往下查找相同文本
   F4  查找变量来源
 
-  CTRL+SHIFT+O  弹出显示查找内容
+  //CTRL+SHIFT+O  弹出显示查找内容
 
-  Ctrl+W 选中代码，连续按会有其他效果
+  Ctrl+W 选中代码，连续按会有其他效果, vim shift %
   F2 或Shift+F2 高亮错误或警告快速定位
   Ctrl+Up/Down 光标跳转到第一行或最后一行下
 
@@ -61,7 +71,6 @@
   CTRL+SHIFT+B  找变量的类
 
   Ctrl+Shift+上下键  上下移动代码
-  Ctrl+Alt+ left/right 返回至上次浏览的位置
   Ctrl+X 删除行
   Ctrl+D 复制行
   Ctrl+/ 或 Ctrl+Shift+/  注释（// 或者/*...*/ ）
