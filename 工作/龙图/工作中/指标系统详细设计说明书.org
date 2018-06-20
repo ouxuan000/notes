@@ -199,6 +199,15 @@
 **** 类设计模型
 *****  
 **** 类详细设计实现
+***** bdgloadingpage
+      | 返回值             | 方法名及参数                                                                                                                                               |
+      | 	java.util.Map	  | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	          |
+      | 	 java.util.Map	 | 	batchModPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            批量修改	 |
+      | 	 java.util.Map	 | 	copyPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            复制	         |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            编辑	         |
+      | 	 java.util.Map	 | 	hangPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            挂接	         |
+      | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	          |
+
 *** 存储分配
 ** 指标综合管理
 *** 功能描述

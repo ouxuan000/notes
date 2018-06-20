@@ -12,6 +12,7 @@ target/
 *.zip
 *.tar
 *.tar.gz
+*.odt
 
 # eclipse ignore
 .settings/
