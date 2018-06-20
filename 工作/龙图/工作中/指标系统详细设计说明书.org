@@ -36,6 +36,13 @@
 *** 用例设计 
 **** 类设计模型
 **** 类详细设计实现
+***** commonpage
+      | 返回值                                                   | 方法名及参数                                                                                                                                                                    |
+      | 	gov.mof.fasp2.buspa.businessvoucher.IBusinessVoucher	 | 	getBusinessVoucher()            获得业务单据信息.	                                                                                                                           |
+      | 	 java.lang.String	                                    | 	getMouldid(javax.servlet.http.HttpServletRequest request)            获得业务类型id.	                                                                                        |
+      | 	 java.util.Map	                                       | 	initCommonConsole(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            初始化各个框架组件key值.	 |
+      | 	 void	                                                | 	setLeftTreeAgencyDatas(javax.servlet.http.HttpServletRequest request)            给左侧树添加单位数据 @param request @throws AppException @throws	                           |
+
 ***** commonservice
      | 返回值                                                        | 方法名及参数                                                                                                                                                                                            |
      | --                                                            | --                                                                                                                                                                                                      |
@@ -163,6 +170,14 @@
      | 	 void	                                                                 | 	updateAuditDate(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> nkeepaccountslist, boolean iscancel)            终审后数据添加终审日期	                                                                                                                                                                                                                |
      | 	 void	                                                                 | 	updateBill(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, gov.mof.fasp2.bdg.common.dto.ParameterDTO parameter)           更新单据 主单: 修改 明细: 新增(guid is null), 修改, 删除(guid在业务表中不存在)	                                                                                                                                    |
      | 	 void	                                                                 | 	updateHasFile(java.util.List guids, java.lang.String tablecode)            修改附件状态标识.	                                                                                                                                                                                                                                                              |
+***** commondao
+      | 返回值                | 方法名及参数                                                                                                                                     |
+      | 	 java.util.List	   | 	findBdgLevelSubConfig(java.lang.String vchtypeid)             	                                                                               |
+      | 	 java.lang.String	 | 	getValueByCode(java.lang.String code)            根据编码查询值集.	                                                                           |
+      | 	 java.lang.String	 | 	getValueBySeq(java.lang.String seq)            根据序列获取值	                                                                                |
+      | 	 void	             | 	lockAndCheckTimestamp(java.lang.String tablecode, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list)            锁记录，并校验时间戳.	 |
+      | 	 java.lang.Object	 | 	putDataToOldSystem(java.lang.String batchid, java.lang.String dblink) 	                                                                       |
+
 *** 存储分配 指标系统通用表业务及日志表: 
     + BDG_T_BDGMAIN (指标主单业务表)。 
     + BDG_T_BDGMAINLOG(指标主单业务日志表)。 
