@@ -380,6 +380,11 @@
       | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	                                                             |
 
 ***** BdgAssignService 
+      | 返回值             | 方法名及参数                                                                                                                                                       |
+      | 	 CommonBO	      | 	getBusinessBO()            获得业务BO.	                                                                                                                         |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	 |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap, java.lang.String vchtypeid, java.lang.String isSendAudit)            保存数据	           |
+      | 	 void	          | 	setBo(BdgAdjustBO bo)            业务BO注入.	                                                                                                                   |
 *** 存储分配
 ** 指标综合情况查询
 *** 功能描述
@@ -387,6 +392,33 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** GeneralQueryBO 
+      | 返回值                                       | 方法名及参数                                                                                     |
+      | 	 CommonDAO	                               | 	getBusinessDAO()            获得业务dao,子类实现.	                                            |
+      | 	 java.util.List<java.lang.String>	        | 	getColumns()             	                                                                    |
+      | 	 gov.mof.fasp2.busfw.ui.dto.DatatableDTO	 | 	getDatatableDTO(java.util.Map sqlMap)             	                                           |
+      | 	 ParameterDTO	                            | 	getParameterDTO(java.lang.String vchTypeId)             	                                     |
+      | 	protected  java.lang.String	              | 	getQueryTablecode(java.lang.String tableType, java.util.Map sqlMap)            获得查询表名.	 |
+      | 	 java.lang.String	                        | 	getVodSql(java.util.Map sqlMap)            进入页面查询主表数据的逻辑	                        |
+
+***** GeneralQueryDAO 
+***** GeneralQueryPage 
+      | 返回值 | 方法名及参数 |
+      |	 java.util.Map	|	detailPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            支付数超链接	|
+      |	 java.util.Map	|	dynamicSummaryPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)             	|
+      |	 java.util.Map	|	queryPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            指标综合情况查询	|
+      |	 java.util.Map	|	summaryQueryPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            汇总查询要素选择	|
+
+***** GeneralQueryService
+      | 返回值                                                     | 方法名及参数                                                                                                                                                        |
+      | 	 void	                                                  | 	delDynamicQueryColumns(java.lang.String guid)             	                                                                                                      |
+      | 	 ICommonBO	                                             | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                                 |
+      | 	 java.util.List<java.lang.String>	                      | 	getQueryColumns()             	                                                                                                                                  |
+      | 	 void	                                                  | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	  |
+      | 	 gov.mof.fasp2.buscore.framework.daosupport.RecordSet	  | 	queryDynamicQueryColumns(java.lang.String vchTypeId)             	                                                                                               |
+      | 	 java.util.Map	                                         | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> dataMap, java.lang.String vchTypeId, java.lang.String isSendAudit)            保存数据	            |
+      | 	 java.lang.String	                                      | 	saveDynamicQueryColumns(java.util.HashMap param) 	                                                                                                               |
+
 *** 存储分配
 ** 预拨指标核销
 *** 功能描述
@@ -394,6 +426,45 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** CheckoffBO 
+      | 返回值                                                             | 方法名及参数                                                                                                                                                                                                              |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	afterAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            审核单据之后.	                                                                                             |
+      | 	protected  void	                                                | 	afterEndAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list)            终审逻辑.	                                                                                                                          |
+      | 	 gov.mof.fasp2.busfw.wf.ActionResult	                           | 	audit(java.util.List billList, ParameterDTO parameter)            审核.	                                                                                                                                               |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	beforeDeleteBill(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            删除单据之前.	                                                                                       |
+      | 	protected  void	                                                | 	beforeEndAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> sublist,ParameterDTO parameter, boolean iscancel)            终审前操作	                  |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	beforeObsolete(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            作废单据之前.	                                                                                         |
+      | 	protected  gov.mof.fasp2.busfw.wf.ActionResult	                 | 	doWF(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, ParameterDTO parameter, gov.mof.fasp2.busfw.wf.Action action, java.lang.String logtype)            对已有单据执行工作流.	                               |
+      | 	 gov.mof.fasp2.busgl.dto.IVoucherDTO	                           | 	getBaseVoucherDto(java.lang.Boolean isCreateGuid, java.lang.String vchTypeId, java.util.HashMap oriDto)            基础数据	                                                                                           |
+      | 	 java.util.List	                                                | 	getBdgList(java.lang.String guid)            根据总账guid获取明细业务数据	                                                                                                                                             |
+      | 	 java.util.List	                                                | 	getBdgMainList(java.lang.String guid)            根据总账guid获取业务数据	                                                                                                                                             |
+      | 	 CommonDAO	                                                     | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                                                                                     |
+      | 	protected  java.lang.String	                                    | 	getDfQueryFilter(java.util.Map sqlmap)            获取自定义查询过滤条件.	                                                                                                                                             |
+      | 	 java.util.Map	                                                 | 	getGlData(java.util.Map map)             	                                                                                                                                                                             |
+      | 	 java.util.List	                                                | 	getMatchData(java.util.List list, ParameterDTO dto)             	                                                                                                                                                      |
+      | 	 ParameterDTO	                                                  | 	getParameterDTO(java.lang.String vchTypeId)             	                                                                                                                                                              |
+      | 	 java.lang.String	                                              | 	getVodSql(java.util.Map sqlmap)            列表查询接口.	                                                                                                                                                              |
+      | 	 java.util.List	                                                | 	matchGLCtrlData(java.util.List list, java.lang.String vchtypeid, java.lang.String bctypeid, java.lang.String acctsystype, java.lang.String wheresql)            根据传入业务数据及一些必要参数， 返回匹配到的所有结果	 |
+      | 	 void	                                                          | 	updataBdgData(java.lang.String toctrlid)            更新对应指标的指标版本	                                                                                                                                            |
+
+***** CheckoffDAO 
+      | 返回值              | 方法名及参数                                                                   |
+      | 	 java.util.List	 | 	getBdgList(java.lang.String guid)            根据总账guid获取业务数据	      |
+      | 	 java.util.List	 | 	getBdgMainList(java.lang.String guid)            根据总账guid获取业务数据	  |
+      | 	 void	           | 	updateDataByColumn(java.lang.String column, java.lang.String fromctrlids) 	 |
+
+***** CheckoffPage 
+      | 返回值             | 方法名及参数                                                                                                                                                                                                  |
+      | 	 java.util.Map	 | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	                                                             |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            编辑	                                                            |
+
+***** CheckoffService
+      | 返回值             | 方法名及参数                                                                                                                                             |
+      | 	 ICommonBO	     | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                      |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest req, javax.servlet.http.HttpServletResponse resp, java.util.Map cfg)            组件初始化调用.	  |
+      | 	 java.util.Map	 | 	queryAvailableIndi(java.util.HashMap map)            根据匹配规则获取正式可用指标	                                                                    |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> dataMap, java.lang.String vchTypeId, java.lang.String isSendAudit)            保存数据	 |
+
 *** 存储分配
 ** 指标特殊修改
 *** 功能描述
