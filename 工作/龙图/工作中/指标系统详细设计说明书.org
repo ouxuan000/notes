@@ -208,6 +208,29 @@
       | 	 java.util.Map	 | 	hangPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            挂接	         |
       | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	          |
 
+***** bdgloadingservice
+      | 返回值             | 方法名及参数                                                                                                                                                                                                       |
+      | 	 ICommonBO	     | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                                                                                |
+      | 	 java.util.Map	 | 	getMapperList(java.util.ArrayList dataList)            指标挂接特殊翻译	                                                                                                                                        |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	                                                 |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap, java.lang.String vchtypeid, java.lang.String isSendAudit)            新增或者修改的保存方法 如果是修改， 将业务数据中写入guid, 先删后插	 |
+      | 	 java.util.Map	 | 	saveHangBill(java.util.List saveList, boolean isCancel)            保存/取消挂接关系	                                                                                                                           |
+      | 	 void	          | 	setBo(CommonBO bo) 	                                                                                                                                                                                            |
+
+***** bdgloadingbo
+      | 返回值                                                             | 方法名及参数                                                                                                                                                                                                              |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	afterCreateBill(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> subList,ParameterDTO parameter, int billType)            记录无来源指标业务数据guid	 |
+      | 	protected  void	                                                | 	afterEndAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> sublist,ParameterDTO parameter, boolean iscancel)            终审后处理	                   |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	afterUpdateBill(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            修改后更新明细indictrlid	                                                                             |
+      | 	 CommonDAO	                                                     | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                                                                                     |
+      | 	protected  java.lang.String	                                    | 	getDfQueryCols(java.util.Map sqlMap)            获取自定义查询列.	                                                                                                                                                     |
+      | 	protected  java.lang.String	                                    | 	getDfQueryFilter(java.util.Map sqlmap)            获取自定义查询过滤条件.	                                                                                                                                             |
+      | 	 java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	           | 	isNeedSend(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> sublist)             	                                                                                                                                  |
+      | 	 java.util.List	                                                | 	savedata(java.util.List billList, java.lang.String vchtypeid, java.lang.String fromctrlid, java.lang.String isSendAudit)            导入保存数据逻辑 导入数据每笔都生成一笔主单一笔子单	                               |
+      | 	 java.util.Map	                                                 | 	saveHangBill(java.util.List saveList, boolean isCancel)            保存/取消挂接关系	                                                                                                                                  |
+      | 	 void	                                                          | 	setDao(CommonDAO dao)                                                                                                                                                                                                   |
+
+***** bdgloadingdao
 *** 存储分配
 ** 指标综合管理
 *** 功能描述
@@ -215,6 +238,32 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** commonmanagepage
+      | 返回值                                                    | 方法名及参数                                                                                                                                                  |
+      | 	 java.util.Map	                                        | 	doubleAudit(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            双列表审核	   |
+      | 	 java.util.Map	                                        | 	doubleQuery(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            双列表查询	   |
+      | 	 gov.mof.fasp2.buspa.businessvoucher.IBusinessVoucher	 | 	getBusinessVoucher()            获取单据定义接口.	                                                                                                         |
+      | 	 java.util.Map	                                        | 	singleAudit(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            单列表 审核	  |
+      | 	 java.util.Map	                                        | 	singleQuery(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            单列表 查询	  |
+      | 	 java.util.Map	                                        | 	subQuery(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            单列表 明细查询	 |
+      | 	 java.util.Map	                                        | 	summaryPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            汇总页面.	    |
+
+***** CommonManageBO 
+      | 返回值                                              | 方法名及参数                                                                                     |
+      | 	 CommonDAO	                                      | 	getBusinessDAO()            获得业务dao,子类实现.	                                            |
+      | 	 CommonManageDAO	                                | 	getDao()             	                                                                        |
+      | 	 java.lang.String	                               | 	getDfQueryFilter(java.util.Map sqlmap)            获取自定义查询过滤条件.	                    |
+      | 	 ParameterDTO	                                   | 	getParameterDTO(java.lang.String vchtypeid)             	                                     |
+      | 	 java.lang.String	                               | 	getQueryTablecode(java.lang.String tableType, java.util.Map sqlMap)            获得查询表名.	 |
+      | 	 java.lang.String	                               | 	getTabPageFilter(java.util.Map sqlmap)            获取自定义查询过滤条件.	                    |
+      | 	 java.util.Map<java.lang.String,java.util.List>	 | 	queryMenuTabInfo()            bdg 所有正在使用的菜单页签关系	                                 |
+      | 	 void	                                           | 	setDao(CommonManageDAO dao) 	                                                                 |
+
+***** CommonManageDAO 
+      | 返回值             | 方法名及参数                                                     |
+      | 	java.util.List	 | 	queryMenuTabInfo()            bdg 所有正在使用的菜单页签关系	 |
+
+***** CommonManageService
 *** 存储分配
 ** 指标明细查询
 *** 功能描述
