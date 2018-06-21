@@ -773,6 +773,41 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** ProjectManageBO 
+      | 返回值                                       | 方法名及参数                                                                                                                                                        |
+      | 	 void	                                    | 	beforeDel(java.util.List<java.lang.String> guids)             	                                                                                                  |
+      | 	 void	                                    | 	deleteBill(java.lang.String whereSql)             	                                                                                                              |
+      | 	 CommonDAO	                               | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                               |
+      | 	 java.lang.String	                        | 	getCode(java.lang.String vchTypeId, java.util.Map dto)             	                                                                                             |
+      | 	 ProjectManageDAO	                        | 	getDao()             	                                                                                                                                           |
+      | 	 gov.mof.fasp2.busfw.ui.dto.DatatableDTO	 | 	getDatatableDTO(java.util.Map sqlMap)             	                                                                                                              |
+      | 	protected  java.lang.String	              | 	getDfQueryCols(java.util.Map sqlMap)            获取自定义查询列.	                                                                                               |
+      | 	 ParameterDTO	                            | 	getParameterDTO(java.lang.String vchtypeid)             	                                                                                                        |
+      | 	protected  java.lang.String	              | 	getQueryTablecode(java.lang.String tableType, java.util.Map sqlMap)            获得查询表名.	                                                                    |
+      | 	 void	                                    | 	receiveData(java.util.List<java.util.Map<?,?>> maps, java.lang.String vchtypeid)            项目接收 获取省厅传入数据后， 留底， 然后转换成下级接收格式进行保存	 |
+      | 	 java.util.Map	                           | 	saveBill(java.util.List billList, ParameterDTO parameter)            重写保存数据的方法.	                                                                        |
+
+***** ProjectManageDAO 
+***** ProjectManagePage 
+      | 返回值             | 方法名及参数                                                                                                                                               |
+      | 	java.util.Map	  | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	          |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            编辑	         |
+      | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	          |
+***** ProjectManageService
+      | 返回值                                                   | 方法名及参数                                                                                                                                                       |
+      | 	 java.lang.Boolean	                                   | 	beforeMod(java.lang.String selectedGuid)            进入修改页面初始化数据.	                                                                                    |
+      | 	 java.util.List	                                      | 	deleteBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap)            删除数据.	                                                                  |
+      | 	 java.lang.Boolean	                                   | 	existsCode(java.lang.String keyWord)             	                                                                                                              |
+      | 	 java.util.Map	                                       | 	getAllData(java.util.HashMap<java.lang.String,java.lang.String> map)             	                                                                              |
+      | 	 ProjectManageBO	                                     | 	getBO()             	                                                                                                                                           |
+      | 	 ProjectManageBO	                                     | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                                |
+      | 	 void	                                                | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	 |
+      | 	 java.util.Map	                                       | 	receiveData(java.util.HashMap param)            根据不通的接收方言, 调用不通的第三方接口	                                                                       |
+      | 	 java.util.Map	                                       | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> dataMap, java.lang.String vchTypeId, java.lang.String isSendAudit)            保存数据	           |
+      | 	 java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	searchName(java.lang.String keyWord)             	                                                                                                              |
+      | 	 void	                                                | 	setBo(ProjectManageBO bo)             	                                                                                                                         |
+      | 	 int	                                                 | 	updateBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap)            删除数据.	                                                                  |
+
 *** 存储分配
 ** 指标上报
 *** 功能描述
