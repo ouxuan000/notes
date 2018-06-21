@@ -815,6 +815,36 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** BdgReportBO 
+      | 返回值                                          | 方法名及参数                                                                                                                                                                                                                                                                                                                                                                                             |
+      | 	 void	                                       | 	cancelConfirm(java.util.HashMap map)            取消确认	                                                                                                                                                                                                                                                                                                                                             |
+      | 	 void	                                       | 	cancelReport(java.util.HashMap map)            更改业务数据上报状态， 并且调用省厅接口取消上报changetype = 2	                                                                                                                                                                                                                                                                                         |
+      | 	 void	                                       | 	confirm(java.util.HashMap map)            确认	                                                                                                                                                                                                                                                                                                                                                       |
+      | 	protected  java.util.List<java.lang.String>	 | 	getAllCols(java.lang.String tablecode, java.lang.Boolean hassys)            根据tablecode获取表的字段信息	                                                                                                                                                                                                                                                                                            |
+      | 	 CommonDAO	                                  | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                                                                                                                                                                                                                                                                    |
+      | 	 BdgReportDAO	                               | 	getDao()             	                                                                                                                                                                                                                                                                                                                                                                                |
+      | 	 ParameterDTO	                               | 	getParameterDTO(java.lang.String vchtypeid)            单表， 不走工作流	                                                                                                                                                                                                                                                                                                                             |
+      | 	protected  java.lang.String	                 | 	getTabPageFilter(java.util.Map sqlmap)            获取页签过滤条件	                                                                                                                                                                                                                                                                                                                                   |
+      | 	 java.util.Map	                              | 	report(java.util.HashMap map)            上报: 选中数据进行上报， 上报之前数据翻译成第三方要求的格式 {"unitCode":"601"," unitName":"广州市"," vfCode ":"xxxxxx","list":[ { "parentVouId": "", "projectNo":"", "sprjId": "","sprjName":””……}, { "parentVouId": "", "projectNo":"", "sprjId": "","sprjName":””……}, { "parentVouId": "", "projectNo":"", "sprjId": "","sprjName":””……}...]}	 |
+      | 	 void	                                       | 	setDao(BdgReportDAO dao) 	                                                                                                                                                                                                                                                                                                                                                                            |
+
+***** BdgReportDAO 
+***** BdgReportPage 
+      | 返回值             | 方法名及参数                                                                                                                                               |
+      | 	java.util.Map	  | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	          |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            编辑	         |
+      | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	          |
+***** BdgReportService
+      | 返回值             | 方法名及参数                                                                                                                                                       |
+      | 	 void	          | 	cancelConfirm(java.util.HashMap map)            确认	                                                                                                           |
+      | 	 void	          | 	cancelReport(java.util.HashMap map)            取消上报指标	                                                                                                    |
+      | 	 void	          | 	confirm(java.util.HashMap map)            确认	                                                                                                                 |
+      | 	 CommonBO	      | 	getBusinessBO()            获得业务BO.	                                                                                                                         |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	 |
+      | 	 java.util.Map	 | 	report(java.util.HashMap map)            上报指标	                                                                                                              |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap, java.lang.String vchtypeid, java.lang.String isSendAudit)            保存数据	           |
+      | 	 void	          | 	setBo(BdgReportBO bo)            业务BO注入.	                                                                                                                   |
+
 *** 存储分配
 ** 指标接收
 *** 功能描述
@@ -822,6 +852,37 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** BdgReceiveBO 
+      | 返回值                          | 方法名及参数                                                                                                                                                                                 |
+      | 	 java.util.Map	              | 	cancelCreate(java.util.List<java.util.Map> datas, ParameterDTO parameterDTO)            根据选中数据取消生成	                                                                             |
+      | 	 java.util.Map	              | 	cancelMount(java.util.List<java.util.Map> datas, ParameterDTO parameterDTO)            取消挂接就是断掉中间表关联关系并退回工作流	                                                        |
+      | 	 java.util.Map	              | 	create(java.util.List billList, ParameterDTO currentParameter)            生成指标业务数据	                                                                                               |
+      | 	 CommonDAO	                  | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                                                        |
+      | 	 CommonDAO	                  | 	getDao()             	                                                                                                                                                                    |
+      | 	protected  java.lang.String	 | 	getDfQueryFilter(java.util.Map sqlmap)            获取自定义查询过滤条件.	                                                                                                                |
+      | 	 ParameterDTO	               | 	getParameterDTO(java.lang.String vchtypeid)             	                                                                                                                                 |
+      | 	 java.util.Map	              | 	receiveData(java.util.List datalist, java.lang.String vchtypeid, IReceiveService bean)             	                                                                                      |
+      | 	 void	                       | 	saveMount(java.util.HashMap<java.lang.String,java.lang.Object> datamap, ParameterDTO parameterDTO)            指标挂接,直接再关联表中插入关联关系， 如果已经挂接过就直接扣减中央指标额度	 |
+      | 	 void	                       | 	setDao(CommonDAO dao) 	                                                                                                                                                                   |
+
+***** BdgReceiveDAO 
+***** BdgReceivePage 
+      | 返回值             | 方法名及参数                                                                                                                                               |
+      | 	java.util.Map	  | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	          |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            编辑	         |
+      | 	 java.util.Map	 | 	mountPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	     |
+***** BdgReceiveService
+      | 返回值             | 方法名及参数                                                                                                                                                             |
+      | 	java.util.Map	  | 	cancelCreate(java.util.HashMap param)            已经生成支付业务的不能撤销生成	                                                                                      |
+      | 	 java.util.Map	 | 	cancelMount(java.util.HashMap param)            选中数据生成指标	                                                                                                     |
+      | 	 java.util.Map	 | 	create(java.util.HashMap param)            选中数据生成指标	                                                                                                          |
+      | 	 CommonBO	      | 	getBo()            不带事务bo	                                                                                                                                        |
+      | 	 ICommonBO	     | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                                      |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	       |
+      | 	 java.util.Map	 | 	receiveData(java.util.HashMap param)            根据不通的接收方言, 调用不通的第三方接口 肇庆省厅接口数据需要分页进行获取， 所以需要先获取数据页码，然后分页获取数据	 |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap, java.lang.String vchtypeid, java.lang.String isSendAudit)            保存数据	                 |
+      | 	 void	          | 	setBo(CommonBO bo) 	                                                                                                                                                  |
+
 *** 存储分配
 ** 指标合并
 *** 功能描述
@@ -829,6 +890,32 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** MergeMultiFundBO 
+      | 返回值                                                             | 方法名及参数                                                                                                                                                                                             |
+      | 	protected  void	                                                | 	addGLVouchers(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> subList,ParameterDTO parameter)            新增记账.	                     |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	afterDeleteBill(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            删除单据之后.	                                                                       |
+      | 	protected  void	                                                | 	auditGLVouchers(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> subList,ParameterDTO parameter, boolean isCancel)            终审记账.	 |
+      | 	protected  java.util.List<java.util.Map>	                       | 	beforeSaveBill(java.util.List<java.util.Map> billList, ParameterDTO parameter, int billType)            保存单据之前回调.	                                                                            |
+      | 	protected  void	                                                | 	deleteGLVouchers(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List mainGuid, java.util.List<java.lang.String> subGuid, ParameterDTO parameter)            删除记账.	           |
+      | 	 CommonDAO	                                                     | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                                                                    |
+
+***** MergeMultiFundDAO 
+      | 返回值                                      | 方法名及参数                                                                                                                   |
+      | 	java.util.List<? extends java.util.Map>	 | 	getBusData(java.lang.String conditions, ParameterDTO parameter)             	                                               |
+      | 	 java.lang.String	                       | 	getSummaryCols(java.lang.String vchTypeId)             	                                                                    |
+      | 	 java.lang.String	                       | 	getSummarySql(java.lang.String vchTypeId, java.lang.String tableCode, java.lang.String busConditions)            已过时。 	 |
+      | 	 java.util.List	                         | 	summaryData(java.lang.String conditions, java.lang.String vchTypeId, java.lang.String tableCode)            已过时。 	      |
+
+***** MergeMultiFundPage 
+      | 返回值             | 方法名及参数                                                                                                                                               |
+      | 	java.util.Map	  | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	          |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            编辑	         |
+      | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	          |
+***** MergeMultiFundService
+      | 返回值             | 方法名及参数                                                                                                                                             |
+      | 	 ICommonBO	     | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                      |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest req, javax.servlet.http.HttpServletResponse resp, java.util.Map cfg)            组件初始化调用.	  |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> dataMap, java.lang.String vchTypeId, java.lang.String isSendAudit)            保存数据	 |
 *** 存储分配
 ** 实拨上报
 *** 功能描述
@@ -836,4 +923,34 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** RealPayReportBO 
+      | 返回值                                          | 方法名及参数                                                                                                                                                                                                                                                                                                                                                                                             |
+      | 	 void	                                       | 	cancelConfirm(java.util.HashMap map)            取消确认	                                                                                                                                                                                                                                                                                                                                             |
+      | 	 void	                                       | 	cancelReport(java.util.HashMap map)            更改业务数据上报状态， 并且调用省厅接口取消上报changetype = 2	                                                                                                                                                                                                                                                                                         |
+      | 	 void	                                       | 	confirm(java.util.HashMap map)            确认	                                                                                                                                                                                                                                                                                                                                                       |
+      | 	protected  java.util.List<java.lang.String>	 | 	getAllCols(java.lang.String tablecode, java.lang.Boolean hassys)            根据tablecode获取表的字段信息	                                                                                                                                                                                                                                                                                            |
+      | 	 CommonDAO	                                  | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                                                                                                                                                                                                                                                                    |
+      | 	 BdgReportDAO	                               | 	getDao()             	                                                                                                                                                                                                                                                                                                                                                                                |
+      | 	 ParameterDTO	                               | 	getParameterDTO(java.lang.String vchtypeid)            单表， 不走工作流	                                                                                                                                                                                                                                                                                                                             |
+      | 	protected  java.lang.String	                 | 	getTabPageFilter(java.util.Map sqlmap)            获取页签过滤条件	                                                                                                                                                                                                                                                                                                                                   |
+      | 	 java.util.Map	                              | 	report(java.util.HashMap map)            上报: 选中数据进行上报， 上报之前数据翻译成第三方要求的格式 {"unitCode":"601"," unitName":"广州市"," vfCode ":"xxxxxx","list":[ { "parentVouId": "", "projectNo":"", "sprjId": "","sprjName":””……}, { "parentVouId": "", "projectNo":"", "sprjId": "","sprjName":””……}, { "parentVouId": "", "projectNo":"", "sprjId": "","sprjName":””……}...]}	 |
+      | 	 void	                                       | 	setDao(BdgReportDAO dao) 	                                                                                                                                                                                                                                                                                                                                                                            |
+
+***** RealPayReportDAO 
+***** RealPayReportPage 
+      | 返回值             | 方法名及参数                                                                                                                                               |
+      | 	java.util.Map	  | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	          |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            编辑	         |
+      | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	          |
+***** RealPayReportService
+      | 返回值             | 方法名及参数                                                                                                                                                       |
+      | 	 void	          | 	cancelConfirm(java.util.HashMap map)            确认	                                                                                                           |
+      | 	 void	          | 	cancelReport(java.util.HashMap map)            取消上报指标	                                                                                                    |
+      | 	 void	          | 	confirm(java.util.HashMap map)            确认	                                                                                                                 |
+      | 	 CommonBO	      | 	getBusinessBO()            获得业务BO.	                                                                                                                         |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	 |
+      | 	 java.util.Map	 | 	report(java.util.HashMap map)            上报指标	                                                                                                              |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap, java.lang.String vchtypeid, java.lang.String isSendAudit)            保存数据	           |
+      | 	 void	          | 	setBo(BdgReportBO bo)            业务BO注入.	                                                                                                                   |
+
 *** 存储分配
