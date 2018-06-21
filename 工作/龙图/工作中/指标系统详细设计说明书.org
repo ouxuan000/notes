@@ -472,6 +472,27 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** BdgModifyBO 
+      | 返回值                                             | 方法名及参数                                                                                                                                                                                |
+      | 	protected  gov.mof.fasp2.busfw.wf.ActionResult	 | 	doWF(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, ParameterDTO parameter, gov.mof.fasp2.busfw.wf.Action action, java.lang.String logtype)            对已有单据执行工作流.	 |
+      | 	 CommonDAO	                                     | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                                                       |
+      | 	 ParameterDTO	                                  | 	getParameterDTO(java.lang.String vchtypeid)             	                                                                                                                                |
+      | 	protected  java.lang.String	                    | 	getQueryTablecode(java.lang.String tabletype, java.util.Map sqlmap)            重写commonBo getQueryTablecode方法	                                                                       |
+      | 	 java.util.Map	                                 | 	saveBill(java.util.List<java.util.Map> billList, ParameterDTO parameter, int billType)            保存单据.	                                                                             |
+
+***** BdgModifyDAO 
+      | 返回值              | 方法名及参数                                                                   |
+      | 	 void	           | 	updateDataByColumn(java.lang.String column, java.lang.String fromctrlids) 	 |
+***** BdgModifyPage 
+      | 返回值             | 方法名及参数                                                                                                                                                                                                  |
+      | 	 java.util.Map	 | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	                                                             |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            编辑	                                                            |
+***** BdgModifyService
+      | 返回值             | 方法名及参数                                                                                                                                             |
+      | 	 ICommonBO	     | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                      |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest req, javax.servlet.http.HttpServletResponse resp, java.util.Map cfg)            组件初始化调用.	  |
+      | 	 java.util.Map	 | 	queryAvailableIndi(java.util.HashMap map)            根据匹配规则获取正式可用指标	                                                                    |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> dataMap, java.lang.String vchTypeId, java.lang.String isSendAudit)            保存数据	 |
 *** 存储分配
 ** 指标多级导入配置
 *** 功能描述
@@ -479,13 +500,26 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
-*** 存储分配
-** 指标资金导入
-*** 功能描述
-*** 用例分析
-*** 用例设计
-**** 类设计模型
-**** 类详细设计实现
+***** BdgLevelProBO 
+      | 返回值                          | 方法名及参数                                                                                     |
+      | 	 CommonDAO	                  | 	getBusinessDAO()            获得业务dao,子类实现.	                                            |
+      | 	 java.util.Map	              | 	getMainDataByGuid(java.util.HashMap param)             	                                      |
+      | 	 ParameterDTO	               | 	getParameterDTO(java.lang.String vchtypeid)             	                                     |
+      | 	protected  java.lang.String	 | 	getQueryTablecode(java.lang.String tabletype, java.util.Map sqlmap)            获得查询表名.	 |
+
+***** BdgLevelProDAO 
+***** BdgLevelProPage 
+      | 返回值             | 方法名及参数                                                                                                                                               |
+      | 	java.util.Map	  | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	          |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            编辑	         |
+      | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	          |
+***** BdgLevelProService
+      | 返回值             | 方法名及参数                                                                                                                                                                                                       |
+      | 	 ICommonBO	     | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                                                                                |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	                                                 |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap, java.lang.String vchtypeid, java.lang.String isSendAudit)            新增或者修改的保存方法 如果是修改， 将业务数据中写入guid, 先删后插	 |
+      | 	 void	          | 	setBo(CommonBO bo) 	                                                                                                                                                                                            |
+      | java.util.Map      | getMainDataByGuid(java.util.HashMap param)                                                                                                                                                                         |
 *** 存储分配
 ** 预算转指标
 *** 功能描述
@@ -493,6 +527,10 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** BgtToBdgBO 
+***** BgtToBdgDAO 
+***** BgtToBdgPage 
+***** BgtToBdgService
 *** 存储分配
 ** 指标要素对照
 *** 功能描述
