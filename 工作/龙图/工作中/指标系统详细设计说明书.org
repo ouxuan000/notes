@@ -264,13 +264,13 @@
       | 	java.util.List	 | 	queryMenuTabInfo()            bdg 所有正在使用的菜单页签关系	 |
 
 ***** CommonManageService
-*** 存储分配
-** 指标明细查询
-*** 功能描述
-*** 用例分析
-*** 用例设计
-**** 类设计模型
-**** 类详细设计实现
+      | 返回值              | 方法名及参数                                                                                                                                                       |
+      | 	 CommonManageBO	 | 	getBo()             	                                                                                                                                           |
+      | 	 ICommonBO	      | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                                |
+      | 	 void	           | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	 |
+      | 	 java.util.Map	  | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap, java.lang.String vchtypeid, java.lang.String isSendAudit)            保存数据	           |
+      | 	 void	           | 	setBo(CommonManageBO bo) 	                                                                                                                                      |
+
 *** 存储分配
 ** 指标调剂
 *** 功能描述
@@ -278,6 +278,44 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** BdgAdjustBO 
+      | 返回值                                                             | 方法名及参数                                                                                                                                                                                                                                                                                                                                          |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	afterAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            审核单据之后.	                                                                                                                                                                                                                         |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	afterCancelAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            取消审核单据之后.	                                                                                                                                                                                                               |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	afterCancelSendAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            取消送审单据之后.	                                                                                                                                                                                                           |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	afterCreateBill(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> subList,ParameterDTO parameter, int billType)            调剂保存后需要做一份对应的调出数据	                                                                                                                     |
+      | 	protected  void	                                                | 	afterEditGLVouchers(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> createSubList, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> updateSubList, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> deleteSubList, ParameterDTO parameter)             	                       |
+      | 	protected  void	                                                | 	afterEndAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> sublist,ParameterDTO parameter, boolean iscancel)            终审后同步 amt < 0 明细	                                                                                                                                  |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	afterSendAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            送审单据之后.	                                                                                                                                                                                                                     |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	afterUpdateBill(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            调剂修改保存后需要同步负数金额值	                                                                                                                                                                                                 |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	beforeDeleteBill(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            删除调剂数据前先吧负数明细删除, 不影响记账	                                                                                                                                                                                      |
+      | 	protected  void	                                                | 	beforeEditGLVouchers(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> createSubList, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> updateSubList, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> deleteSubList, ParameterDTO parameter)            调剂修改前过滤掉负数据	 |
+      | 	protected  void	                                                | 	beforeEndAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> sublist,ParameterDTO parameter, boolean iscancel)            调出数据(amt < 0)不能终审记账	                                                                                                                           |
+      | 	protected  java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	 | 	beforeObsolete(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> billList, ParameterDTO parameter)            作废调剂数据先作废负数明细, 这部分数据不参与记账	                                                                                                                                                                                  |
+      | 	 java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO>	           | 	getAdjustSubList(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.lang.String flag)            杭州调剂数据正负金额必须分批次传给老指标系统,所以需要在此进行明细分组	                                                                                                                                                                |
+      | 	 CommonDAO	                                                     | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                                                                                                                                                                                                                 |
+      | 	 BdgAdjustDAO	                                                  | 	getDao()             	                                                                                                                                                                                                                                                                                                                             |
+      | 	 java.util.Map	                                                 | 	getDetails(java.lang.String mainguid)            根据guid获取子单信息	                                                                                                                                                                                                                                                                             |
+      | 	protected  java.lang.String	                                    | 	getDfQueryFilter(java.util.Map sqlmap)            获取自定义查询过滤条件.	                                                                                                                                                                                                                                                                         |
+      | 	 void	                                                          | 	setDao(BdgAdjustDAO dao) 	                                                                                                                                                                                                                                                                                                                         |
+
+***** BdgAdjustDAO 
+***** BdgAdjustPage 
+      | 返回值             | 方法名及参数                                                                                                                                                             |
+      | 	java.util.Map	  | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	                        |
+      | 	 java.util.Map	 | 	auditModPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            审核修改	               |
+      | 	 java.util.Map	 | 	batchaddPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            批量调剂	               |
+      | 	 java.util.Map	 | 	batchModPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            批量修改	               |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            进入页面显示已经调账的数据	 |
+      | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	                        |
+***** BdgAdjustService
+      | 返回值             | 方法名及参数                                                                                                                                                       |
+      | 	 CommonBO	      | 	getBusinessBO()            获得业务BO.	                                                                                                                         |
+      | 	 java.util.Map	 | 	getDetails(java.lang.String mainguid)            根据guid获取子单信息	                                                                                          |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	 |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap, java.lang.String vchtypeid, java.lang.String isSendAudit)            保存数据	           |
+      | 	 void	          | 	setBo(BdgAdjustBO bo)            业务BO注入.	                                                                                                                   |
+
 *** 存储分配
 ** 指标追减
 *** 功能描述
@@ -285,6 +323,28 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** BdgReduceBO 
+      | 返回值                                       | 方法名及参数                                                                                                                                                                                                                                    |
+      | 	protected  void	                          | 	afterEndAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> sublist,ParameterDTO parameter, boolean iscancel)            终审后处理	                                         |
+      | 	protected  void	                          | 	beforeEndAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> sublist,ParameterDTO parameter, boolean iscancel)            终审前toctrlid特殊处理	                            |
+      | 	 CommonDAO	                               | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                                                                                                           |
+      | 	 gov.mof.fasp2.busfw.ui.dto.DatatableDTO	 | 	getDatatableDTO(java.util.Map sqlmap)            重写getDatatableDTO方法,获取查询总账的数据 如果是第一个页签或者首次加载，select语句只查询汇总字段和guids数据 其他情况，走正常的查询逻辑 uitablecode配置 maindatatable：fasp_t_glctrl288000	 |
+      | 	protected  java.lang.String	              | 	getDfQueryFilter(java.util.Map sqlmap)            获取自定义查询过滤条件.	                                                                                                                                                                   |
+      | 	protected  java.lang.String	              | 	getQueryTablecode(java.lang.String tabletype, java.util.Map sqlmap)            获得查询表名.	                                                                                                                                                |
+ 
+***** BdgReduceDAO 
+***** BdgReducePage 
+      | 返回值             | 方法名及参数                                                                                                                                                             |
+      | 	java.util.Map	  | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	                        |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            进入页面显示已经调账的数据	 |
+      | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	                        |
+***** BdgReduceService
+      | 返回值             | 方法名及参数                                                                                                                                                       |
+      | 	 CommonBO	      | 	getBusinessBO()            获得业务BO.	                                                                                                                         |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            组件初始化调用.	 |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> datamap, java.lang.String vchtypeid, java.lang.String isSendAudit)            保存数据	           |
+      | 	 void	          | 	setBo(BdgAdjustBO bo)            业务BO注入.	                                                                                                                   |
+ 
 *** 存储分配
 ** 指标分配
 *** 功能描述
@@ -292,6 +352,34 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** BdgAssignBO 
+      | 返回值                                       | 方法名及参数                                                                                                                                                                                                                                                |
+      | 	protected  void	                          | 	afterEndAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> sublist, ParameterDTO parameter, boolean iscancel)            终审后操作 如果当前单据设置了空转就走空转逻辑， 没有直接跳过	  |
+      | 	protected  void	                          | 	beforeEndAudit(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> list, java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> sublist, ParameterDTO parameter, boolean iscancel)            终审之前处理, 取消终审后如果是空转删除自动生成的支付业务单据	 |
+      | 	protected  java.util.List<java.util.Map>	 | 	beforeSaveBill(java.util.List<java.util.Map> billList, ParameterDTO parameter, int billType)            保存前重新组装数据, 指标明细未修改数据用总帐数据覆盖	                                                                                            |
+      | 	 CommonDAO	                               | 	getBusinessDAO()            获得业务dao,子类实现.	                                                                                                                                                                                                       |
+      | 	 CommonDAO	                               | 	getDao()             	                                                                                                                                                                                                                                   |
+      | 	protected  java.lang.String	              | 	getDfQueryCols(java.util.Map sqlMap)            获取自定义查询列.	                                                                                                                                                                                       |
+      | 	protected  java.lang.String	              | 	getDfQueryFilter(java.util.Map sqlmap)            获取自定义查询过滤条件.	                                                                                                                                                                               |
+      | 	 java.util.List	                          | 	getDicColList(java.util.List cols, java.lang.String tableCode)            获取翻译数据	                                                                                                                                                                  |
+      | 	protected  java.lang.String	              | 	getQueryTablecode(java.lang.String tabletype, java.util.Map sqlmap)            重写commonbo中方法, 业务特殊查询实现	                                                                                                                                     |
+      | 	 java.util.List	                          | 	savedata(java.util.List billList, java.lang.String vchtypeid, java.lang.String fromctrlid, java.lang.String isSendAudit)            指标分配当作计划额度是不汇总处理, 如果有汇总逻辑需要修改	                                                            |
+      | 	 void	                                    | 	setDao(CommonDAO dao) 	                                                                                                                                                                                                                                  |
+
+***** BdgAssignDAO 
+***** BdgAssignPage 
+      | 返回值             | 方法名及参数                                                                                                                                                                                                  |
+      | 	 java.util.Map	 | 	addCountryPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            追加市县新增 查询字段需要特殊处理, 只能查询这个表有的字段	 |
+      | 	 java.util.Map	 | 	addPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            新增	                                                             |
+      | 	 java.util.Map	 | 	batchAddPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            batch assign based on agencies	                              |
+      | 	 java.util.Map	 | 	batchAssignPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            modify page	                                              |
+      | 	 java.util.Map	 | 	batchModPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            批量修改	                                                    |
+      | 	 java.util.Map	 | 	copyPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            复制	                                                            |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            编辑	                                                            |
+      | 	 java.util.Map	 | 	modCountryPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            追加市县修改	                                              |
+      | 	 java.util.Map	 | 	modPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)            修改	                                                             |
+
+***** BdgAssignService 
 *** 存储分配
 ** 指标综合情况查询
 *** 功能描述
