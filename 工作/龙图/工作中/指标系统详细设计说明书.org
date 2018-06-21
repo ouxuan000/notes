@@ -521,6 +521,8 @@
       | 	 void	          | 	setBo(CommonBO bo) 	                                                                                                                                                                                            |
       | java.util.Map      | getMainDataByGuid(java.util.HashMap param)                                                                                                                                                                         |
 *** 存储分配
+    + BDG_T_BDGLEVELPROMAIN 多级导入配置主表
+    + BDG_T_BDGLEVELPROSUB 多级导入配置子表
 ** 预算转指标
 *** 功能描述
 *** 用例分析
@@ -846,6 +848,9 @@
       | 	 void	          | 	setBo(BdgReportBO bo)            业务BO注入.	                                                                                                                   |
 
 *** 存储分配
+    + bdg_t_bdgsub 指标业务表
+    + bdg_t_report 指标上报数据拆分表
+    + bdg_T_REPORT_view 上报数据转换视图
 ** 指标接收
 *** 功能描述
 *** 用例分析
@@ -884,6 +889,9 @@
       | 	 void	          | 	setBo(CommonBO bo) 	                                                                                                                                                  |
 
 *** 存储分配
+    + BDG_T_BDGRECEIVEDATA 接收数据临时表
+    + BDG_V_RECEIVE2BDG 接收数据转换视图
+    + BDG_T_BDGRECEIVE 接收数据业务表
 ** 指标合并
 *** 功能描述
 *** 用例分析
@@ -954,3 +962,17 @@
       | 	 void	          | 	setBo(BdgReportBO bo)            业务BO注入.	                                                                                                                   |
 
 *** 存储分配
+    + realpay_t_paysub 实拨业务表
+    + realpay_t_report 实拨上报数据拆分表
+    + REALPAY_T_REPORT_view 上报数据转换视图
+** 指标下发
+*** 功能描述
+*** 用例分析
+*** 用例设计
+**** 类设计模型
+**** 类详细设计实现
+    | 返回值             | 方法名及参数                                                                                                 |
+    | 	 java.util.Map	 | 	bdgSend(java.util.List<gov.mof.fasp2.busgl.dto.IVoucherDTO> datas)            根据传入数据保存到下发表中	 |
+*** 存储分配
+    + BDG_V_BDG2SEND (指标业务到下发数据转换视图)。 
+    + BDG_T_BDGSENDDATA(指标下发数据临时表)。 
