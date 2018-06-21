@@ -714,6 +714,20 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** CascadeQueryBO 
+      | 返回值                      | 方法名及参数                                                 |
+      | 	 CommonDAO	              | 	getBusinessDAO()            获得业务dao,子类实现.	        |
+      | 	 ParameterDTO	           | 	getParameterDTO(java.lang.String vchtypeid)             	 |
+      | protected  java.lang.String | getDfQueryCols(java.util.Map sqlMap) 获取自定义查询列.       |
+***** CascadeQueryDAO 
+***** CascadeQueryPage 
+      | 返回值             | 方法名及参数                                                                                                                                          |
+      | 	 java.util.Map	 | 	cascadeQuery(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)   单列表明细查询 |
+***** CascadeQueryService
+      | 返回值             | 方法名及参数                                                                                                                                             |
+      | 	 ICommonBO	     | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                      |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest req, javax.servlet.http.HttpServletResponse resp, java.util.Map cfg)            组件初始化调用.	  |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> dataMap, java.lang.String vchTypeId, java.lang.String isSendAudit)            保存数据	 |
 *** 存储分配
 ** 综合操作
 *** 功能描述
@@ -721,6 +735,26 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** GeneralAddBO 
+      | 返回值                          | 方法名及参数                                                                                     |
+      | 	 CommonDAO	                  | 	getBusinessDAO()            获得业务dao,子类实现.	                                            |
+      | 	 GeneralAddDAO	              | 	getDao()             	                                                                        |
+      | 	 java.lang.String	           | 	getDfQueryFilter(java.util.Map sqlmap)            获取自定义查询过滤条件.	                    |
+      | 	 ParameterDTO	               | 	getParameterDTO(java.lang.String vchtypeid)             	                                     |
+      | 	protected  java.lang.String	 | 	getQueryTablecode(java.lang.String tabletype, java.util.Map sqlmap)            获得查询表名.	 |
+      | 	protected  java.lang.String	 | 	getTabPageFilter(java.util.Map sqlmap)            获取自定义查询过滤条件.	                    |
+      | 	 void	                       | 	setDao(GeneralAddDAO dao) 	                                                                   |
+
+***** GeneralAddDAO 
+***** GeneralAddPage 
+      | 返回值             | 方法名及参数                                                                                                                                          |
+      | 	 java.util.Map	 | 	editPage(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, java.util.Map config)   编辑页面 |
+***** GeneralAddService
+      | 返回值             | 方法名及参数                                                                                                                                             |
+      | 	 ICommonBO	     | 	getBusinessBO()            获得业务bo,子类实现.	                                                                                                      |
+      | 	 void	          | 	initComponent(javax.servlet.http.HttpServletRequest req, javax.servlet.http.HttpServletResponse resp, java.util.Map cfg)            组件初始化调用.	  |
+      | 	 java.util.Map	 | 	saveBill(java.util.HashMap<java.lang.String,java.lang.Object> dataMap, java.lang.String vchTypeId, java.lang.String isSendAudit)            保存数据	 |
+      | java.lang.String   | getImportCodeByVchtypeid(java.lang.String vchtypeid) 查询当前单据设置的编号规则中的文号规则                                                              |
 *** 存储分配
 ** 杭州预算执行情况报表
 *** 功能描述
@@ -728,6 +762,10 @@
 *** 用例设计
 **** 类设计模型
 **** 类详细设计实现
+***** BudgetDetailQueryBO 
+***** BudgetDetailQueryDAO 
+***** BudgetDetailQueryPage 
+***** BudgetDetailQueryService
 *** 存储分配
 ** 项目维护
 *** 功能描述
