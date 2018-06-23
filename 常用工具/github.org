@@ -128,3 +128,11 @@ git push -u origin master
     git config --global --unset http.https://github.com.proxy
     #+END_EXAMPLE
 
+* github.io + hexo
+  + 安装node.js  使用node -v 进行测试
+  + 安装hexo: npm -install -g hexo-cli
+  + 初始化博客目录 hexo init blog(以后的博客都在这个目录里面搞)
+  + hexo n(new) my_site_demo(创建一个新的生成样板)
+  + hexo g(generate) 生成html文件
+  + hexo s(server) 启动服务， 默认端口4000, 启动后通过http://1ocalhost:4000 即可访问
+  + hexo clean 清除缓存， 感觉网站不对劲时候可以清理下
