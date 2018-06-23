@@ -136,3 +136,12 @@ git push -u origin master
   + hexo g(generate) 生成html文件
   + hexo s(server) 启动服务， 默认端口4000, 启动后通过http://1ocalhost:4000 即可访问
   + hexo clean 清除缓存， 感觉网站不对劲时候可以清理下
+  + 与github进行绑定(先再github建立好要展示的repo, 用户名.github.io), 然后在刚刚初始化好的blog下面找到_config.yml文件, 最后加入
+    #+BEGIN_EXAMPLE
+      deploy: 
+        type: git
+        repo: 这里填入你之前在GitHub上创建仓库的完整路径，记得加上 .git
+        branch: master参考如下：
+    #+END_EXAMPLE
+  + 安装git插件 npm install hexo-deployer-git --save, 这样就可以通过hexo-deploy同步数据到github
+  + 参考: https://zhuanlan.zhihu.com/p/26625249
