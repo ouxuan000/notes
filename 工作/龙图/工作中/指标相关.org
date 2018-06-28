@@ -492,3 +492,5 @@ select substr(regexp_substr(t.config, 'key:''[^'']*'),6) as uikey, t.* from Fw_t
         AND
             t.appid = 'bdg';
   #+END_EXAMPLE
+* 批量调剂，追减等新增页面amt默认不能查
+  + 设置字段config  {"issync":2}
