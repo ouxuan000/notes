@@ -493,4 +493,81 @@ select substr(regexp_substr(t.config, 'key:''[^'']*'),6) as uikey, t.* from Fw_t
             t.appid = 'bdg';
   #+END_EXAMPLE
 * 批量调剂，追减等新增页面amt默认不能查
-  + 设置字段config  {"issync":2}
+  + 设置字段 coltype==2 默认查询时候不查该字段
+    #+BEGIN_EXAMPLE
+      public String getSelectColumns(DatatableDTO datatableDto) throws AppException {
+            StringBuilder allColString = new StringBuilder();
+            List<String> keys = new ArrayList<String>();
+            // 包含展示字段和系统字段
+            // 1.获取展示列信息
+            List<DataColumnsDTO> uiColList = datatableDto.getCols();
+            for (DataColumnsDTO coldto : uiColList) {
+                String columncode = coldto.getColcode().toLowerCase();
+
+                if (keys.contains(columncode) || 2 == coldto.getColtype() ||"attach".equalsIgnoreCase(columncode) ||"files".equalsIgnoreCase(coldto.getType())) {
+                    continue;
+                }
+                if (allColString.length() == 0) {
+                    allColString.append(columncode);
+                } else {
+                    allColString.append(",").append(columncode);
+                }
+                keys.add(columncode);
+            }
+            try {
+                Map config = datatableDto.getConfigMap();
+                if (config == null || config.get("showsyscol") == null || (Boolean) config.get("showsyscol")) {
+                    // 2.根据tablecode查询diccol里的系统字段 标志 issys = 1
+                    String tablecode = datatableDto.getTablecode();
+                    IDicTableQueryService dtqs = (IDicTableQueryService) ServiceFactory.getBean("bus.dic.table.queryService");
+                    List<DicColumnDTO> sysColList = dtqs.getDicColumnByTablecode(tablecode);
+                    for (DicColumnDTO m : sysColList) {
+                        if ("1".equals(m.get("issys"))) {
+                            String columncode = m.get("columncode").toString().toLowerCase();
+                            if (!keys.contains(columncode)) {
+                                allColString.append(",").append(columncode);
+                                keys.add(columncode);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+            return allColString.toString();
+        }
+    #+END_EXAMPLE
+
+  + 快速查询不查该字段
+    #+BEGIN_EXAMPLE
+      if(isvisiable != 1 ||coltype !=1){
+                  continue;
+                }  
+    #+END_EXAMPLE
+* 新加字段直接添加单据定义, 或者本身为系统字段
+  + 配置 issync为1, 或者2
+    #+BEGIN_EXAMPLE
+      for (DicColumnDTO columndto : columnList) {
+              // 增加系统字段过滤.
+              if (!columndto.isSys()) {
+                  codeList.add(columndto.get("columncode") + "");
+              }
+          }
+      for (int i = 0; i < moulist.size(); i++) {
+                  String colcode = moulist.get(i).get("colcode").toString();
+                  UIconfigDTO moldDTO = (UIconfigDTO) moulist.get(i).clone();// 克隆，换掉对象，用以添加新对象csid
+                  Map config = moldDTO.getConfigMap();
+                  if (colcode.equalsIgnoreCase("curbal") || colcode.equalsIgnoreCase("adjustamt")) {
+                      list.add(moldDTO);
+                  } else if (config != null && config.get("issync") != null && config.get("issync").equals(2)) {
+                      moldDTO.put("csid", csidMap.get(colcode.toUpperCase()));// 增加csid属性
+                      list.add(moldDTO);
+                  } else if (codeList.contains(colcode.toUpperCase())) {
+                      moldDTO.put("csid", csidMap.get(colcode.toUpperCase()));// 增加csid属性
+                      list.add(moldDTO);
+                  } else if (config != null && config.get("issync") != null && config.get("issync").equals(1)) {// issync:1
+                                                                                                                // UI表的字段不经过dic表的检查，直接显示。
+                      list.add(moulist.get(i));
+                  }
+              }
+    #+END_EXAMPLE
