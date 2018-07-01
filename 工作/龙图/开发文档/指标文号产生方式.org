@@ -54,7 +54,7 @@
               sql += " and (" + drfilter.replaceFirst("(?i)guid", "department") + ")";
           } 
     #+END_SRC
-  + 前台选中处室过滤, 需要再单据定义主编辑区文号字段加入过滤条件 department='#FININTORGGUID', 就会根据处室过滤文号模板
+  + 前台选中处室过滤, 需要再单据定义主编辑区文号字段加入过滤条件 department='#FININTORGGUID', 就会根据处室过滤文号模板, 或者直接再数据库中插入{"fromsource":0,uifilter:'department= \'#finintorgguid\''}
     #+BEGIN_SRC javascript
     {
             bgtdocno: {
