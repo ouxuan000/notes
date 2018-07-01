@@ -522,6 +522,7 @@ Dubbo是基于Java原生SPI机制思想的一个改进，所以，先从JAVA SPI
               2.根据名称，获取实现类ExtensionLoader.getExtensionLoader(扩展接口类).getExtension(扩展接口实现类名称)，然后调用实现类的方法。
               需要明白一点dubbo的内部传参基本上都是基于Url来实 现的，也就是说Dubbo是基于URL驱动的技术
               所以，适配器类的目的是在运行期获取扩展的真正实现来调用，解耦接口和实现，这样的话要不我们自己实现适配器类，要不dubbo帮我们生成，而这些都是通过Adpative来实现。
+
 *** dubbo服务发布
 * 一些小问题
 ** Main方法怎么启动的
