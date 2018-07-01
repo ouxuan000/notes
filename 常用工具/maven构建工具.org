@@ -151,7 +151,7 @@
 4. The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
    解決:systemctl start mysqld.service
 
-*  依赖范围和classpath
+* 依赖范围和classpath
 依赖范围{scope:[compile, {test: junit},{provided: serverlet-api}, {runtime: jdbc 驱动}, {system: 系统本地jar文件, 与provided范围一致}， import]} 就是用来控制 {编译, 测试, 运行}classpath, 以junit为例， scope设置为 test, 如果是测试阶段classpath, 就会引入junit， 如果是编译阶段classpath就不会引入junit
 
 下图标识依赖范围和classpath的关系
@@ -163,7 +163,7 @@
 | runtime  | ----              | Y                 | Y                 | jdbc        |
 | system   | Y                 | Y                 | ----              | 本地jar文件 |
 
-*  传递性依赖和依赖范围 
+* 传递性依赖和依赖范围 
 (如下图： 左一列为第一依赖范围， 最上一行为第二依赖范围, 表格为空的部分表示不传递)
 | 第一依赖\第二依赖 | compiler | test | provided | runtime  |
 |-------------------+----------+------+----------+----------|
@@ -179,7 +179,7 @@
 
 * 生命周期和插件
   1. 命令的输入代表了生命周期[clean:{清理项目}, default:{构建项目 compile, xxxx}, site:{建立站点}] (抽象: 生命周期只定义， 具体插件实现), 三套生命周期相互独立, 例如: mvn compile不会clean， 只有mvn clean compile才会去clean
-*  最佳实践:
+* 最佳实践:
   1.  seting.xml 放到用户目录 cp /opt/maven/setting.xml ~/.m2/ 配置用户范围seting
   2. 自定义脚手架，自动生成项目(general servelet)
   3. 排除依赖 (去掉不想使用的依赖版本(版权， 非正式版), 手动指定)
@@ -191,7 +191,7 @@
 * 常用操作
   1. 生成普通项目模块
   #+BEGIN_EXAMPLE
-  mvn archetype:generate -DgroupId=com.lx.ssm -DartifactId=dao
+    mvn archetype:generate -DgroupId=com.lx.app -DartifactId=helloworld -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
   #+END_EXAMPLE
   2. 生成web项目模块
   #+BEGIN_EXAMPLE
