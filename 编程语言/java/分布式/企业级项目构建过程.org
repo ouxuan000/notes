@@ -1,0 +1,19 @@
+* 实现目标
+** 前后端分离
+** 后端服务之间通过rpc调用
+** 技术架构
+   + 使用Dubbo+spring 构建整个项目
+   + Maven构建项目
+   + Jenkins作为持续集成
+   + 使用 Apollo 配置中心
+   + 使用Spring+Spring MVC+MyBatisSSM框架
+   + 数据库连接池使用druid
+   + 数据库使用MySQL和Redis
+   + 网页采用Velocity生成静态化页面
+   + 采用ElasticSearch实现搜索服务
+   + 负载均衡使用Nginx、keepalived实现高可用
+   + 消息中间件采用ActiveMQ
+   + 在分布式事务上则采用了TCC解决时效性要求性高的分布式事务
+   + 可靠的消息服务则来解决时效性要求低的分布式事务.
+   + 前端采用vue nginx bootstrap 
+* 项目整体架构
