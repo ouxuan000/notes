@@ -34,8 +34,7 @@
       + user-api :服务端对外暴露接口
         + 提供可供消费端使用的xml文件, 服务端更了解一些信息
       + user-provider: 服务端具体实现
-        + 提供dubbo服务, 服务端配置文件一定实在META-INF/spring{}
-    
+        + 提供dubbo服务, 服务端配置文件一定是在META-INF/{spring, dubbo}(约定， dubbo源码中有体现, 路径:)
 *** 登录校验
 ** 订单服务
 ** 商品中心
