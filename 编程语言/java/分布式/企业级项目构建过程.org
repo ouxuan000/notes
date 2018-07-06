@@ -17,11 +17,25 @@
    + 可靠的消息服务则来解决时效性要求低的分布式事务.
    + 前端采用vue nginx bootstrap 
 * 项目整体架构
+** maven构建项目框架
+    #+BEGIN_EXAMPLE
+          + 父级目录, 创建好后修改pom.xml中package为pom, 该目录作为项目依赖包的目录
+          mvn archetype:generate -DgroupId=com.lx.lotterysys -DartifactId=lotterysys -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+    #+END_EXAMPLE
 ** 用户中心
 *** 项目构建 
-    #+BEGIN_EXAMPLE
-    mvn archetype:generate -DgroupId=com.lx.lotterysys -DartifactId=demo-user -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
-    #+END_EXAMPLE
+    + maven 构建项目骨架
+      #+BEGIN_EXAMPLE
+        mvn archetype:generate -DgroupId=com.lx.user -DartifactId=demo-user -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+        mvn archetype:generate -DgroupId=com.lx.user -DartifactId=user-api -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+        mvn archetype:generate -DgroupId=com.lx.user -DartifactId=user-provider -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+      #+END_EXAMPLE
+    + dubbo架构搭建
+      + user-api :服务端对外暴露接口
+        + 提供可供消费端使用的xml文件, 服务端更了解一些信息
+      + user-provider: 服务端具体实现
+        + 提供dubbo服务, 服务端配置文件一定实在META-INF/spring{}
+    
 *** 登录校验
 ** 订单服务
 ** 商品中心
