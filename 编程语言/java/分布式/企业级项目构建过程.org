@@ -1,7 +1,8 @@
 * 实现目标
 ** 前后端分离
 ** 后端服务之间通过rpc调用
-** 技术架构
+* 项目整体架构
+** 技术架构, 技术选型
    + 使用Dubbo+spring 构建整个项目
    + Maven构建项目
    + Jenkins作为持续集成
@@ -16,8 +17,8 @@
    + 在分布式事务上则采用了TCC解决时效性要求性高的分布式事务
    + 可靠的消息服务则来解决时效性要求低的分布式事务.
    + 前端采用vue nginx bootstrap 
-* 项目整体架构
-** 
+** 数据库表设计
+*** 全部设计， 或者单表设计
 ** maven构建项目框架
     #+BEGIN_EXAMPLE
           + 父级目录, 创建好后修改pom.xml中package为pom, 该目录作为项目依赖包的目录
@@ -32,10 +33,17 @@
         mvn archetype:generate -DgroupId=com.lx.user -DartifactId=user-provider -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
       #+END_EXAMPLE
     + dubbo架构搭建
+      + manven引入相关的jar包, dubbo, spring等
+        #+BEGIN_EXAMPLE
+
+        #+END_EXAMPLE
       + user-api :服务端对外暴露接口
         + 提供可供消费端使用的xml文件, 服务端更了解一些信息
+        + 方法以功能为单位
       + user-provider: 服务端具体实现
         + 提供dubbo服务, 服务端配置文件一定是在META-INF/{spring, dubbo}(约定， dubbo源码中有体现, 路径:)
+          + application.properties /service-common.xml
+        + 建立持久话类以及实体， 可以自己写，也可以使用mybatis插件生成
 *** 登录校验
 ** 订单服务
 ** 商品中心
