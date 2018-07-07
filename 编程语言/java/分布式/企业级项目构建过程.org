@@ -17,6 +17,7 @@
    + 可靠的消息服务则来解决时效性要求低的分布式事务.
    + 前端采用vue nginx bootstrap 
 * 项目整体架构
+** 
 ** maven构建项目框架
     #+BEGIN_EXAMPLE
           + 父级目录, 创建好后修改pom.xml中package为pom, 该目录作为项目依赖包的目录
