@@ -52,6 +52,36 @@
           + application.properties /service-common.xml/ service-provider.xml
           + 采用dubbo管理spring配置文件有个好处就是可以以文件形式添加配置， 比如加入spring-aop.xml, 加入spring-db.xml等 
 *** 登录校验
+*** 填坑之路
+    + 一直访问不到mapper?
+      + 检查发现java源码下的xml没有编译到class中
+      + 测试知道mybatis先可以正常访问
+        #+BEGIN_EXAMPLE
+        @ContextConfiguration(locations = {"classpath*:META-INF/spring/application-common.xml","classpath*:META-INF/spring/application-db.xml"})
+        @RunWith(SpringJUnit4ClassRunner.class)
+        public class AppTest
+        {
+            @Autowired
+            private SqlSessionFactory sqlSessionFactory = null;
+
+            @Test
+            public void loadById() {
+
+                SqlSession sqlSession = null;
+                try{
+                    sqlSession = sqlSessionFactory.openSession();
+                    UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+                    User user = userMapper.selectByPrimaryKey(1);
+                    System.out.println(user);
+                }finally{
+                    assert sqlSession != null;
+                    sqlSession.close();
+                }
+            }
+        }
+        #+END_EXAMPLE
+    + mavan 打包访问不到本地jar包
+      + 临时使用systempath直接访问
 ** 订单服务
 ** 商品中心
 ** 运营服务
