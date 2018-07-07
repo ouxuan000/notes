@@ -48,6 +48,7 @@
         + 日志处理， 统一处理或者代码中嵌入
         + 提供dubbo服务, 通过dubbo来启动spring配置文件, 服务端配置文件一定是在META-INF/{spring, dubbo}(约定， dubbo源码中有体现, 路径:)
           + application.properties /service-common.xml/ service-provider.xml
+          + 采用dubbo管理spring配置文件有个好处就是可以以文件形式添加配置， 比如加入spring-aop.xml, 加入spring-db.xml等 
 *** 登录校验
 ** 订单服务
 ** 商品中心
