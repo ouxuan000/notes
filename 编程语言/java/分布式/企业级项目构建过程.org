@@ -50,7 +50,8 @@
         + 日志处理， 统一处理或者代码中嵌入
         + 提供dubbo服务, 通过dubbo来启动spring配置文件, 服务端配置文件一定是在META-INF/{spring, dubbo}(约定， dubbo源码中有体现, 路径:)
           + application.properties /service-common.xml/ service-provider.xml
-          + 采用dubbo管理spring配置文件有个好处就是可以以文件形式添加配置， 比如加入spring-aop.xml, 加入spring-db.xml等 
+          + 采用dubbo管理spring配置文件有个好处就是可以以文件形式添加配置， 比如加入spring-aop.xml, 加入spring-db.xml等
+          + 目前本地测试直接暴露url， 没有使用zookeeper
 *** 登录校验
 *** 填坑之路
     + 一直访问不到mapper?
@@ -82,9 +83,41 @@
         #+END_EXAMPLE
     + mavan 打包访问不到本地jar包
       + 临时使用systempath直接访问
+        #+BEGIN_EXAMPLE
+            <dependency>
+              <groupId>com.lx.user</groupId>
+              <artifactId>user-api</artifactId>
+
+              <scope>system</scope>
+              <systemPath>/home/lx7ly/.m2/repository/com/lx/user/user-api/1.0-SNAPSHOT/user-api-1.0-SNAPSHOT.jar</systemPath>
+            </dependency>
+        #+END_EXAMPLE
 ** 订单服务
 ** 商品中心
 ** 运营服务
 ** 订单服务
 ** 支付服务
 ** 搜索引擎
+** 前端访问
+*** 基于springmvc
+    + 通过dubbo使用user服务暴露的接口校验用户进行登录
+    + 引入提供者提供的bean信息
+      #+BEGIN_EXAMPLE
+      <?xml version="1.0" encoding="UTF-8"?>
+      <beans xmlns="http://www.springframework.org/schema/beans"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+            xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans.xsd        http://code.alibabatech.com/schema/dubbo        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+          <dubbo:application name="demo-web" owner="zhao"/>
+
+          <dubbo:registry address="N/A"/>
+          <!--<dubbo:registry protocol="zookeeper" group="dubbo-dev"-->
+                          <!--address="192.168.11.156:2181"/>-->
+
+          <!--引入提供者提供的bean信息-->
+          <import resource="classpath*:client/user-reference.xml"/>
+
+
+      </beans>
+      #+END_EXAMPLE
