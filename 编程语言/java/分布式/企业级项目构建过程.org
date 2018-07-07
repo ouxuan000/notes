@@ -41,9 +41,13 @@
         + 提供可供消费端使用的xml文件, 服务端更了解一些信息
         + 方法以功能为单位
       + user-provider: 服务端具体实现
-        + 提供dubbo服务, 服务端配置文件一定是在META-INF/{spring, dubbo}(约定， dubbo源码中有体现, 路径:)
-          + application.properties /service-common.xml
         + 建立持久话类以及实体， 可以自己写，也可以使用mybatis插件生成
+        + 具体实现登录方法
+        + 异常处理
+        + 返回请求编码
+        + 日志处理， 统一处理或者代码中嵌入
+        + 提供dubbo服务, 服务端配置文件一定是在META-INF/{spring, dubbo}(约定， dubbo源码中有体现, 路径:)
+          + application.properties /service-common.xml/ service-provider.xml
 *** 登录校验
 ** 订单服务
 ** 商品中心
