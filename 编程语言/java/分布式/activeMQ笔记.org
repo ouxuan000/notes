@@ -72,11 +72,50 @@ API 和管理工具。客户端使用 api 调用，把消息发送到由提供�
   通过前面的内容讲解以及案例演示，我们已经知道了JMS 规范以及他的基本功能是用于和面向消息中间件相互通信的应用程序的接口，那么JMS提供的具体标准有哪些呢？ 我们来仔细去研究下
   消息传递域。JMS 规范中定义了两种消息传递域：点对点（point-to- point ） 消 息 传 递 域 和 发 布 / 订 阅 消 息 传 递 域(publish/subscribe)
   简单理解就是：有点类似于我们通过qq聊天的时候，在群里面发消息和给其中一个同学私聊消息。在群里发消息， 所有群成员都能收到消息。私聊消息只能被私聊的学员能收到消息，
-  + 点对点消息传递域
+  + 点对点消息传递域(queue)
     + 每个消息只能有一个消费者
-    + 消息的生产者和消费者之间没有时间上的相关性。无论消费者在生产者发送消息的时候是否处于运行状态，都可以提取消息
-  + 发布订阅消息传递域
-    +每个消息可以有多个消费者  +生产者和消费者之间有时间上的相关性。订阅一个主题的消费者只能消费自它订阅之后发布的消息。JMS规范允许客户创建持久订阅，这在一定程度上降低了时间上的相关性要求。持久订阅允许消费者消费它在未处于激活状态时发送的消息
+    + 消息的生产者和消费者之间没有时间上的相关性。无论消费者在生产者发送消息的时候是否处于运行状态，都可以提取消息, 类似于qq, 无论谁先上后上都能收到对方的信息
+    + 代码实现
+      #+BEGIN_SRC java
+        public static void main(String[] args) {
+          ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.31.248:61616");
+          Connection connection = null;
+          try {
+              //创建连接
+              connection = connectionFactory.createConnection();
+              //一定要启动连接
+              connection.start();
+
+              Session session = connection.createSession(Boolean.TRUE, Session.AUTO_ACKNOWLEDGE);
+
+              //创建queue, 这个类似于一个编号
+              Destination myqueue = session.createQueue("myQueue");
+
+              //创建消费者
+              MessageConsumer consumer = session.createConsumer(myqueue);
+
+              //接收消息, receive 阻塞
+              TextMessage textMessage = (TextMessage)consumer.receive();
+              System.out.println(textMessage.getText());
+
+              session.commit();
+              session.close();
+          } catch (JMSException e) {
+              e.printStackTrace();
+          }finally {
+              if(connection != null){
+                  try {
+                      connection.close();
+                  } catch (JMSException e) {
+                      e.printStackTrace();
+                  }
+              }
+          }
+      }
+      #+END_SRC
+  + 发布订阅消息传递域(topic)
+    +每个消息可以有多个消费者  
+    +生产者和消费者之间有时间上的相关性。订阅一个主题的消费者只能消费自它订阅之后发布的消息。JMS规范允许客户创建持久订阅，这在一定程度上降低了时间上的相关性要求。持久订阅允许消费者消费它在未处于激活状态时发送的消息, 例如微信的公众号信息订阅, 正常情况下，只有先订阅了以后才可以新发送的推送， 但是有的公众号有个历史消息功能(持久订阅)， 就可以获取以前发布的推送
 ** 消息结构组成
   JMS 消息由及部分组成：消息头、属性、消息体
   + 消息头
@@ -92,7 +131,7 @@ API 和管理工具。客户端使用 api 调用，把消息发送到由提供�
       + JMSprovider特定的属性
   + 消息体
     就是我们需要传递的消息内容，JMSAPI定义了5中消息体格式，可以使用不同形式发送接收数据，并可以兼容现有的消息格式，其中包括绝大部分的时候，我们只需要基于消息体进行构造
-* 持久订阅
+** 持久订阅
   持久订阅的概念，也很容易理解，比如还是以 QQ 为例， 我们把 QQ 退出了，但是下次登录的时候，仍然能收到离线的消息。
   + 持久订阅就是这样一个道理，持久订阅有两个特点：
     + 持久订阅者和非持久订阅者针对的Domain是Pub/Sub，而不是P2P
