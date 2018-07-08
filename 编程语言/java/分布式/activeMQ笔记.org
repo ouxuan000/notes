@@ -33,10 +33,11 @@ ActiveMQ是完全基于JMS规范实现的一个消息中间件产品。是Apache
   + 完全支持 jms1.1和J2ee1.4 规范
   + 对spring 的支持，ActiveMQ可以很容易内嵌到spring模块中
 ** ActiveMQ 安装
-  + 登录到	http://activemq.apache.org/activemq-5150-release.html，找到 ActiveMQ 的下载地址
-  + 直接	copy	到 服 务 器 上通过	tar	-zxvf	apache-activeMQ.tar.gz
+  + 登录到	http://activemq.apache.org/activemq-5150-release.html 找到 ActiveMQ 的下载地址
+  + 直接copy到服务器上通过tar -zxvf	apache-activeMQ.tar.gz
+  + archlinux直接 yaourt -S activemq
   + 启动运行
-    + 普通启动：到bin 目录下， shactivemqstart
+    + 普通启动：到bin 目录下， sh activemq start
     + 启 动 并 指 定 日 志 文 件 sh activemqstart>/tmp/activemqlog
   + 检查是否已启动
     ActiveMQ 默认采用61616 端口提供JMS 服务，使用8161端口提供管理控制台服务，执行以下命令可以检查是否成功启动 ActiveMQ 服务 netstat -an|grep 61616
@@ -90,70 +91,43 @@ API 和管理工具。客户端使用 api 调用，把消息发送到由提供�
         使用“JMSX”作为属性名的前缀，通过下面这段代码可以返回所有连接支持的 JMSX 属性的名字
       + JMSprovider特定的属性
   + 消息体
-    就是我们需要传递的消息内容，JMSAPI定义了5中消息体格式，可以使用不同形式发送接收数据，并可以兼容现有的消息格式，其中包括
-
-
-
-
-
-绝大部分的时候，我们只需要基于消息体进行构造
-持久订阅
-持久订阅的概念，也很容易理解，比如还是以 QQ 为例， 我们把 QQ 退出了，但是下次登录的时候，仍然能收到离线的消息。
-持久订阅就是这样一个道理，持久订阅有两个特点：
-    1. 持久订阅者和非持久订阅者针对的Domain是Pub/Sub，而不是P2P
-    2. 当Broker发送消息给订阅者时，如果订阅者处于 未激活状态状态：持久订阅者可以收到消息，而非持久订阅者则收不到消息。
-
-当然这种方式也有一定的影响：当持久订阅者处于 未激活状态时，Broker需要为持久订阅者保存消息；如果持久订阅者订阅的消息太多则会溢出。
-消费端改动
-
-connection=connectionFactory.createConnectio n();
-connection.setClientID("Mic-001");	
-connection.start();
-Session	session=connection.createSession(Boolean.TRUE,Session.AUTO_ACKNOWLEDGE);	
-Topic	destination=session.createTopic("myTopic");MessageConsumer consumer=session.createDurableSubscriber(destination,"Mic-001");	TextMessage	message=(TextMessage)consumer.receive(); System.out.println(message.getText());
-
-
-修改三处地方，然后先启动消费端去注册一个持久订阅。
-
-持久订阅时，客户端向JMS服务器注册一个自己身份的ID， 当这个客户端处于离线时，JMSProvider会为这个ID保存所有发送到主题的消息，当客户再次连接到	JMS
-Provider时，会根据自己的ID得到所有当自己处于离线时发送到主题的消息。
+    就是我们需要传递的消息内容，JMSAPI定义了5中消息体格式，可以使用不同形式发送接收数据，并可以兼容现有的消息格式，其中包括绝大部分的时候，我们只需要基于消息体进行构造
+* 持久订阅
+  持久订阅的概念，也很容易理解，比如还是以 QQ 为例， 我们把 QQ 退出了，但是下次登录的时候，仍然能收到离线的消息。
+  + 持久订阅就是这样一个道理，持久订阅有两个特点：
+    + 持久订阅者和非持久订阅者针对的Domain是Pub/Sub，而不是P2P
+    + 当Broker发送消息给订阅者时，如果订阅者处于 未激活状态状态：持久订阅者可以收到消息，而非持久订阅者则收不到消息。当然这种方式也有一定的影响：当持久订阅者处于 未激活状态时，Broker需要为持久订阅者保存消息；如果持久订阅者订阅的消息太多则会溢出。
+  + 代码实现
+  #+BEGIN_SRC java
+    connection=connectionFactory.createConnectio n();
+    connection.setClientID("Mic-001");	
+    connection.start();
+    Session	session=connection.createSession(Boolean.TRUE,Session.AUTO_ACKNOWLEDGE);	
+    Topic	destination=session.createTopic("myTopic");MessageConsumer consumer=session.createDurableSubscriber(destination,"Mic-001");	TextMessage	message=(TextMessage)consumer.receive(); System.out.println(message.getText());
+  #+END_SRC
+持久订阅时，客户端向JMS服务器注册一个自己身份的ID， 当这个客户端处于离线时，JMSProvider会为这个ID保存所有发送到主题的消息，当客户再次连接到	JMSProvider时，会根据自己的ID得到所有当自己处于离线时发送到主题的消息。
 这个身份ID，在代码中的体现就是connection的ClientID，这个其实很好理解，你要想收到朋友发送的qq消息，前提就是你得先注册个QQ号，而且还要有台能上网的设备，电脑或手机。设备就相当于是clientId是唯一的；qq号相当于是订阅者的名称，在同一台设备上，不能用同一个qq号挂2个客户端。连接的clientId必须是唯一的，订阅者的名称在同一个连接内必须唯一。这样才能唯一的确定连接和订阅者。
 activeMQ 控制台的截图
 设置持久订阅以后，在控制台能看到下图的变化
-
-JMS 消息的可靠性机制
-理论上来说，我们需要保证消息中间件上的消息，只有被消费者确认过以后才会被签收，相当于我们寄一个快递出去，收件人没有收到快递，就认为这个包裹还是属于待签收状态，这样才能保证包裹能够安全达到收件人手里。消息中间件也是一样。
-消息的消费通常包含 3 个阶段：客户接收消息、客户处理消息、消息被确认
-首先，来简单了解 JMS 的事务性会话和非事务性会话的概念
-JMS Session接口提供了commit和rollback方法。事务提交意味着生产的所有消息被发送，消费的所有消息被确认； 事务回滚意味着生产的所有消息被销毁，消费的所有消息被恢复并重新提交，除非它们已经过期。 事务性的会话总是牵涉到事务处理中，commit或rollback方法一旦被调用，一个事务就结束了，而另一个事务被开始。关闭事务性会话将回滚其中的事务
-在事务型会话中
-在事务状态下进行发送操作，消息并未真正投递到中间件，而只有进行session.commit操作之后，消息才会发送到中
-
-间件，再转发到适当的消费者进行处理。如果是调用
-rollback操作，则表明，当前事务期间内所发送的消息都取消掉。通过在创建session的时候使用true or false来决定当前的会话是事务性还是非事务性connection.createSession(Boolean.TRUE,Session.AUTO_ACKNOWLEDGE);
-
-在事务性会话中，消息的确认是自动进行，也就是通过
-session.commit()以后，消息会自动确认。
-    • 必须保证发送端和接收端都是事务性会话
-在非事务型会话中
-消 息 何 时 被 确 认 取 决 于 创 建 会 话 时 的 应 答 模 式
-(acknowledgement mode). 有三个可选项
-Session.AUTO_ACKNOWLEDGE
-当客户成功的从	receive	方法返回的时候，或者从
-MessageListenner.onMessage方法成功返回的时候，会话自动确认客户收到消息。
-Session.CLIENT_ACKNOWLEDGE
-客户通过调用消息的 acknowledge 方法确认消息。
-
-CLIENT_ACKNOWLEDGE特性
-在这种模式中，确认是在会话层上进行，确认一个被消费的消息将自动确认所有已被会话消费的消息。列如，如果一个消息消费者消费了10个消息，然后确认了第5个消息，那么0~5的消息都会被确认 ->
-演示如下：发送端发送10个消息，接收端接收10个消息，但是在i==5的时候，调用message.acknowledge()进行确认，会发现0~4的消息都会被确认
-Session.DUPS_ACKNOWLEDGE
-消息延迟确认。指定消息提供者在消息接收者没有确认发送时重新发送消息，这种模式不在乎接受者收到重复的消息。
-消息的持久化存储
-消息的持久化存储也是保证可靠性最重要的机制之一，也就是消息发送到Broker 上以后，如果broker出现故障宕机了，那么存储在broker上的消息不应该丢失。可以通过下面的代码来设置消息发送端的持久化和非持久化特性
-
-
-
-
-    • 对于非持久的消息，JMSprovider不会将它存到文件/数据库等稳定的存储介质中。也就是说非持久消息驻留在内存中，如果jmsprovider宕机，那么内存中的非持久消息会丢失
-    • 对于持久消息，消息提供者会使用存储-转发机制，先将消息存储到稳定介质中，等消息发送成功后再删除。如果jmsprovider挂掉了，那么这些未送达的消息不会丢失；jmsprovider恢复正常后，会重新读取这些消息， 并传送给对应的消费者。
+* JMS 消息的可靠性机制
+理论上来说，我们需要保证消息中间件上的消息，只有被消费者确认过以后才会被签收，相当于我们寄一个快递出去，收件人没有收到快递，就认为这个包裹还是属于待签收状态，这样才能保证包裹能够安全达到收件人手里。消息中间件也是一样。消息的消费通常包含 3 个阶段：客户接收消息、客户处理消息、消息被确认
+** 首先，来简单了解 JMS 的事务性会话和非事务性会话的概念
+  JMS Session接口提供了commit和rollback方法。事务提交意味着生产的所有消息被发送，消费的所有消息被确认； 事务回滚意味着生产的所有消息被销毁，消费的所有消息被恢复并重新提交，除非它们已经过期。 事务性的会话总是牵涉到事务处理中，commit或rollback方法一旦被调用，一个事务就结束了，而另一个事务被开始。关闭事务性会话将回滚其中的事务
+  在事务型会话中在事务状态下进行发送操作，消息并未真正投递到中间件，而只有进行session.commit操作之后，消息才会发送到中间件，再转发到适当的消费者进行处理。如果是调用
+  rollback操作，则表明，当前事务期间内所发送的消息都取消掉。通过在创建session的时候使用true or false来决定当前的会话是事务性还是非事务性connection.createSession(Boolean.TRUE,Session.AUTO_ACKNOWLEDGE);
+  在事务性会话中，消息的确认是自动进行，也就是通过session.commit()以后，消息会自动确认。
+  注意： 必须保证发送端和接收端都是事务性会话
++ 在非事务型会话中消息何时被确认取决于创建会话时的应答模式(acknowledgement mode). 有三个可选项
+  + Session.AUTO_ACKNOWLEDGE
+    当客户成功的从	receive	方法返回的时候，或者从
+    MessageListenner.onMessage方法成功返回的时候，会话自动确认客户收到消息。
+  + Session.CLIENT_ACKNOWLEDGE
+    客户通过调用消息的 acknowledge 方法确认消息。
+  + CLIENT_ACKNOWLEDGE特性
+    在这种模式中，确认是在会话层上进行，确认一个被消费的消息将自动确认所有已被会话消费的消息。列如，如果一个消息消费者消费了10个消息，然后确认了第5个消息，那么0~5的消息都会被确认 ->
+    演示如下：发送端发送10个消息，接收端接收10个消息，但是在i==5的时候，调用message.acknowledge()进行确认，会发现0~4的消息都会被确认
+  + Session.DUPS_ACKNOWLEDGE
+    消息延迟确认。指定消息提供者在消息接收者没有确认发送时重新发送消息，这种模式不在乎接受者收到重复的消息。
+    消息的持久化存储消息的持久化存储也是保证可靠性最重要的机制之一，也就是消息发送到Broker 上以后，如果broker出现故障宕机了，那么存储在broker上的消息不应该丢失。可以通过下面的代码来设置消息发送端的持久化和非持久化特性
+    +对于非持久的消息，JMSprovider不会将它存到文件/数据库等稳定的存储介质中。也就是说非持久消息驻留在内存中，如果jmsprovider宕机，那么内存中的非持久消息会丢失
+    +对于持久消息，消息提供者会使用存储-转发机制，先将消息存储到稳定介质中，等消息发送成功后再删除。如果jmsprovider挂掉了，那么这些未送达的消息不会丢失；jmsprovider恢复正常后，会重新读取这些消息， 并传送给对应的消费者。
