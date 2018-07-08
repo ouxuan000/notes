@@ -35,7 +35,7 @@ ActiveMQ是完全基于JMS规范实现的一个消息中间件产品。是Apache
 ** ActiveMQ 安装
   + 登录到	http://activemq.apache.org/activemq-5150-release.html 找到 ActiveMQ 的下载地址
   + 直接copy到服务器上通过tar -zxvf	apache-activeMQ.tar.gz
-  + archlinux直接 yaourt -S activemq
+  + archlinux直接 yaourt -S activemq (这种安装方式再/opt下面，并且webapps目录全部被移动，导致进不去管理页面)
   + 启动运行
     + 普通启动：到bin 目录下， sh activemq start
     + 启 动 并 指 定 日 志 文 件 sh activemqstart>/tmp/activemqlog
