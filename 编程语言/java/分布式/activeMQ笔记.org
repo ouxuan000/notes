@@ -41,8 +41,8 @@ ActiveMQ是完全基于JMS规范实现的一个消息中间件产品。是Apache
     + 启 动 并 指 定 日 志 文 件 sh activemqstart>/tmp/activemqlog
   + 检查是否已启动
     ActiveMQ 默认采用61616 端口提供JMS 服务，使用8161端口提供管理控制台服务，执行以下命令可以检查是否成功启动 ActiveMQ 服务 netstat -an|grep 61616
-  + 通过http://192.168.11.156:8161访问activeMQ管理页面	，默认帐号密码admin/admin
-  + 关闭ActiveMQ;	sh activemqstop
+  + 通过http://:8161访问activeMQ管理页面	，默认帐号密码admin/admin
+ 关闭ActiveMQ;	sh activemqstop
 * 从 JMS 规范来了解 ActiveMQ
 ** JMS 定义
   Java消息服务（JavaMessageService）是java平台中关于面向消息中间件的API，用于在两个应用程序之间，或者分布式系统中发送消息，进行异步通信。
