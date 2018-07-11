@@ -1,48 +1,38 @@
-## 一、archlinux安裝
-- **注意事项**
- - 强烈建议新手移步 Arch Wiki > 新手指南
- - 经验者请参阅 Arch Wiki > 安装指南
- - 若在安装 / 使用过程中遇到问题，请查阅 Arch Wiki，咨询 Google、百度，或在官方论坛（英文）、本论坛发帖提问。
- - 本指南介绍如何通过 ArchISO（Arch Linux 安装镜像，下同）以官方推荐的安装方式将 Arch Linux 安装到到一台普通 PC 上。
- - 安装过程中请保持网络畅通
--  **简要介绍**
- - pacman 是 Arch Linux 的软件包管理器，下文中提及的软件均可通过其完成安装：
-  pacman -S <软件包> ...
- - 本文推荐使用 vi 编辑文件：
-  vi <文件>
-- **安装准备**
- - 获取并校验 ArchISO
-    ArchISO 攘括了 32 位和 64位版本，同时支持 x86 和 x86_64，可从官方下载页面下载。
-    在该页面亦能找到 ArchISO 的 SHA1、MD5 值和 PGP 签名，用于进行校验。
- - 准备安装介质
-   ArchISO 支持多种方式引导。用户可将其刻录至光盘中，写入 USB 闪存盘、移动硬盘，或载入内存中。请根据自身需求及实际情况进行选择，這裏我使用了poweriso，軟碟通和dd我這裏不能用
-- **启动至 ArchISO**
+* archlinux安裝
+** 注意事项
+  + 强烈建议新手移步 Arch Wiki > 新手指南
+  + 经验者请参阅 Arch Wiki > 安装指南
+  + 若在安装 / 使用过程中遇到问题，请查阅 Arch Wiki，咨询 Google、百度，或在官方论坛（英文）、本论坛发帖提问。
+  + 本指南介绍如何通过 ArchISO（Arch Linux 安装镜像，下同）以官方推荐的安装方式将 Arch Linux 安装到到一台普通 PC 上。
+  + 安装过程中请保持网络畅通
+** 简要介绍
+  + pacman 是 Arch Linux 的软件包管理器，下文中提及的软件均可通过其完成安装：pacman -S <软件包> ...
+  + 本文推荐使用 vi 编辑文件：vi <文件>
+** 安装准备
+  + 获取并校验 ArchISO
+      ArchISO 攘括了 32 位和 64位版本，同时支持 x86 和 x86_64，可从官方下载页面下载。
+      在该页面亦能找到 ArchISO 的 SHA1、MD5 值和 PGP 签名，用于进行校验。
+  + 准备安装介质
+    ArchISO 支持多种方式引导。用户可将其刻录至光盘中，写入 USB 闪存盘、移动硬盘，或载入内存中。请根据自身需求及实际情况进行选择，這裏我使用了poweriso，軟碟通和dd我這裏不能用
+** 启动至 ArchISO
     ArchISO 包含了完整的 Arch Linux 基础系统。但 ArchISO 无法保存用户所做的改动（关机即失），因此只适合用于系统安装与维护，请勿用于日常。接下来的安装操作都会在 ArchISO 进行。
     根据机器的不同，用户可能需要调整机器的引导顺序，或者调出机器的引导菜单。具体做法请查阅随机手册。
-    机
-
-器成功从准备好的安装介质中启动后，屏幕将呈现出一个菜单。用户可以根据需要使用 [↑]/[↓]（方向键）进行选择，[↩]
-
-（回车键）确认。市面上大部分 PC 机同时支持 UEFI 和 BIOS 接口。根据设置的不同，Arch Linux 可能在 UEFI
-
-环境下启动，或在环境 BIOS 下启动。根据启动环境的不同，用户可能看到不同菜单界面。
+    机器成功从准备好的安装介质中启动后，屏幕将呈现出一个菜单。用户可以根据需要使用 [↑]/[↓]（方向键）进行选择，[↩]（回车键）确认。市面上大部分 PC 机同时支持 UEFI 和 BIOS 接口。根据设置的不同，Arch Linux 可能在 UEFI环境下启动，或在环境 BIOS 下启动。根据启动环境的不同，用户可能看到不同菜单界面。
     需要指出的是，虽然32 位版的 Arch Linux 能够在 UEFI 环境下运行，但默认情况下无法通过 ArchISO 安装 32 位的 Arch Linux。若有这样的需求，请参考上文的注意事项。
     参考链接：
         - Arch Wiki > USB 闪存盘安装介质
-    - 检查环境
+    + 检查环境
         efivar -l
         若 efivar 正确地列出了 UEFI 变量，则本机为 UEFI 系统，否则为 BIOS。
-    - 配置 ArchISO
-        预设：
-            键盘布局：US （美式键盘）
-            locale：en_US.UTF-8（美式英语）
-            网络连接：dhcpcd（有线连接）
-         配置：
-键盘布局：localectl list-keymaps 查看可用键盘布局
-loadkeys <键盘布局>
-终端字体：ls /usr/share/kbd/consolefonts/ 查看可用终端字体
-setfornt <终端字体>
-显示语言（不建议中文用户修改）：nano /etc/locale.gen    # 反注释需要的 locale
+    + 配置 ArchISO
+      + 预设：
+        键盘布局：US （美式键盘）
+        locale：en_US.UTF-8（美式英语）
+        网络连接：dhcpcd（有线连接）
+      + 配置：
+      + 键盘布局：localectl list-keymaps 查看可用键盘布局 loadkeys <键盘布局>
+      + 终端字体：ls /usr/share/kbd/consolefonts/ 查看可用终端字体 setfornt <终端字体>
+      + 显示语言（不建议中文用户修改）：nano /etc/locale.gen    # 反注释需要的 locale
 locale-gen
 export LANG=<语言>
 网络连接：在设置网络之前，请先查明自己的网卡名称，网络设备名可以通过 ip link 或 iw dev(无线网络)查到设备名称。通常以 en (ethernet), wl (WLAN) 或 ww (WWAN)开头。
