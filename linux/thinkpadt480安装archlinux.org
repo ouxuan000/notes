@@ -1,0 +1,67 @@
+* 制作U盘启动盘
+  + 下载archlinux镜像
+  + 下载powerison
+  + 将镜像刻录到U盘中
+* 设置bios
+  + 如果已经安装了win8+系统, 开机重启然后按f1，进入设置界面，加载启动项中将usb放到最前
+  + 保存后，插入启动盘重启，按f12， 选择启动项，选择archlinux
+* 开始安装系统
+  + 连接wifi
+    + 首先查看网卡 ip link命令列出网卡id
+    + systemctl stop dhcpxxx.service 关闭现有网络
+    + wifi-menu -o wlp3s0,选择可连接网络连接
+  + 配置服务镜像
+    + 如果是在中国， 就把mirrorlist中的china相关镜像提前, 我这里只把163的镜像放最前面
+* 分区采用fdisk
+  + 重建分区表干掉所有分区 fdisk /dev/sda, g w
+  + 创建分区 efi / /home
+  + 格式化分区
+  + 分区挂载
+* 安装系统
+  + 安装基本包
+    打开mirrorlist文件，把中国的镜像服务器地址放到前面。编辑器可以选nano或是vi，按个人喜欢。
+    #vi /etc/pacman.d/mirrorlist
+    开始安装，只装base部分, 后续功能系统正常安装后自行安装
+    #pacstrap -i /mnt base
+  + pacman -sy 刷新系统更新文件
+  + 安装引导工具
+    + 这里有个大坑一定要填
+      #+BEGIN_EXAMPLE
+        GRUB启动, UEFI的系统，要装grub-efi-x86_64和efibootmgr
+        #pacman -S grub-efi-x86_64, efibootmgr
+        把GRUB装到EFI分区里，这样就多一条GRUB启动项了。
+        #grub-install --efi-directory=/boot/efi --bootloader-id=arch-grub --recheck
+      #+END_EXAMPLE
+    + 下面这个必须执行, 生成grub.cfg配置文件， 默认安装系统会自带一个
+      #+BEGIN_EXAMPLE
+        生成grub配置文件(否则启动一致会报grub的错误)
+        arch-chroot /mnt
+        pacman -S os-prober
+        #grub-install /dev/sda(根目录下, 如果出现grub缺少文件时候再执行)
+        grub-mkconfig -o /boot/grub/grub.cfg
+      #+END_EXAMPLE
+  + 为了下次可以连无线最好安装下 #pacman -S dialog
+  + exit， 取消必要的挂载后重启， 系统已经安装完成
+* 一些必要的优化及软件安装
+** 时区，编码
+  + 打开locale.gen文件，把en_US.UTF-8, zh_CN.UTF-8, zh_CN.GBK前面的#去掉。
+    #vi /etc/locale.gen
+  + 运行locale-gen命令，重建编码表。
+    #locale-gen
+  + 生成localtime的软链就算设置时区了。
+    #ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+  + 设置系统时间是当地时间，Linux默认是UTC时间，Windows默认是当地时间，改成一致。
+    #hwclock --localtime
+** hostname
+  设置电脑名，随你喜欢。
+  #echo ArchHost > /etc/hostname
+** 图形界面
+   + 安装yaourt
+      /etc/pacman.conf:
+
+      [archlinuxcn]
+      #The Chinese Arch Linux communities packages.
+      SigLevel = Optional TrustedOnly
+      Server   = http://repo.archlinuxcn.org/$arch
+   + 禁用nvida显卡
+
