@@ -14,16 +14,18 @@
     + 如果是在中国， 就把mirrorlist中的china相关镜像提前, 我这里只把163的镜像放最前面
 * 分区采用fdisk
   + 重建分区表干掉所有分区 fdisk /dev/sda, g w
-  + 创建分区 efi / /home
-  + 格式化分区
+  + 创建分区 n{ /dev/sda1(efi), /dev/sda2(/), /dev/nvmxxx(/home)}
+  + 格式化分区 
+    + mkfs.vfat -F32 /dev/sda1
+    + mkfs.ext4 /dev/sda2 ()
   + 分区挂载
 * 安装系统
   + 安装基本包
-    打开mirrorlist文件，把中国的镜像服务器地址放到前面。编辑器可以选nano或是vi，按个人喜欢。
-    #vi /etc/pacman.d/mirrorlist
-    开始安装，只装base部分, 后续功能系统正常安装后自行安装
-    #pacstrap -i /mnt base
-  + pacman -sy 刷新系统更新文件
+    + 打开mirrorlist文件，把中国的镜像服务器地址放到前面。编辑器可以选nano或是vi，按个人喜欢。
+      #vi /etc/pacman.d/mirrorlist
+    + pacman -sy 刷新系统更新文件
+    + 开始安装，只装base部分, 后续功能系统正常安装后自行安装
+      #pacstrap -i /mnt base
   + 安装引导工具
     + 这里有个大坑一定要填
       #+BEGIN_EXAMPLE
@@ -40,7 +42,7 @@
         #grub-install /dev/sda(根目录下, 如果出现grub缺少文件时候再执行)
         grub-mkconfig -o /boot/grub/grub.cfg
       #+END_EXAMPLE
-  + 为了下次可以连无线最好安装下 #pacman -S dialog
+  + 为了下次可以连无线最好安装下 #pacman -S dialog, xxxx
   + exit， 取消必要的挂载后重启， 系统已经安装完成
 * 一些必要的优化及软件安装
 ** 时区，编码
