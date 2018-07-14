@@ -45,6 +45,7 @@
   + 为了下次可以连无线最好安装下 #pacman -S dialog, xxxx
   + exit， 取消必要的挂载后重启， 系统已经安装完成
 * 一些必要的优化及软件安装
+** 重启后进入自己安装好的系统
 ** 时区，编码
   + 生成localtime的软链就算设置时区了。
     #ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
@@ -67,4 +68,10 @@
       SigLevel = Optional TrustedOnly
       Server   = http://repo.archlinuxcn.org/$arch
    + 禁用nvida显卡
+   + 安装xfce4
+   + 安装slim
+   + .xinintrc中配置 启动startxfce4
+   + 安装openbox(窗口管理器, 如果需要自定义界面)
+   + 安装openssh  sudo pacman -S openssh
+   + 安装chromium
 
