@@ -24,8 +24,8 @@
     + 打开mirrorlist文件，把中国的镜像服务器地址放到前面。编辑器可以选nano或是vi，按个人喜欢。
       #vi /etc/pacman.d/mirrorlist
     + pacman -sy 刷新系统更新文件
-    + 开始安装，只装base部分, 后续功能系统正常安装后自行安装
-      #pacstrap -i /mnt base
+    + 安装基础系统及后续工具, base-devel也可以装好系统后再安装
+      #pacstrap -i /mnt base base-devel
   + 安装引导工具
     + 这里有个大坑一定要填
       #+BEGIN_EXAMPLE
@@ -67,6 +67,7 @@
       #The Chinese Arch Linux communities packages.
       SigLevel = Optional TrustedOnly
       Server   = http://repo.archlinuxcn.org/$arch
+    + binutils, yaourt 需要进行二进制编译
    + 禁用nvida显卡
    + 安装xfce4
    + 安装slim
@@ -74,4 +75,5 @@
    + 安装openbox(窗口管理器, 如果需要自定义界面)
    + 安装openssh  sudo pacman -S openssh
    + 安装chromium
+   + reflector 镜像刷新工具
 
