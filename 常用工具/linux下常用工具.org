@@ -31,7 +31,9 @@
       #+BEGIN_EXAMPLE
       配置启动: nohup sudo create_ap wlp2s0 enp0s20u2u4 archer 1234567890 > /tmp/create_ap.log & tail -f /tmp/create_ap.log
       #+END_EXAMPLE
-  14.  数据传输工具， 类似飞球， yaourt -s iptux
+  14. 数据传输工具， 类似飞球， yaourt -s iptux
+  15. 使用zsh + oh my zsh
+  16. 开发工具使用idea, 我直接使用idea eap版本(免费的旗舰版)
 
 * 问题处理
   1. 网易云音乐白板 : rm `locate netease |grep cache` 删掉缓存即可

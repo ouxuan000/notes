@@ -12,13 +12,17 @@
     + wifi-menu -o wlp3s0,选择可连接网络连接
   + 配置服务镜像
     + 如果是在中国， 就把mirrorlist中的china相关镜像提前, 我这里只把163的镜像放最前面
-* 分区采用fdisk
+* 分区
+  + 工具:fdisk 
   + 重建分区表干掉所有分区 fdisk /dev/sda, g w
   + 创建分区 n{ /dev/sda1(efi), /dev/sda2(/), /dev/nvmxxx(/home)}
   + 格式化分区 
     + mkfs.vfat -F32 /dev/sda1
     + mkfs.ext4 /dev/sda2 ()
   + 分区挂载
+    + mount /dev/sda2 /mnt
+    + mount /dev/sda1 /mnt/boot/efi
+    + mount /dev/sda3 /mnt/home
 * 安装系统
   + 安装基本包
     + 打开mirrorlist文件，把中国的镜像服务器地址放到前面。编辑器可以选nano或是vi，按个人喜欢。
@@ -26,6 +30,8 @@
     + pacman -sy 刷新系统更新文件
     + 安装基础系统及后续工具, base-devel也可以装好系统后再安装
       #pacstrap -i /mnt base base-devel
+  + 配置fstab
+    + # genfstab -U /mnt >> /mnt/etc/fstab
   + 安装引导工具
     + 这里有个大坑一定要填
       #+BEGIN_EXAMPLE
@@ -39,7 +45,8 @@
         生成grub配置文件(否则启动一致会报grub的错误)
         arch-chroot /mnt
         pacman -S os-prober
-        #grub-install /dev/sda(根目录下, 如果出现grub缺少文件时候再执行)
+        #grub-install /dev/sda(根目    + binutils
+录下, 如果出现grub缺少文件时候再执行)
         grub-mkconfig -o /boot/grub/grub.cfg
       #+END_EXAMPLE
   + 为了下次可以连无线最好安装下 #pacman -S dialog, xxxx
