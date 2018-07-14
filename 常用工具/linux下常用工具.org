@@ -34,6 +34,10 @@
   14. 数据传输工具， 类似飞球， yaourt -s iptux
   15. 使用zsh + oh my zsh
   16. 开发工具使用idea, 我直接使用idea eap版本(免费的旗舰版)
+  17. sqldeveloper安装
+      + oracle 限制， 需要登录下载， 所以先到官网下载sqldeveloper18.nojar.zip
+      + pacman -S oracle-sqldeveloper
+      + 安装过程中将刚刚下载的zip包放到其他pass文件同级的目录, 继续即可
 
 * 问题处理
   1. 网易云音乐白板 : rm `locate netease |grep cache` 删掉缓存即可
