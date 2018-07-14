@@ -46,14 +46,15 @@
   + exit， 取消必要的挂载后重启， 系统已经安装完成
 * 一些必要的优化及软件安装
 ** 时区，编码
-  + 打开locale.gen文件，把en_US.UTF-8, zh_CN.UTF-8, zh_CN.GBK前面的#去掉。
-    #vi /etc/locale.gen
-  + 运行locale-gen命令，重建编码表。
-    #locale-gen
   + 生成localtime的软链就算设置时区了。
     #ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
   + 设置系统时间是当地时间，Linux默认是UTC时间，Windows默认是当地时间，改成一致。
     #hwclock --localtime
+** 编码
+  + 打开locale.gen文件，把en_US.UTF-8, zh_CN.UTF-8, zh_CN.GBK前面的#去掉。
+    #vi /etc/locale.gen
+  + 运行locale-gen命令，重建编码表。
+    #locale-gen
 ** hostname
   设置电脑名，随你喜欢。
   #echo ArchHost > /etc/hostname
