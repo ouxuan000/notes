@@ -192,3 +192,5 @@
   + Top #1智能补全：Ctrl+Shift+Space
   + Top #1自我修复：Alt+Enter
   + Top #1重构一切：Ctrl+Shift+Alt+T
+* 好东西了解下
+  + live templete: idea中可以自定义一些自动生成方式， 很强大, 类似sout生成
