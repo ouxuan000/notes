@@ -89,4 +89,11 @@ export XMODIFIERS="@im=fcitx"
 export GTK_IM_MODULE="fcitx"
 export QT_IM_MODULE="fcitx"
 #+BEGIN_EXAMPLE
+* 定时任务
+  + 安装cronie，这个时候会提醒与vixie-cron要卸载后者：以root身份运行pacman -S cronie
+  + 启用并打开cronie.service：以root身份运行systemctl enable cronie.service && systemctl start cronie.service
+  + 确保普通用户能使用cron，否则运行echo arche >> /etc/cron.allow 【arche是你的用户名】
+  + 编写~/MyCrontab任务计划，参考https://www.lulinux.com/archives/2252的“crontab写法举例”
+  + 载入MyCrontab计划到cronie服务模块中：crontab ~/MyCrontab
+  + 检查crontab计划是否就绪：crontab -l
 
