@@ -2,6 +2,16 @@
   1. 安装配置JAVA环境
   2. 下载安装maven (http://maven.apache.org/)，配置环境变量M2_HOME
   3. 生成项目骨架: mvn archetype:generate -DgroupId=com.lx.app -DartifactId=helloworld -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+     + 如果遇到,[INFO] Generating project in Batch mode
+       + 增加一个-X参数         
+        #+BEGIN_EXAMPLE
+          mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -X
+        #+END_EXAMPLE
+       + 停留在了 [DEBUG] Searching for remote catalog: http://repo1.maven.org/maven2/archetype-catalog.xml
+       + 下载缓存文件
+        1. 把上述地址复制到浏览器中，下载这个文件到本地。
+        2. 把文件archetype-catalog.xml复制到目录.m2\repository\org\apache\maven\archetype\archetype-catalog\2.2下面。
+        3. 在上述命令后增加参数-DarchetypeCatalog=local，变成读取本地文件即可。 
   4. 创建HelloWorld.java
     #+BEGIN_SRC java
     package com.lx.app;
@@ -104,9 +114,7 @@
     #+END_EXAMPLE
   11. maven中央仓库
     http://mvnrepository.com/
-
   12. mvn archetype:crawl 生成本地maven构建可选列表, 下次构建时候使用 mvn archetype:generate -DarchetypeCatalog=local ,构建会从本地选择构建项目类型
-
 * 问题解决
 1. 不能再maven项目下通过命令添加模块:  需要修改父级目录下的pom.xml里面package标签中war改成pom
 2. 打包以后发现包名与artifactid指定的不一致，与父目录指定了下面的配置有关系，覆盖或删掉
