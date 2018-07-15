@@ -10,3 +10,4 @@
     1. 打开org文件时候， 会报错 org-projectfilexx, 直接在 elph目录下找到这个org-projecxx目录， 进去后执行git-fetch，ok
     2. spacemacs 打开自动折行M-x spacemacs/toggle-visual-line-navigation-on
     3. m+q 折行快捷键， spac+t+L
+    4. emacs -nw 命令行启动
