@@ -39,6 +39,7 @@
   + *注意*: 与其他 mq 中间件不同的点，producer 发送消息到 broker
   的过程是 push，而 consumer 从 broker 消费消息的过程是 pull，主动去拉数
   据。而不是 broker 把数据主动发送给 consumer
+  *注*: broker就是一个或者多个kafka服务器的统称
 * kafka 的安装部署
   + 下载安装包
     https://www.apache.org/dyn/closer.cgi?path=/kafka/1.1.0/kafka_2.11-1.1.0.tgz
@@ -49,19 +50,20 @@
   + /libs 依赖库目录
   + /logs 日志数据目录
 * Kafka 的基本操作
+** 可以使用./xx命令 --help查看命令支持的参数
 ** 启动/停止 kafka
   + 需要先启动 zookeeper，如果没有搭建 zookeeper 环境，可以直接运行kafka 内嵌的 zookeeper
     启动命令： bin/zookeeper-server-start.sh config/zookeeper.properties &
   + 进入 kafka 目录，运行 bin/kafka-server-start.sh ｛-daemon 后台启动｝config/server.properties &
   + 进入 kafka 目录，运行 bin/kafka-server-stop.sh config/server.properties
 ** 创建 topic
-  ./kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
+  ./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
   + Replication-factor: 表示该 topic 需要在不同的 broker 中保存几份，这里设置成 1，表示在两个 broker 中保存两份
   + Partitions 分区数
 ** 查看 topic
-  ./kafka-topics.sh --list --zookeeper localhost:2181
+  ./bin/kafka-topics.sh --list --zookeeper localhost:2181
 ** 查看 topic 属性
-  ./kafka-topics.sh --describe --zookeeper localhost:2181 --topic test
+  ./bin/kafka-topics.sh --describe --zookeeper localhost:2181 --topic test
 ** 消费消息
   ./kafka-console-consumer.sh –bootstrap-server localhost:9092 --topic test --from-beginning
 ** 发送消息
