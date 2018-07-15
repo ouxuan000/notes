@@ -76,6 +76,7 @@
     当 Kafka broker 启动时，它会在 ZK 上注册自己的 IP 和端口号，客户端就通过
     这个 IP 和端口号来连接
 ** Kafka JAVA API 的使用
+  https://github.com/offline7LY/demo/tree/master/kafka
 * 配置信息分析
 ** 发送端的可选配置信息分析
 *** acks
