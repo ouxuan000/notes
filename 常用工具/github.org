@@ -13,7 +13,6 @@ git remote add origin git@github.com:offline7LY/ssm.git
 git push -u origin master
 #+END_EXAMPLE
 * 如何安装git
-
   + 下载安装桌面端git。
   linux: 各个发行版都有打包工具 (archlinux: pacman -S git) 
   Windows请至：http://code.google.com/p/msysgit/
@@ -107,27 +106,27 @@ git push -u origin master
 
 * 小技巧走一波
     + alias使用
-    #+BEGIN_EXAMPLE
-    git config --global alias.ac '!git add -A && git commit'
-    git ac -m "message"
-    #+END_EXAMPLE
-    + 坑爹的gwf, git设置代理访问
-    #+BEGIN_EXAMPLE
-    --利用了shawnsocks5做代理访问
-    #全局设置
-    git config --global http.proxy 'socks5://127.0.0.1:1080' 
-    git config --global https.proxy 'socks5://127.0.0.1:1080'
-    #如果不需要全局设置， 单独再git项目中使用不用--global
-    git config  http.proxy 'socks5://127.0.0.1:1080' 
-    git config  https.proxy 'socks5://127.0.0.1:1080'
-    #查看配置 
-    git config -l
-    #只对github.com
-    git config --global http.https://github.com.proxy socks5://127.0.0.1:1080
-    #取消代理
-    git config --global --unset http.https://github.com.proxy
-    #+END_EXAMPLE
-
+      #+BEGIN_EXAMPLE
+      git config --global alias.ac '!git add -A && git commit -m'
+      git ac "message"
+      #+END_EXAMPLE
+    + 坑爹的gwf, git设置代理访问(我这里貌似不管用, 直接在ssh中做了代理)
+      #+BEGIN_EXAMPLE
+      --利用了shawnsocks5做代理访问
+      #全局设置
+      git config --global http.proxy 'socks5://127.0.0.1:1080' 
+      git config --global https.proxy 'socks5://127.0.0.1:1080'
+      #如果不需要全局设置， 单独再git项目中使用不用--global
+      git config  http.proxy 'socks5://127.0.0.1:1080' 
+      git config  https.proxy 'socks5://127.0.0.1:1080'
+      #查看配置 
+      git config -l
+      #只对github.com
+      git config --global http.https://github.com.proxy socks5://127.0.0.1:1080
+      #取消代理
+      git config --global --unset http.https://github.com.proxy
+      #+END_EXAMPLE
+    + 在想找东西时候，记得搜 awesome xxx
 * github.io + hexo
   + 安装node.js  使用node -v 进行测试
   + 安装hexo: npm -install -g hexo-cli
