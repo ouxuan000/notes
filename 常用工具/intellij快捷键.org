@@ -194,4 +194,4 @@
   + Top #1重构一切：Ctrl+Shift+Alt+T
 * 一些实用的设置
   + live templete: idea中可以自定义一些自动生成方式， 很强大, 类似sout生成
-  + 隐藏页签
+  + 隐藏页签 setting-->editor-->general-->placement/none
