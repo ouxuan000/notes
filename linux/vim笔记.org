@@ -16,3 +16,10 @@
 ### 统计字符数
 + 选中字符 
 +  g <ctrl-g> 会展示当前文件字符信息
+  
+* vbundle
++ $ git clone https://github.com/VundleVim/Vundle.vim.git
++ vimrc.bundle set rtp+=~/.vim/bundle/Vundle.vim
++ :PluginInstall   BundleUpdate
++ cd ~/.vim & cp -r bundle/molokai/colors .
+
