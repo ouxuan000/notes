@@ -195,3 +195,4 @@
 * 一些实用的设置
   + live templete: idea中可以自定义一些自动生成方式， 很强大, 类似sout生成
   + 隐藏页签 setting-->editor-->general-->placement/none
+  + fcitx, 修改idea安装目录下的执行命令idea.sh, 加入与.xinitc一样的一些fcitx的环境变量
