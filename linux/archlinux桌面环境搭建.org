@@ -96,4 +96,9 @@ export QT_IM_MODULE="fcitx"
   + 编写~/MyCrontab任务计划，参考https://www.lulinux.com/archives/2252的“crontab写法举例”
   + 载入MyCrontab计划到cronie服务模块中：crontab ~/MyCrontab
   + 检查crontab计划是否就绪：crontab -l
+* 网络共享
+  + 安装:
+    pacman -S create_ap
+  + create_ap
+    sudo create_ap wlp3s0 enp0s31f6 arch-zhao 1234567890
 
