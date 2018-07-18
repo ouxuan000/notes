@@ -13,5 +13,9 @@
   + 参考地址: https://scarletsky.github.io/2016/01/22/spacemacs-usage/
   + 打开spacemacs自动折行功能 M-x spacemacs/toggle-visual-line-navigation-on
   + emacs导出文件 C-c C-e h
+  + spc-spc : 跳出命令列表，可运行命令，也可以查找快捷键
+  + spc-h-spc : 查找包的用途与定义
+  + spc-tab 切换到上一个 buffer
+  + spc f f 打开文件  spc p f 打开项目
 * 填坑
   + Specs Emacs org mode不能用，报错 orgproject  cd. .emacs.d el org project file.  Gitfetch 
