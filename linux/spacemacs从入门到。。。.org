@@ -19,8 +19,8 @@
   + spc f f 打开文件  spc p f 打开项目
 * 填坑
   + Specs Emacs org mode不能用，报错 orgproject  cd. .emacs.d el org project file.  Gitfetch 
-* java list sout 2 json
-  + format to json
-  + %s/\s //g
-  + %s/[^=,{},]*/"&/g
-  + %s/\n//g
+* java list输出转标准json
+  + 在线json格式化 format to json
+  + 去掉空格 %s/\s //g
+  + 在jsonkey value俩边加引号 %s/[^=,{},]*/"&/g
+  + 去掉换行 %s/\n//g
