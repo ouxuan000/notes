@@ -345,3 +345,111 @@ BEGIN
     dbms_output.put_line(v_sql);
 END;
 #+END_EXAMPLE
+* Oracle 行转列(pivot、wm_concat、decode)使用总结
+  1. 创建测试数据
+    #+BEGIN_EXAMPLE
+    CREATE TABLE CC
+      (Student NVARCHAR2(2),Course NVARCHAR2(2),Score INT
+      );
+
+    INSERT into CC 
+    select N'张三',N'语文',78 from dual union all
+    select N'张三',N'数学',87 from dual union all
+    select N'张三',N'英语',82 from dual union all
+    select N'张三',N'物理',90 from dual union all
+    select N'李四',N'语文',65 from dual union all
+    select N'李四',N'数学',77 from dual union all
+    select N'李四',N'英语',65 from dual union all
+    select N'李四',N'物理',85 from dual ;
+    commit;
+
+    希望看到查询結果: 
+    李四 77 85 65 65 292
+    张三 87 90 82 78 337
+    #+END_EXAMPLE
+  2.使用wm_concat方法
+    #+BEGIN_EXAMPLE
+      SELECT STUDENT,WM_CONCAT(SCORE),SUM(SCORE) FROM CC GROUP BY STUDENT;
+    #+END_EXAMPLE
+  3.使用Oracle 11g pivot方法
+    #+BEGIN_EXAMPLE
+      SELECT KIN.*,
+        KIN.a+KIN.b+KIN.c+KIN.d AS TOTAL
+      FROM
+        (SELECT                               *
+        FROM CC PIVOT ( MAX(SCORE) FOR COURSE IN ('语文' AS A , '数学' AS B, '英语' AS C,'物理' AS D) )
+        ) KIN;
+    #+END_EXAMPLE
+  4.使用DECODE方法
+  #+BEGIN_EXAMPLE
+    SELECT
+    student,
+    MAX(decode(COURSE, '语文', SCORE)) A,
+    MAX(DECODE(COURSE, '数学', SCORE)) B,
+    MAX(DECODE(COURSE, '英语', SCORE)) C,
+    MAX(DECODE(COURSE, '物理', SCORE)) D,
+    SUM(SCORE) TOTAL
+    FROM
+    CC
+    GROUP BY
+    student;
+  #+END_EXAMPLE
+
+* oracle中lpad函数
+  lpad函数，在字符串的左侧添加指定字符串，用法： 
+  select lpad('test',10) from dual; 
+  将返回“ test” 
+  select lpad('test',10,'ee') from dual; 
+  结果将返回eeeeeetest。
+* Oracle存储过程的异常处理
+  1. 为了提高存储过程的健壮性，避免运行错误，当建立存储过程时应包含异常处理部分。
+  2. 异常(EXCEPTION)是一种PL/SQL标识符，包括预定义异常、非预定义异常和自定义异常；
+  3. RAISE_APPLICATION_ERROR用于自定义错误消息，并且消息号必须在－20000～－20999之间
+
+    命名的系统异常     产生原因 
+    access_into_null    未定义对象 
+    case_not_found     case中若未包含相应的when，并且没有设置 
+    collection_is_null    集合元素未初始化 
+    curser_already_open    游标已经打开 
+    dup_val_on_index    唯一索引对应的列上有重复的值 
+    invalid_cursor     在不合法的游标上进行操作 
+    invalid_number    内嵌的 sql 语句不能将字符转换为数字  
+    no_data_found     使用 select into 未返回行，或应用索引表未初始化的  
+    too_many_rows     执行 select into 时，结果集超过一行 
+    zero_divide     除数为 0 
+    subscript_beyond_count    元素下标超过嵌套表或varray的最大值 
+    subscript_outside_limit   使用嵌套表或 varray 时，将下标指定为负数 
+    value_error     赋值时，变量长度不足以容纳实际数据 
+    login_denied     pl/sql 应用程序连接到 oracle 数据库时，提供了不正确的用户名或密码      确的用户名或密码 
+    not_logged_on     pl/sql 应用程序在没有连接 oralce 数据库的情况下访问数据      问数据 
+    program_error     pl/sql 内部问题，可能需要重装数据字典＆ pl./sql系统包     统包 
+    rowtype_mismatch          主游标变量与 pl/sql 游标变量的返回类型不兼容 
+    self_is_null     使用对象类型时，在 null 对象上调用对象方法 
+    storage_error     运行 pl/sql 时，超出内存空间 
+    sys_invalid_id     无效的 rowid 字符串 
+    timeout_on_resource    oracle 在等待资源时超时
+  4. 自定义异常处理
+     #+BEGIN_EXAMPLE
+      CREATE OR REPLACE PROCEDURE stu_proc
+      (
+        --多个用逗号隔开
+        v_id IN NUMBER
+      ) IS
+        --多个用分号隔开
+        v_max_id NUMBER;
+        v_name VARCHAR2(20);
+        v_raise EXCEPTION; 
+      BEGIN
+        SELECT MAX(a.id) INTO v_max_id FROM student a;
+        IF v_id>v_max_id THEN
+          RAISE v_raise;
+        END IF;
+        SELECT o.sname INTO v_name FROM student o WHERE o.id=v_id;
+        dbms_output.put_line('学生名称为：'||v_name);
+      EXCEPTION
+        WHEN v_raise THEN 
+          RAISE_APPLICATION_ERROR(-20010, 'v_id not exists!');
+        WHEN NO_DATA_FOUND THEN 
+          RAISE_APPLICATION_ERROR(-20011, 'ERROR：不存在！');
+      END stu_proc;
+     #+END_EXAMPLE
