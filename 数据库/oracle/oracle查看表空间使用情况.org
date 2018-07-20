@@ -110,12 +110,6 @@ startup;
 * 修改表空间存储路径
 ** 查看数据文件的存储路径：
   SQL> select name from v$datafile;
-  NAME
-  --------------------------------------------------------------------------------
-  /u01/oracle/oradata/yoon/system01.dbf
-  /u01/oracle/oradata/yoon/sysaux01.dbf
-  /u01/oracle/oradata/yoon/undotbs01.dbf
-  /u01/oracle/oradata/yoon/users01.dbf
 ** 修改表空间为offline：
   SQL> alter tablespace users offline;
 ** 拷贝数据文件
@@ -123,18 +117,17 @@ startup;
 ** 修改表空间存储路径
   SQL> alter tablespace users rename datafile '/u01/oracle/oradata/yoon/users01.dbf' to '/u01/oracle/oradata/yoondata/users01.dbf';
 ** 修改表空间为online
-
-SQL> alter tablespace users online;
-
-Tablespace altered.
-
-6.重新查看数据文件路径
-
-SQL> select name from v$datafile;
-
-NAME
---------------------------------------------------------------------------------
-/u01/oracle/oradata/yoon/system01.dbf
-/u01/oracle/oradata/yoon/sysaux01.dbf
-/u01/oracle/oradata/yoon/undotbs01.dbf
-/u01/oracle/oradata/yoondata/users01.dbf
+  SQL> alter tablespace users online;
+** 重新查看数据文件路径
+  SQL> select name from v$datafile;
+* 删除表空间
+  + 删除空的表空间，但是不包含物理文件
+    drop tablespace tablespace_name;
+  + 删除非空表空间，但是不包含物理文件
+    drop tablespace tablespace_name including contents;
+  + 删除空表空间，包含物理文件
+    drop tablespace tablespace_name including datafiles;
+  + 删除非空表空间，包含物理文件
+    drop tablespace tablespace_name including contents and datafiles;
+  + 如果其他表空间中的表有外键等约束关联到了本表空间中的表的字段，就要加上CASCADE CONSTRAINTS
+    drop tablespace tablespace_name including contents and datafiles CASCADE CONSTRAINTS;

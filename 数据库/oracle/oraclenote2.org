@@ -79,6 +79,13 @@
   +select root_id,id,name,level from t2 where level=1 
   +start with root_id = 0 
   +connect by prior id = root_id;
+** where条件作用域，先start with再过滤，所以
+   #+BEGIN_EXAMPLE
+    select area_code
+    from (select * from tableA where isvalid=1)
+    start with area_code = 5002002753
+    connect by  prior parent_area_code = area_code 
+   #+END_EXAMPLE
 * 索引创建
   1.  明确地创建索引
       #+BEGIN_EXAMPLE	
@@ -202,7 +209,7 @@
 很明显，索引虽然可以提高查询速度。但是，也会对一些表的更新操作产生不良的影响。当在表中建立的索引越多，这个不利影响也会越大。故数据库管理员在设置索引的时候，还需要注意，在这两个之间需要一个均衡点。
 
 按照一般的理论来说，当某个表多数用来查询、更新相对来说比较上的话，则要多多采用索引。相反，当某个表记录更新居主导，查询相对来说比较少的话，则不要建立太多的索引，避免对更新的速度差生不利影响。
-* minus使用
+* minus使用, 判断俩个结果集是否完全相等
 ** 建立测试数据及表
   #+BEGIN_EXAMPLE
   CREATE TABLE test1 (str VARCHAR2(15));
@@ -240,6 +247,16 @@
       FROM TEST2)
     UNION ALL (SELECT * FROM TEST2 MINUS SELECT * FROM TEST1)
   #+END_EXAMPLE
+** count groupby 解决方案
+   #+BEGIN_EXAMPLE
+   select Cause, Rate  
+    from (  
+    select Cause, Rate from A1  
+    union all  
+    select Cause, Rate from A2)  
+    group by Cause, Rate   
+    having count(*) < 2  
+   #+END_EXAMPLE
 * oracle数据查询结果转json
 #+BEGIN_EXAMPLE
 执行这个过程， 得到sql语句, 执行sql获取的数据就是json格式

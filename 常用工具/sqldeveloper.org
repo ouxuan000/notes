@@ -10,3 +10,13 @@
  修改调用sql模板的快捷键，输入id 例如 ssf ctrl+M 会提示
 * 代码提示
  工具--》 首选项 --》 代码编辑器 --》 完成设置  增大弹出速度 以及 
+* plsql输出结果
+  在 sql worksheet 中，执行一个 block 之前，执行 set serveroutput on;
+  #+BEGIN_EXAMPLE
+    set serveroutput on;
+    declare g_salary number:=100;
+    begin
+      select salary into g_salary from employees where employee_id=178;
+      dbms_output.put_line('the salary is:'|| g_salary);
+    end;
+  #+END_EXAMPLE

@@ -93,7 +93,6 @@ analyze table ysgl_compile_reqsub
 compute statistics for all indexes;
 也要看情况，不是什么情况都可以优化，等下次有机会再测试一下。
 
-
 * 三、删除用户时提示:无法删除当前已连接的用户,则表明当前用户在数据库session中有连接，可以查询出来并kill掉这些连接
   select username, sid, serial# from v$session where username="用户名";
   结果：
@@ -246,3 +245,42 @@ Configuration Assistant, 配置实例额ip地址为实际的ip地址
   sqldeveloper上， 可以工具-->监视会话， 然后让它一直自动刷新， 这样就不会被断开了
 * oracle设置触发器以后, ora04019
   检查下是否再逻辑中对触发的表做了查询操作, 比如create trigger on test, 那么处理逻辑中不能出现select* from test
+* 分段显示不连续序列
+  + 题目
+    有一个序列生成的列，但不是完全连续的， 如：
+    SQL> select c1 from t1;
+
+    C1
+    ------
+    1
+    2
+    3
+    5
+    8
+    9
+    10
+    15
+    16
+    17
+    20
+
+    可以看出中间有断裂的区间，现在的目的是把这些断裂的区间显示出来， 如：
+    4  4        #这个断层区间只有一个值4，所以起点是4，终点也是4。
+    6  7        #这个断层区间起点是6，终点是7。
+    11  14    #这个断层区间起点是11，终点是14。
+    18  19    #这个断层区间起点是18，终点是19。
+  + 查询sql
+    #+BEGIN_EXAMPLE
+      SELECT lag_id+1 gap_start,ID-1 gap_end
+      FROM (
+      SELECT ID,lag(ID) over(ORDER BY ID) lag_id
+      FROM t
+      ) WHERE ID-lag_id<>1;
+      
+      SELECT * FROM (
+      SELECT LAG(MAX(C1)+1) OVER(ORDER BY MIN(C1)) GAP_START,MIN(C1)-1 GAP_END 
+        FROM (SELECT C1,ROW_NUMBER() OVER(ORDER BY C1) RN FROM T1) 
+      GROUP BY C1-RN
+      )
+      WHERE GAP_START IS NOT NULL;
+    #+END_EXAMPLE
