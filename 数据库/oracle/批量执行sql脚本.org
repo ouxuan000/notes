@@ -14,3 +14,21 @@
 >% 代表针对被编辑文件的每一行进行后续操作
 >$ 代表一行的结尾处
 >^ 代表一行的开头处
+
+```
+@echo off
+rem 建立all.sql清除里面数据
+echo. > all.sql
+echo. spool all.log >> all.sql
+setlocal enabledelayedexpansion
+rem 生成all.sql
+for /f "delims=" %%i in ('dir /s /b *.sql') do (
+					set str=%%i
+					set var=!str:~-7!
+					if not "!var!"=="all.sql" (echo set echo on >> all.sql && echo. -- %%i >> all.sql && echo set echo off >> all.sql && echo. @"%%i" >> all.sql)
+	)
+echo spool off >> all.sql
+rem 执行all.sql
+rem sqlplus %1/%2 @all.sql
+pause
+```
