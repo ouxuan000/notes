@@ -127,6 +127,10 @@ git push -u origin master
       git config --global --unset http.https://github.com.proxy
       #+END_EXAMPLE
     + 在想找东西时候，记得搜 awesome xxx
+    + git下载 https://chromium.googlesource.com/chromium/src/tools/clang/
+      + 调整 shadowsocket的本地代理方式为http
+      + git  -c http.proxy=127.0.0.1:1080 -c http.sslVerify=false clone --depth 1 https://chromium.googlesource.com/chromium/src/tools/clang/
+      + -c 是为了后面设置变量键值， 临时生效不污染git --global
 * github.io + hexo
   + 安装node.js  使用node -v 进行测试
   + 安装hexo: npm -install -g hexo-cli
