@@ -31,7 +31,7 @@
       #+BEGIN_EXAMPLE
       配置启动: nohup sudo create_ap wlp2s0 enp0s20u2u4 archer 1234567890 > /tmp/create_ap.log & tail -f /tmp/create_ap.log
       #+END_EXAMPLE
-  14. 数据传输工具， 类似飞球， yaourt -s iptux
+  14. 数据传输工具， 类似飞球， yaourt -s iptux, 但是最新的0.75版本有问题， 不能扫描局域网用户, 目前使用0.6.4版本进行源码编译安装
   15. 使用zsh + oh my zsh
   16. 开发工具使用idea, 我直接使用idea eap版本(免费的旗舰版)
   17. sqldeveloper安装
