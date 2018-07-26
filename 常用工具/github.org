@@ -133,7 +133,7 @@ git push -u origin master
       + -c 是为了后面设置变量键值， 临时生效不污染git --global
 * github.io + hexo
   + 安装node.js  使用node -v 进行测试
-  + 安装hexo: npm -install -g hexo-cli
+  + 安装hexo: sudo npm install -g hexo-cli
   + 初始化博客目录 hexo init blog(以后的博客都在这个目录里面搞)
   + 后续操作都在blog目录下执行
   + hexo n(new) my_site_demo(创建一个新的生成样板)
