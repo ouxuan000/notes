@@ -49,7 +49,13 @@
     #+END_SRC
   + 数据补充
     #+BEGIN_EXAMPLE
-    
+    update bdg_t_bdgsub t set t.expfuncguidl = (select t3.guid from fasp_t_pubexpfunc t3 where t3.code = (select substr(t2.code, 0, 3) from fasp_t_pubexpfunc t2 where t.expfuncguid = t2.guid)) ;
+    update bdg_t_bdgsub t set t.expfuncguidk = (select t3.guid from fasp_t_pubexpfunc t3 where t3.code = (select substr(t2.code, 0, 5) from fasp_t_pubexpfunc t2 where t.expfuncguid = t2.guid)) ;
+    update bdg_t_bdgsub t set t.expfuncguidx = t.expfuncguid;  
     #+END_EXAMPLE
 * 部门信息
   + 一级单位(ROOTAGENCY)
+  + 数据补充
+    #+BEGIN_EXAMPLE
+      update bdg_t_bdgsub t set t.rootagency = (select t3.guid from FASP_V_AGE_LEVEL1PROVINCE t3 where t3.code = (select substr(t2.code, 0, 3) from FASP_V_AGE_LEVEL1PROVINCE t2 where t.agencyguid = t2.guid)) ;
+    #+END_EXAMPLE

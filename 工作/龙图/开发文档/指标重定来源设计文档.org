@@ -14,6 +14,7 @@
     + adjustGlCtrlelement 调账接口需要根据业务循环调用， 所以需要保证原数据中vchtypeid当作核算要素， 用来区分业务, 明细账数据缺少vchtypeid需要补齐后进行操作, 调用接口后， 原额度应该还回并且占用新额度
     + updateGlCtrlElement
     + directAuditGLRecords 更新明细账要素， 总帐先删后插， 调用后修改的核算要素与业务应该一致
+  7. 总账匹配出的业务数据需要过滤掉余额小于当前选中明细金额的数据
 * 测试校验
 #+BEGIN_SRC sql
 SELECT GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_SETPARM('','1500','2017','') FROM DUAL;
