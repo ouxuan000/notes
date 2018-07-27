@@ -1,0 +1,55 @@
+* 类款项信息
+  + 类(EXPFUNDGUIDL): 功能科目一级
+  + 款(EXPFUNDGUIDK)：功能科目二级
+  + 项(EXPFUNDGUIDX): 功能科目三级
+  + 该信息主要作为报表统计及执行情况表页面展示汇总
+  + 代码实现
+    #+BEGIN_SRC java
+        /**
+     * 更新功能分类科目类款项信息
+     * xxL(类) xxk(款) xxX(项)
+     * @param createSubList
+     */
+    private void refreshExpFunc(List<IVoucherDTO> createSubList) throws AppException {
+        long l = System.currentTimeMillis();
+        //获取指定字段的csid
+        String csid = getCsidByColumncode("EXPFUNCGUID");
+
+        IDataSetService dataSetService = (IDataSetService) ServiceFactory.getBean("bus.dic.datasetmanagerange.service");
+        //获取要素的拆分级次
+        DataSetDTO dataSetDTO = dataSetService.getDataSetByGuid(csid);
+        String codemode = dataSetDTO.getCodemode();
+        String[] cms = codemode.split("-");
+
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        //获取类款项的code截取位置
+        int codeleg = 0;
+        for (int i = 0; i < cms.length; i++) {
+            codeleg += Integer.parseInt(cms[i]);
+            map.put("codeleg_"+i, codeleg);
+        }
+
+        //获取该要素完整结果集
+        List<DicRangeDTO> ranges = dataSetService.getRangesByElementcode(dataSetDTO.getElementcode());
+        logger.debug("获取功能科目要素值集耗时: " + (System.currentTimeMillis() - l));
+
+        for (IVoucherDTO iVoucherDTO : createSubList) {
+            Set set = iVoucherDTO.keySet();
+            if(set.contains("expfuncguid")){
+                //获取要素编码
+                String expfuncguid = String.valueOf(iVoucherDTO.get("expfuncguid"));
+                //类款项赋值
+                iVoucherDTO.put("expfuncguidl", getLKXGuid(ranges, map.get("codeleg_0"), expfuncguid));
+                iVoucherDTO.put("expfuncguidk", getLKXGuid(ranges, map.get("codeleg_1"), expfuncguid));
+                iVoucherDTO.put("expfuncguidx", getLKXGuid(ranges, map.get("codeleg_2"), expfuncguid));
+            }
+        }
+        logger.debug("获取类款项信息耗时: " + (System.currentTimeMillis() - l));
+    }
+    #+END_SRC
+  + 数据补充
+    #+BEGIN_EXAMPLE
+    
+    #+END_EXAMPLE
+* 部门信息
+  + 一级单位(ROOTAGENCY)
