@@ -58,8 +58,7 @@ Server端承诺会维护client端状态数据，这个状态仅仅维持一小�
     tar -zxvf zookeeper-3.4.10.tar.gz
     + cd 到 ZK_HOME/conf  , copy一份zoo.cfg
     cp  zoo_sample.cfg  zoo.cfg
-    + sh zkServer.sh
-    {start|start-foreground|stop|restart|status|upgrade|print-cmd}
+    + sh zkServer.sh {start|start-foreground|stop|restart|status|upgrade|print-cmd}
     + sh zkCli.sh -server  ip:port
 ** 集群环境(多ip)
     zookeeper集群, 包含三种角色: leader / follower /observer
