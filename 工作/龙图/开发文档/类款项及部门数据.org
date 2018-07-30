@@ -1,7 +1,7 @@
 * 类款项信息
-  + 类(EXPFUNDGUIDL): 功能科目一级
-  + 款(EXPFUNDGUIDK)：功能科目二级
-  + 项(EXPFUNDGUIDX): 功能科目三级
+  + 类(EXPFUNCGUIDL: 功能科目一级
+  + 款(EXPFUNCGUIDK)：功能科目二级
+  + 项(EXPFUNCGUIDX): 功能科目三级
   + 该信息主要作为报表统计及执行情况表页面展示汇总
   + 代码实现
     #+BEGIN_SRC java

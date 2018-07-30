@@ -1,0 +1,30 @@
+* 模块化前时代
+** Ant 时代
+** Maven 时代
+** OSGI 时代
+
+* 定义模块
+** 模块声明
+   #+BEGIN_SRC java
+    module com.gupao {}
+   #+END_SRC
+** 依赖
+  requires
+** 导出
+  exports
+** 模块结构
+** 模块描述文件
+  module-info.class
+** Java 平台模块
+* 使用模块
+模块路径
+模块解析
+模块可读性
+模块访问性
+隐性可读性
+* 工具整合
+** maven工具
+** idea工具
+* 兼容性
+非命名模块
+自动模块
