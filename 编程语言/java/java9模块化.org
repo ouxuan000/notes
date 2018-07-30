@@ -1,30 +1,43 @@
-* 模块化前时代
-** Ant 时代
-** Maven 时代
-** OSGI 时代
+* 模块化
+** 模块化前时代
+*** Ant 时代
+*** Maven 时代
+*** OSGI 时代
 
-* 定义模块
-** 模块声明
-   #+BEGIN_SRC java
-    module com.gupao {}
-   #+END_SRC
-** 依赖
-  requires
-** 导出
-  exports
-** 模块结构
-** 模块描述文件
-  module-info.class
-** Java 平台模块
-* 使用模块
-模块路径
-模块解析
-模块可读性
-模块访问性
-隐性可读性
-* 工具整合
-** maven工具
-** idea工具
-* 兼容性
-非命名模块
-自动模块
+** 定义模块
+*** 模块声明
+    #+BEGIN_SRC java
+     module com.gupao {}
+    #+END_SRC
+*** 依赖
+   requires
+*** 导出
+   exports
+*** 模块结构
+*** 模块描述文件
+   module-info.class
+*** Java 平台模块
+** 使用模块
+ 模块路径
+ 模块解析
+ 模块可读性
+ 模块访问性
+ 隐性可读性
+** 工具整合
+*** maven工具
+*** idea工具
+** 兼容性
+ 非命名模块
+ 自动模块
+* java9核心
+** 往期公开课 
+  《Spring Annotation 驱动编程》
+  《 Java 9 异步并发编程》
+  《 Java 8 异步并发编程》
+  《异步事件 Web 驱动编程》
+  《深入浅出 Spring Boot 管控》
+  《深入浅出 Spring Boot 日志》
+  《微服务实践之路（二） 》
+  《微服务实践之路》
+** Java 9 新特性简介
+** Java 9 核心库
