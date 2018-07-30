@@ -40,4 +40,21 @@
   《微服务实践之路（二） 》
   《微服务实践之路》
 ** Java 9 新特性简介
+*** 重要新特性
+    模块化
+    核心库
+    安全
+    部署
+    JVM
+    调优
+*** 详情
+	http://docs.oracle.com/javase/9/whatsnew/toc.htm
 ** Java 9 核心库
+  集合工厂方法（Factory Method of Collections）
+  进程（Process）
+  堆栈 API（Stack-Walking API）
+  变量处理（Variable Handles）
+  统一日志 API（Platform Logging API）
+  自旋等待提示（Spin-Wait Hints）
+  压缩字符串（Compact String）
+  GitHub 资源：https://github.com/mercyblitz
