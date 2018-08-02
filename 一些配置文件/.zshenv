@@ -20,13 +20,13 @@ export PATH=${JAVA_HOME}/bin:$PATH
 #export ORACLE_UNQNAME=orcl
 #
 #环境变量
-export PATH=$ORACLE_HOME/bin:$PATH
-export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+#export PATH=$ORACLE_HOME/bin:$PATH
+export LD_LIBRARY_PATH=/home/lx7ly/applications/instantclient_12_2
 export EDITOR=vim
 export VISUAL=vim
 
 #maven
-export M2_HOME=/home/lx7ly/application/apache-maven-3.3.9
+export M2_HOME=/opt/maven
 #export MAVEN_OPTS=-Xms128m -Xmx512m
 export PATH=$PATH:${M2_HOME}/bin/;
 
@@ -39,4 +39,4 @@ export PATH=$PATH:${M2_HOME}/bin/;
 #export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$MAGICK_HOME/lib
 
 #sqldeveloper
-export PATH=/home/lx7ly/application/sqldeveloper:$PATH
+#export PATH=/home/lx7ly/application/sqldeveloper:$PATH
