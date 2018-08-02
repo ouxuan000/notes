@@ -21,7 +21,7 @@ export PATH=${JAVA_HOME}/bin:$PATH
 #
 #环境变量
 #export PATH=$ORACLE_HOME/bin:$PATH
-export LD_LIBRARY_PATH=/home/lx7ly/applications/instantclient_12_2
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/lx7ly/applications/instantclient_12_2
 export EDITOR=vim
 export VISUAL=vim
 
