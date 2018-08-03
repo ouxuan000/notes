@@ -4,7 +4,7 @@
 export EDITOR=vim
 
 #java环境变量
-export JAVA_HOME=/home/lx7ly/application/jdk
+export JAVA_HOME=/home/lx7ly/applications/jdk
 export JRE_HOME=${JAVA_HOME}/jre    
 export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib    
 export PATH=${JAVA_HOME}/bin:$PATH 
