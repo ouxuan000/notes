@@ -196,7 +196,20 @@
 * 一些实用的设置
   + live templete: idea中可以自定义一些自动生成方式， 很强大, 类似sout生成, 目前将用户配置user.xml备份上传
   + 隐藏页签 setting-->editor-->general-->placement/none
-  + 无法输入中文, fcitx, 修改idea安装目录下的执行命令idea.sh, 加入与.xinitc一样的一些fcitx的环境变量
+  + 无法输入中文, fcitx, 修改idea安装目录下的执行命令idea.sh, 在最前面加入与.xinitc一样的一些fcitx的环境变量
+    + vim /usr/bin/idea.sh
+    + 开头加入
+      #+BEGIN_SRC
+        #!/bin/sh
+        export XMODIFIERS="@im=fcitx"
+        export GTK_IM_MODULE="fcitx"
+        export QT_IM_MODULE="fcitx"
+        if [ -z "$IDEA_JDK" ] ; then
+                IDEA_JDK="/usr/lib/jvm/java-8-openjdk"
+        fi
+        exec env IDEA_JDK=$IDEA_JDK /usr/share/intellijidea-ce/bin/idea.sh $@
+      #+END_SRC
+    + 使用的jdk版本可以加入环境变量 export IDEA_JDK="$JAVA_HOME"
   + idea重新安装后无法import project, 改用社区版本+ remote断点的方式
     + 首先在weblogic域中打开debugflag(默认端口8453)(setdomainenv), 或者将内容复制到startweblogic.sh启动参数中
     + 启动weblogic服务后，idea中新建remote, 修改访问的地址以及端口即可, 注意，一定要指定module
