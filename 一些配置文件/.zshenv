@@ -40,3 +40,5 @@ export PATH=$PATH:${M2_HOME}/bin/;
 
 #sqldeveloper
 #export PATH=/home/lx7ly/application/sqldeveloper:$PATH
+
+#export IDEA_JDK="$JAVA_HOME"
