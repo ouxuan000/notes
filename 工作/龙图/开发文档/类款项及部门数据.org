@@ -59,3 +59,25 @@
     #+BEGIN_EXAMPLE
       update bdg_t_bdgsub t set t.rootagency = (select t3.guid from FASP_V_AGE_LEVEL1PROVINCE t3 where t3.code = (select substr(t2.code, 0, 3) from FASP_V_AGE_LEVEL1PROVINCE t2 where t.agencyguid = t2.guid)) ;
     #+END_EXAMPLE
+  + 数据校验
+    #+BEGIN_SRC sql
+      SELECT
+          t.amt,
+          t.mainguid,
+          t.timestamps,
+          t.expfuncguid,
+          t.expfuncguidl,
+          t.expfuncguidk,
+          t.expfuncguidx,
+          t.rootagency,
+          t2.code AS rootagencycode,
+          t.agencyguid,
+          t2.code AS agencyguidcode
+      FROM
+          bdg_t_bdgsub t,
+          fasp_v_age_level1province t2
+      WHERE
+          t.rootagency = t2.guid (+)
+      ORDER BY
+          t.timestamps DESC;
+    #+END_SRC
