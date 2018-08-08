@@ -15,6 +15,8 @@
     + updateGlCtrlElement
     + directAuditGLRecords 更新明细账要素， 总帐先删后插， 调用后修改的核算要素与业务应该一致
   7. 总账匹配出的业务数据需要过滤掉余额小于当前选中明细金额的数据
+  8. 3.0版本支持冲定来源取消终审，及调剂重定来源
+     + 调剂重定来源需要将负数的数据根据原始数据， 更新与重定后要素一致
 * 测试校验
 #+BEGIN_SRC sql
 SELECT GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_SETPARM('','1500','2017','') FROM DUAL;

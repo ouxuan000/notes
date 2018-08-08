@@ -11,3 +11,4 @@
     2. spacemacs 打开自动折行M-x spacemacs/toggle-visual-line-navigation-on
     3. m+q 折行快捷键， spac+t+L
     4. emacs -nw 命令行启动
+    5. 导出其他格式 c-c c-e o
