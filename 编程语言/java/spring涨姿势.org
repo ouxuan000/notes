@@ -1,0 +1,10 @@
+* spring配置信息进化
+  + applicatinxmlappcontext
+    + (T)xx.getbean(xx)
+    + xx.getbea.(xx, T)
+  + annotationappcontext
+* ejb和spring
+  + ejb = localbean(当前容器bean) + remotebean(远程rpc) = rmi + interface = dubbo、 springcloud
+  + spring container = localbean
+  + spring cloud = remotebean
+  + spring 是阉割版的ejb
