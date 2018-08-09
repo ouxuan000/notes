@@ -58,3 +58,6 @@
   自旋等待提示（Spin-Wait Hints）
   压缩字符串（Compact String）
   GitHub 资源：https://github.com/mercyblitz
+* java beans
+  + beanwrapper就是利用了javabean机制
+
