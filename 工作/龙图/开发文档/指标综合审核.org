@@ -3,3 +3,14 @@
 * 明细查询时关联总账动态金额
   + 注: 只有终审后才会进行动态金额计算，如果不满足需求，找总账
   + 目前支持清算金额(qsamt), 已批复计划(ypfamt), 以及已分配金额查看明细
+    #+BEGIN_SRC sql
+      -- qsamt
+      select t2.* from pay_t_paysub t3, fasp_t_glrecord288000 t2 where t2.dc = 1 
+      and t3.guid = t2.billguid(+) and t3.INDICTRLID in( '1 <> 1') 
+      and t3.cleardate is not null 
+      union all select t2.* from realpay_t_paysub t3, fasp_t_glrecord288000 t2 where t2.dc = 1 and t3.guid = t2.billguid(+) and t3.INDICTRLID in( '1 <> 1')
+      --ypfamt
+      select * from pay_t_plan t where INDICTRLID in( '1 <> 1')
+      --zbsyamt
+      select t.* from BDG_T_BDGSUB t where t.indictrlid = '3F4B9A7EC76EF9DA5A87E29A88EE3A3E' and bdglevel = '3001'
+    #+END_SRC
