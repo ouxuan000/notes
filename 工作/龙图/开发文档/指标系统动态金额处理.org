@@ -16,10 +16,12 @@
        + 追减数据不查询动态金额
     2. 支持金额:
     #+BEGIN_EXAMPLE
+     已批计划数: DECODE(t2.ZBAMT+t2.ZBTJAMT,0,0,ROUND((t2.YPFAMT/(t2.ZBAMT+t2.ZBTJAMT))*100, 2)) end as ALPLANPERT
      CSAMT  初始金额
-     AMT08 当前预算
+     AMT08 当前预算   (t2.ZBAMT + t2.ZBTJAMT) end as AMT08
      ZBSYAMT  已分配金额
-     WSYYE  指标余额
-     ADJAMT 调整金额
-     SYPERT  已分配%
+     WSYYE  指标余额   (t2.DAMT-t2.CAMT) end as WSYYE
+     ADJAMT 调整金额   (t2.ZBAMT + t2.ZBTJAMT - t2.CSAMT) end as ADJAMT
+     SYPERT  已分配%    DECODE(t2.ZBAMT+t2.ZBTJAMT,0,0,ROUND((t2.ZBSYAMT/(t2.ZBAMT+t2.ZBTJAMT))*100, 2)) end as SYPERT
     #+END_EXAMPLE
+    3. 除上述有计算方式字段，其他均为总账直接提供
