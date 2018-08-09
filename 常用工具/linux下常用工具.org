@@ -40,6 +40,7 @@
       + 安装过程中将刚刚下载的zip包放到其他pass文件同级的目录, 继续即可
   18. postman curl 模拟请求
   19. processon/graphviz 流程图
+      + c-c c-c编译执行dot文件
 
 * 问题处理
   1. 网易云音乐白板 : rm `locate netease |grep cache` 删掉缓存即可
