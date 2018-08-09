@@ -203,3 +203,8 @@ find . -type f -name "*.org"|xargs -i -t sed -i 's/#+BEGIN_EXAMPLE/#+BEGIN_EXAMP
 #+BEGIN_EXAMPLE
 cd /home/lx7ly/Oracle/Middleware/user_projects/app/3.0/WebRoot && find . -name "bdg*" ! -name "*.gif" -exec tar -rvf out.tar {} \; && gzip out.tar && mv out.tar.gz ~/Documents/th/
 #+END_EXAMPLE
+
+54. 导出odt文件，发送到开发设计文档目录中
+    #+BEGIN_SRC 
+   find /home/lx7ly/Documents/notes -name "*.odt" -exec mv {} /home/lx7ly/workspace/BDG-指标管理/03分析设计/02系统设计/V3_0_3_0 \; 
+    #+END_SRC
