@@ -1579,3 +1579,8 @@ emacs
   cat /proc/cpuinfo| grep "processor"| wc -l
 ** 查看CPU信息（型号）
   cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
+* archlinux 查看开启启动的服务, 解决无法静态连接网络
+  + systemctl list-unit-files --state=enabled
+    + 发现dhcpcd和静态配置同时存在，关闭dhcp.service
+    +  参考archlinx官方文档网络配置， 动态dhcp 和static不要同时配置
+    + nmcli命令查看网络配置

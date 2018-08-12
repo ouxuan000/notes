@@ -8,3 +8,10 @@
   + spring container = localbean
   + spring cloud = remotebean
   + spring 是阉割版的ejb
+* spring源码分析
+** 类加载的过程， 从配置文件到加载完成
+** 类调用过程
+** 模块详细介绍
+* spring干了几件事
+* springdoc
+  +https://docs.spring.io/spring/docs/
