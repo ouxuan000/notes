@@ -25,3 +25,16 @@
      SYPERT  已分配%    DECODE(t2.ZBAMT+t2.ZBTJAMT,0,0,ROUND((t2.ZBSYAMT/(t2.ZBAMT+t2.ZBTJAMT))*100, 2)) end as SYPERT
     #+END_EXAMPLE
     3. 除上述有计算方式字段，其他均为总账直接提供
+* 加入动态金额配置表
+  + 目前加入amt01 -- 05现场使用时根据具体情况修改计算方式(calculation)
+  + 计算的金额必须是总账已经提供的金额字段
+    | alias | calculation | remark |
+    | amt01 | damt        |        |
+    | amt02 | damt - camt |        |
+    | amt03 |             |        |
+    | ...   | ...         | ...    |
+  + 查询方式
+    #+BEGIN_EXAMPLE
+    select WMSYS.WM_CONCAT(t.CALCULATION || ' as ' || t.ALIAS) from BDG_T_DYAMTCONFIG t where t.calculation is not null;
+    #+END_EXAMPLE
+
