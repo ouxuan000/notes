@@ -571,3 +571,11 @@ select substr(regexp_substr(t.config, 'key:''[^'']*'),6) as uikey, t.* from Fw_t
                   }
               }
     #+END_EXAMPLE
+* buspageconsolecomconfig获取key
+#+BEGIN_EXAMPLE
+select Regexp_Substr(t.config, '([^'']+)', '11') as key from bus_t_pageconsolecomconfig t where t.url like '%resetsrc/add%';
+找到第二个匹配串并截取一位
+或者
+select regexp_replace('1001-ad3Df38Fd,1002-6fG3Hdg,1003-Ku45SdGf78','([0-9]*)-([0-9a-zA-Z]*),?','\1(\2)'||chr(10))from dual;
+通过组的替换实现
+#+END_EXAMPLE
