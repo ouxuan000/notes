@@ -2,7 +2,7 @@
   + 只有总帐的link表保留了所有业务系统业务数据的fromctrl toctrlid级次关系， 展示树状结构需要通过该表
   + 查询时因为业务系统会存在 a - b -a的数据结构， 所以需过过滤掉部分模版id， 追减退款业务的数据不作为一次查询直接展示， 递归查询sql中只允许包含正向逻辑
   + 数据补全通过总帐明细账表关联，进行补齐， link.guid = record.billguid
-* 3022调整
+* 3_0_2_2调整
   + 3.0.2.2版本调整， 来源去向展示来源展示追减数据，并且可以展示去向， 但是如果追减的去向科目是无来源科目， 不展示， 不展示的交易令id为60C3D0CB5DC72B03E055000000000001
       #+BEGIN_EXAMPLE
         create or replace PACKAGE PKG_BDG_GLSRCTO is
@@ -49,3 +49,4 @@
     'QSAMT','YPFAMT','ADJAMT','WSYYE','ZBSYAMT','ZBAMT','CSAMT','ALPAYPERT','SYPERT','ALPLANPERT','AMT08','OCCUPYAMT','TZAMT','TJAMT'
     #+END_EXAMPLE
   + 执行情况表支持来源去向
+    + 执行情况表数据来源为总账, guid会对应bdgsub的toctrlid, 通过关联业务查询来源去向
