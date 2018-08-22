@@ -33,6 +33,7 @@ cd :无参数，返回主目录
 格式：mkdir 目录名
 mkdir test
 mkdir -p com/tt/zhao 递归创建目录
+mkdir -p com/tt/{11,22} //大括号里面内容不能有空格
 3. rmdir 删除目录
 格式：rmdir 目录名
 rmdir test
