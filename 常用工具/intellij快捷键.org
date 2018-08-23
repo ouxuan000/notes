@@ -215,3 +215,14 @@
     + 启动weblogic服务后，idea中新建remote, 修改访问的地址以及端口即可, 注意，一定要指定modu
   + idea vim插件 :actionlist 显示所有的快捷键,(好牛逼..)
   + ctrl-shift v： idea的历史剪贴板
+  + 神奇的Inject language
+    + Inject language or reference。
+    + alt-enter
+    + enter
+    + json file
+    + alter-enter -- > json file fragment
+    + 编辑完成后ctrl-f4退出
+  + 擦屁股快捷键ctrl+shift+enter
+  + ctrl-w alt-j批量修改
+  + 代码在项目中的定位: alt-f1 --> 选择project --> enter, 如果还想回去 f4
+
