@@ -98,61 +98,58 @@
           + SQL 92 / 99 / 03
             + MySQL
             + OraclePostgreSQL
-  + 安全
-    + Permission管理
-    + 加密/解密
-    + 安全证书管理
-  + 管理/运维
-    + JMX
-    + 进程管理
-      + Process
-      + Java进程管理API
-
-
-
-Java EE
-Servlet/JSP/JSTL/EL JSF
-EJB JPAJMS
-BeanValidation
-JTA（Java Transaction API）JTS（JavaTransactionService）JAX-RS（REST）
-JAX-WS（Web Services）
-
-
-线：知识的衔接
-
-JavaSE
-语言
-
-
-
-
-
-面向对象编程（OOP）与设计模式（GoF 23）面向函数编程（FOP）与Reactive
-数据结构
-接口设计与数据结构选择
-Java集合和线程安全
-Apache commons-collection与Guava扩展背景
-I/O与 网络
-BIO与I/O接口的关系
-NIO新数据结构（ByteBuﬀer）数据库
-DML、DDL与JDBC API的关系
-JDBC与数据事务的关系
-Spring事务（AOP）
-setAutoCommit(false) begin transactionINSERT、DELETE、Updateendtransaction
-commit()
-事务传播
-EJB容器
-
-Java EE
-数据层
-Bean ValidationJPA
-Web相关
-Servlet/JSP/JSTL/EL JSF
-JAX-RS（REST）
-JAX-WS（Web Services）
-WebSockets
-服务/集成层
-EJBJMS
-事务
-JTA（Java Transaction API）JTS（JavaTransactionService）
+    + 安全
+      + Permission管理
+      + 加密/解密
+      + 安全证书管理
+    + 管理/运维
+      + JMX
+      + 进程管理
+        + Process
+        + Java进程管理API
+*** Java EE
+    + Servlet/JSP/JSTL/EL JSF
+    + EJB JPAJMS
+    + BeanValidation
+    + JTA（Java Transaction API）
+    + JTS（JavaTransactionService）
+    + JAX-RS（REST）
+    + JAX-WS（Web Services）
+** 线：知识的衔接
+*** JavaSE
+    + 语言
+      + 面向对象编程（OOP）与设计模式（GoF 23）
+      + 面向函数编程（FOP）与Reactive
+    + 数据结构
+      + 接口设计与数据结构选择
+      + Java集合和线程安全
+        + CopyOnWriteArrayList
+      + Apache commons-collection与Guava扩展背景
+    + I/O与 网络
+      + BIO与I/O接口的关系
+      + NIO新数据结构（ByteBuﬀer）
+    + 数据库
+      + DML、DDL与JDBC API的关系
+      + JDBC与数据事务的关系
+        + Spring事务（AOP）
+        + setAutoCommit(false) begin transactionINSERT、DELETE、Updateendtransaction
+        + commit()
+      + 事务传播
+        + EJB容器
+*** Java EE
+    + 数据层
+      + Bean Validation
+      + JPA
+    + Web相关
+      + Servlet/JSP/JSTL/EL 
+      + JSF
+      + JAX-RS（REST）
+      + JAX-WS（Web Services）
+      + WebSockets
+    + 服务/集成层
+      + EJB
+      + JMS
+    + 事务
+      + JTA（Java Transaction API）
+      + JTS（JavaTransactionService）
 * 学习路径
