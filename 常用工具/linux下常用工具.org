@@ -33,7 +33,10 @@
       #+END_EXAMPLE
   14. 数据传输工具， 类似飞球， yaourt -s iptux, 但是最新的0.75版本有问题， 不能扫描局域网用户, 目前使用0.6.4版本进行源码编译安装
   15. 使用zsh + oh my zsh
-  16. 开发工具使用idea, 我直接使用idea eap版本(免费的旗舰版)
+  16. 开发工具使用idea, community
+      + 插件: 
+        + ideavim: vi模式， 用过都说好
+        + Key promoter: 快捷键菜鸡必备，比如我
   17. sqldeveloper安装
       + oracle 限制， 需要登录下载， 所以先到官网下载sqldeveloper18.nojar.zip
       + pacman -S oracle-sqldeveloper

@@ -214,3 +214,4 @@
     + 首先在weblogic域中打开debugflag(默认端口8453)(setdomainenv), 或者将内容复制到startweblogic.sh启动参数中
     + 启动weblogic服务后，idea中新建remote, 修改访问的地址以及端口即可, 注意，一定要指定modu
   + idea vim插件 :actionlist 显示所有的快捷键,(好牛逼..)
+  + ctrl-shift v： idea的历史剪贴板
