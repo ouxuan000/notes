@@ -19,6 +19,7 @@
   + spc f f 打开文件  spc p f 打开项目
   + 导出 cc ce h
   + gtd 修改todo done  c-c c-t在todo和done状态切换
+  + c-x r t spacemacs中vim block模式有问题，可以用这个加前缀标题
 * 填坑
   + Specs Emacs org mode不能用，报错 orgproject  cd. .emacs.d el org project file.  Gitfetch 
 * java list输出转标准json

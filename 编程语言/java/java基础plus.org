@@ -36,74 +36,77 @@
             #+END_EXAMPLE
           + 缩进格式
           + 类命名
-          前缀模式
-          I开头表示接口后缀模式：
-          VO（Value Object）DTO（Data Transfter Object）DO（Data Object）DAO（Data Access Object）
-          JDBC、数据库
-小马哥个人经验：
-数据模型：不需要前后缀，Entity -> Person
-仓储模型：PersonRepository
-数据库、Redis、Cache、Mongo
-接口：如果没有两个以上的实现或远程调用，不要写接口
+            + 前缀模式
+              I开头表示接口
+            + 后缀模式：
+              VO（Value Object）
+              DTO（Data Transfter Object）
+              DO（Data Object）
+              DAO（Data Access Object） JDBC、数据库
+*** 小马哥经验：
+    数据模型：不需要前后缀，Entity -> Person
+    仓储模型：PersonRepository
+    数据库、Redis、Cache、Mongo
+    接口：如果没有两个以上的实现或远程调用，不要写接口
 * 学习方法
-点：知识的梳理
-
-JavaSE
-语言
-
-
-
-
-
-
-
-Java 5泛型/注解/ For Each
-Java 7 try-catch提升/ AutoCloseable
-Java 8 Lambda
-Java 9模块化
-元编程
-Class、Package、ModuleClassLoader
-反射（Reﬂection）
-Bytecode：ClassLoader、ASM、CgLib等
-Annotations
-Common AnnotationsFunction
-
-
-
-
-数据结构
-Java集合：Collection、List、Set、Map Apachecommons-collection扩展：BagGoogleGuava扩展
-I/O和 网络
-文件系统
-URL资源
-Socket（BIO）NIO（Non-Blocking I/O）
-NIO 2
-文件系统提升
-文件监听修改
-AIO
-
-并发/并行
-
-异步（Future）+ NIO
-Java Thread / Runnable
-Java5Executor/ExecutorServiceJava 7Fork/Join
-Java 8 CompletableFuture（函数式+非阻塞）
-Java9FlowAPI（ReactiveStreamsAPI）数据库
-JDBC
-数据源（DataSource）Apache DBCP C3P0
-Hikari
-事务/隔离级别
-关注数据一致性数据库隔离级别
-SQL 92 / 99 / 03
-MySQL
-OraclePostgreSQL
-安全
-Permission管理加密/解密
-安全证书管理管理/运维
-JMX
-进程管理
-Process
-Java进程管理API
+** 点：知识的梳理
+*** JavaSE
+    + 语言
+      + Java 5泛型/注解/ For Each
+      + Java 7 try-catch提升/ AutoCloseable
+      + Java 8 Lambda
+      + Java 9模块化
+    + 元编程
+      + Class、Package、ModuleClassLoader
+      + 反射（Reﬂection）
+      + Bytecode：ClassLoader、ASM、CgLib等
+      + Annotations
+      + Common Annotations
+      + Function
+        + Consumer
+        + Supplier
+        + Function
+        + Predicate
+    + 数据结构
+      + Java集合：Collection、List、Set、Map 
+      + Apachecommons-collection扩展：Bag
+      + GoogleGuava扩展
+    + I/O和 网络
+      + 文件系统
+      + URL资源
+      + Socket（BIO）NIO（Non-Blocking I/O）
+      + NIO 2
+        + 文件系统提升
+          + 文件监听修改
+      + AIO
+        + Future + NIO
+    + 并发/并行
+      + Java Thread / Runnable
+      + Java5Executor/ExecutorServiceJava 7Fork/Join
+      + Java 8 CompletableFuture（函数式+非阻塞）
+      + Java9FlowAPI（ReactiveStreamsAPI）
+    + 数据库
+      + JDBC
+      + 数据源（DataSource）
+        + Apache DBCP 
+        + C3P0
+        + Hikari
+      + 事务/隔离级别
+        + 关注数据一致性
+        + 数据库隔离级别
+          + java.sql.Connection#TRANSACTION_NONE
+          + SQL 92 / 99 / 03
+            + MySQL
+            + OraclePostgreSQL
+  + 安全
+    + Permission管理
+    + 加密/解密
+    + 安全证书管理
+  + 管理/运维
+    + JMX
+    + 进程管理
+      + Process
+      + Java进程管理API
 
 
 
