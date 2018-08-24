@@ -37,6 +37,7 @@
       + 插件: 
         + ideavim: vi模式， 用过都说好
         + Key promoter: 快捷键菜鸡必备，比如我
+        + Markdown support
   17. sqldeveloper安装
       + oracle 限制， 需要登录下载， 所以先到官网下载sqldeveloper18.nojar.zip
       + pacman -S oracle-sqldeveloper
