@@ -42,3 +42,4 @@ update fasp_t_glrecord288000 t set t.vchtypeid = (select t.vchtypeid from bdg_t_
 #+END_SRC
 * 现场问题
   + 送审报错， 没有给明细账接口传数据, 查看输出日志没走调用业务数据的循环, 检查过滤条件
+    + 数据的交易令不在范围， 修改代码， 或者在支持的模板中随便加入一个单据交易令为待分到待分
