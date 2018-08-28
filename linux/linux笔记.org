@@ -979,6 +979,9 @@ $ awk '{
 > print}
 > }' test
 
+awk的处理逻辑, 输入行前 输入行 最后一行之后
+awk 'BEGIN {} END'
+
 29、vim技巧  Ctrl+o就可以回到你之前的位置
 
 30、缩进
