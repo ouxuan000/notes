@@ -40,3 +40,5 @@ select t.guid, t.fromctrlid, t.expfuncguid, t.toctrlid, t.amt, t.bgtdocno, t.bil
 --补全数据的单据id
 update fasp_t_glrecord288000 t set t.vchtypeid = (select t.vchtypeid from bdg_t_bdgsub t where t.guid = 'FBD12859CC7EE50F60F0B7B3FC809A6E') where t.billguid in (select t.guid from bdg_t_bdgsub t where t.guid = 'FBD12859CC7EE50F60F0B7B3FC809A6E');
 #+END_SRC
+* 现场问题
+  + 送审报错， 没有给明细账接口传数据, 查看输出日志没走调用业务数据的循环, 检查过滤条件
