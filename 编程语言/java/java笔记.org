@@ -931,3 +931,6 @@
 ** rpc
    + dubbo
    + spring cloud
+* javax小工具技巧
+  + 查看java进程 jps
+  + 查看jvm信息, jconsole
