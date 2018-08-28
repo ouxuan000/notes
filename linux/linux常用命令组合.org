@@ -198,3 +198,5 @@ find /home/lx7ly/Documents/notes -name "*.odt" -exec mv {} /home/lx7ly/workspace
     + for i in {1..10};do echo $i; done |awk '/[0-9]/ {print "hello"}'
     + while true; do date; sleep 1; done
     + watch -n 1 date
+55. 统计空行
+    + awk '/^$/ {++x} END {print x}' 1.txt 
