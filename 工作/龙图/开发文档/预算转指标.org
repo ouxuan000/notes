@@ -37,3 +37,33 @@
     + 可取消时候根据批次撤销生产痕迹
     + 临时表数据的处理方式
       + 是否应该全部清理
+*** api
+    #+BEGIN_SRC java
+    /**
+    * 对外提供预算转指标接口
+    */
+    public interface IBgtToBdg {
+
+        /**
+        * 预算转指标
+        * @param userid
+        * @param province
+        * @param year
+        * @param data
+        * @return
+        * @throws Exception
+        */
+        Map create(String userid, String province, String year, List data) throws Exception;
+
+        /**
+        * 撤销预算转指标
+        * @param userid
+        * @param province
+        * @param year
+        * @param data
+        * @return
+        * @throws Exception
+        */
+        Map cancelCreate(String userid,String province,String year,List data) throws Exception;
+    }
+    #+END_SRC
