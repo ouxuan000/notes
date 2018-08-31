@@ -988,6 +988,10 @@ echo -e "zhangsan 85 92 78 94 88\nlisi 89 90 75 90 86\nwangwu 84 88 80 92 84"|aw
   #+BEGIN_EXAMPLE
   echo -e "zhangsan 85 92 78 94 88\nlisi 89 90 75 90 86\nwangwu 84 88 80 92 84"|awk '$1 ~ /z.+/ {total=$2+$3+$4+$5+$6; avg=total/5; print $1"-->总成绩:"total" 平均分:"avg}'
   #+END_EXAMPLE
++ 统计文件数及总大小
+  #+BEGIN_EXAMPLE
+    ll |awk '{print $5 "\t" $9}'|awk '$1 !~ '/^$/' {sum+=$1; ++filenum} END {print sum "\t" filenum}'
+  #+END_EXAMPLE
 
 29、vim技巧  Ctrl+o就可以回到你之前的位置
 
