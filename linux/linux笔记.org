@@ -986,7 +986,10 @@ echo -e "zhangsan 85 92 78 94 88\nlisi 89 90 75 90 86\nwangwu 84 88 80 92 84"|aw
 #+END_EXAMPLE
 + 正则表达式匹配某个字段
   #+BEGIN_EXAMPLE
+  #low b写法
   echo -e "zhangsan 85 92 78 94 88\nlisi 89 90 75 90 86\nwangwu 84 88 80 92 84"|awk '$1 ~ /z.+/ {total=$2+$3+$4+$5+$6; avg=total/5; print $1"-->总成绩:"total" 平均分:"avg}'
+  # for循环
+echo -e "zhangsan 85 92 78 94 88\nlisi 89 90 75 90 86\nwangwu 84 88 80 92 84"|awk '$1 ~ /z.+/ {total=0; for(i=2; i<=NF; i++){total+=$i;}; avg=total/5; print $1"-->总成绩:"total" 平均分:"avg}'
   #+END_EXAMPLE
 + 统计文件数及总大小
   #+BEGIN_EXAMPLE
