@@ -934,3 +934,6 @@
 * javax小工具技巧
   + 查看java进程 jps
   + 查看jvm信息, jconsole
+* java涨姿势
+  + java中一般s结尾的是工具类
+    + executors objects collections
