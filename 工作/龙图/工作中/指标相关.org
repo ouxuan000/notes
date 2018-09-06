@@ -579,3 +579,10 @@ select Regexp_Substr(t.config, '([^'']+)', '11') as key from bus_t_pageconsoleco
 select regexp_replace('1001-ad3Df38Fd,1002-6fG3Hdg,1003-Ku45SdGf78','([0-9]*)-([0-9a-zA-Z]*),?','\1(\2)'||chr(10))from dual;
 通过组的替换实现
 #+END_EXAMPLE
+* 新增页面用编辑区的末级控制更新列表去对应字段
+  #+BEGIN_EXAMPLE
+    select GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_SETPARM('', '1500', '2017', '') from DUAL; 
+    select 'update busfw_t_uicolumn t set t.bottomcontrl = (select nvl(t2.bottomcontrl,0) from busfw_T_uieditform t2 where t2.key =
+    (select t3.uikey from fasp_T_papage t3 where t3.menutype = '''|| t2.guid ||''' and t3.vchtypeid = '''||t.guid||''' and t3.type = ''editform'') and lower(t.columncode) = lower(t2.columncode)) where t.key = 
+    (select t.uikey from fasp_T_papage t where t.menutype = '''|| t2.guid ||''' and t.vchtypeid = '''||t.guid||''' and t.type = ''datatable'');' from fasp_t_pavoucher t, fasp_t_pabusinessmodelmenu t2 where t2.menucode = 'add' and t.mouldid = t2.mouldid and  t.mouldid in ('50BA23DJCKDNCK63BJDKCJ39A6A05186');
+  #+END_EXAMPLE
