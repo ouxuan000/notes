@@ -38,3 +38,6 @@
   + 虚拟机规范，字节码规范书籍
 * 搜索版本小技巧
   + 可以下载源码, 在linux中通过文件搜索，查找 since 1.x, 获取版本
+* java documents
+  + 进入oracle docs网页 --> 选择jdk版本 --> 选择getstart#whatsnew
+  + https://docs.oracle.com/javase/9/whatsnew/
