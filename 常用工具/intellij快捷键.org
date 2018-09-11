@@ -225,4 +225,16 @@
   + 擦屁股快捷键ctrl+shift+enter
   + ctrl-w alt-j批量修改
   + 代码在项目中的定位: alt-f1 --> 选择project --> enter, 如果还想回去 f4
-
+* 插件推荐
+  + ideavim
+  + lombok 可选， 定义bean的时候不用在写getset
+  + Alibaba Java Coding Guidelines plugin  阿里规范
+  + findbugs  避免低级bug
+  + maven helper据说很吊， 暂时没用， 排查maven依赖的
+  + generateallsetter 自定调用一个bean的set方法
+    #+BEGIN_SRC java
+      User user = new User();
+      alt-enter
+      选择自动生成
+    #+END_SRC
+  + key promoter 这个插件是告诉你个傻x， 输入几次了还及不住快捷键
