@@ -474,55 +474,168 @@
     和用户管理相关的操作基本都要在admin数据库下运行，要先use admin;
     如果在某个单一的数据库下，那只能对当前数据库的权限进行操
 *** 用户删除操作
+    #+BEGIN_EXAMPLE
+    db.system.users.remove({user:"zhangsan"});
+    #+END_EXAMPLE
 *** 查看当前用户权限
+    #+BEGIN_EXAMPLE
+      db.runCommand({usersInfo:"tom",showPrivileges:true})
+    #+END_EXAMPLE
 *** 修改密码
+    #+BEGIN_EXAMPLE
+      db.changeUserPassword("zhangsan", "123456")
+    #+END_EXAMPLE
 *** 启用用户
+    #+BEGIN_EXAMPLE
+      db.auth("zhangsan","123")
+    #+END_EXAMPLE
 *** 安全检查--auth
     非testdb是不能操作数据库的,启用自己的用户才能访问
     非admin数据库的用户不能使用数据库命令，admin数据库中的数据经过认证为管理员用户
 ** MongoDB高可用方案实战演
-详解RouteServer（路由服务器）、
-ConfigServer（配置服务器）、ReplicaSet（副本集）、
-Shard（切片）、
-Chunk（分块）MongDB启动与关闭
+  详解RouteServer（路由服务器）、
+  ConfigServer（配置服务器）、ReplicaSet（副本集）、
+  Shard（切片）、
+  Chunk（分块）MongDB启动与关闭
 *** 命令行启动
+    #+BEGIN_EXAMPLE
+    ./mongod --fork --dbpath=/opt/mongodb/data
+    #+END_EXAMPLE
 *** 配置文件启动
+    #+BEGIN_EXAMPLE
+    ./mongod -f mongodb.cfg
+    #+END_EXAMPLE
     mongoDB基本配置/opt/mongodb/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/data
+      logpath=/opt/mongodb/logs/mongodb.log
+      logappend=true
+      fork=true
+      bind_ip=192.168.209.128
+      port=27017
+    #+END_EXAMPLE
     环境变量配置
     Mongodb的三种集群方式的搭建：Master-Slaver/ReplicaSet/Sharding。
 *** MongoDB主从搭建
     这个是最简答的集群搭建，不过准确说也不能算是集群，只能说是主备。并且官方已经不推荐这种方式， 所以在这里只是简单的介绍下吧，搭建方式也相对简单。
     主机配置/opt/mongodb/master-slave/master/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/master-slave/master/data
+      logpath=/opt/mongodb/master-slave/master/logs/mongodb.log
+      logappend=true
+      fork=true
+      bind_ip=192.168.209.128
+      port=27001
+      master=true
+      source=192.168.209.128:27002
+    #+END_EXAMPLE
     从机配置/opt/mongodb/master-slave/slave/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/master-slave/slave/data
+      logpath=/opt/mongodb/master-slave/slave/logs/mongodb.log
+      logappend=true
+      fork=true
+      bind_ip=192.168.209.128
+      port=27002
+      slave=true
+      source=192.168.209.128:27001
+    #+END_EXAMPLE
     启动服务
+    #+BEGIN_EXAMPLE
+      cd /opt/mongodb/master-slave/master/
+      mongod --config mongodb.cfg #
+      cd /opt/mongodb/master-slave/slave/
+      mongod --config mongodb.cfg #
+    #+END_EXAMPLE
     连接测试
+    #+BEGIN_EXAMPLE
+      mongo --host 192.168.209.128 --port 27001
+      mongo --host 192.168.209.128 --port 27002
+    #+END_EXAMPLE
     基本上只要在主节点和备节点上分别执行这两条命令，Master-Slaver就算搭建完成了。我没有试过主节点挂掉后备节点是否能变成主节点，不过既然已经不推荐了，大家就没必要去使用了。
 *** MongoDB副本集
-    中文翻译叫做副本集，不过我并不喜欢把英文翻译成中文，总是感觉怪怪的。其实简单来说就是集群当中包含了多份数据，保证主节点挂掉了，备节点能继续提供数据服务，提供的前提就是数据需要和主节点一致。如下图：
+      中文翻译叫做副本集，不过我并不喜欢把英文翻译成中文，总是感觉怪怪的。其实简单来说就是集群当中包含了多份数据，保证主节点挂掉了，备节点能继续提供数据服务，提供的前提就是数据需要和主节点一致.
     Mongodb(M)表示主节点，Mongodb(S)表示备节点，Mongodb(A)表示仲裁节点。主备节点存储数据，仲裁节点不存储数据。客户端同时连接主节点与备节点，不连接仲裁节点。
     默认设置下，主节点提供所有增删查改服务，备节点不提供任何服务。但是可以通过设置使备节点提供查询服务，这样就可以减少主节点的压力，当客户端进行数据查询时，请求自动转到备节点上。这个设置叫做ReadPreferenceModes，同时Java客户端提供了简单的配置方式，可以不必直接对数据库进行操作。
     仲裁节点是一种特殊的节点，它本身并不存储数据，主要的作用是决定哪一个备节点在主节点挂掉之后提升为主节点，所以客户端不需要连接此节点。这里虽然只有一个备节点，但是仍然需要一个仲裁节点来提升备节点级别。我开始也不相信必须要有仲裁节点，但是自己也试过没仲裁节点的话，主节点挂了备节点还是备节点，所以咱们还是需要它的。
     介绍完了集群方案，那么现在就开始搭建了。
-    1.建立数据文件夹
-    一般情况下不会把数据目录建立在mongodb的解压目录下，不过这里方便起见，就建在mongodb解压目录下吧。
-    2.建立配置文件
+    + 建立数据文件夹
+      一般情况下不会把数据目录建立在mongodb的解压目录下，不过这里方便起见，就建在mongodb解压目录下吧。
+      #+BEGIN_EXAMPLE
+        mkdir -p /opt/mongodb/replset/master
+        mkdir -p /opt/mongodb/replset/slaver
+        mkdir -p /opt/mongodb/replset/arbiter
+      #+END_EXAMPLE
+    + 建立配置文件
     由于配置比较多，所以我们将配置写到文件里。
     vi/opt/mongodb/replset/master/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/replset/master/data
+      logpath=/opt/mongodb/replset/master/logs/mongodb.log
+      logappend=true
+      replSet=shard002
+      bind_ip=192.168.209.128
+      port=27017
+      fork=true
+    #+END_EXAMPLE
     vi/opt/mongodb/replset/slave/mongodb.cfg
-
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/replset/slave/data
+      logpath=/opt/mongodb/replset/slave/logs/mongodb.log
+      logappend=true
+      replSet=shard002
+      bind_ip=192.168.209.129
+      port=27017
+      fork=true
+    #+END_EXAMPLE
     vi/opt/mongodb/replset/arbiter/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/replset/arbiter/data
+      logpath=/opt/mongodb/replset/arbiter/logs/mongodb.log
+      logappend=true
+      replSet=shard002
+      bind_ip=192.168.209.130
+      port=27017
+      fork=true
+    #+END_EXAMPLE
     参数解释：
     dbpath：数据存放目录
     logpath：日志存放路径logappend：以追加的方式记录日志replSet：replicaset的名字
     bind_ip：mongodb所绑定的ip地址
     port：mongodb进程所使用的端口号，默认为27017
     fork：以后台方式运行进程
-    3、分发到集群下的其他机器
-    4.启动mongodb
-    进入每个mongodb节点的bin目录下
-    注意配置文件的路径一定要保证正确，可以是相对路径也可以是绝对路径。
+    + 分发到集群下的其他机器
+      #+BEGIN_EXAMPLE
+        # 192.168.209.129
+        scp -r /opt/mongodb/replset/slave
+        root@192.168.209.129:/opt/mongodb/replset
+        # 192.168.209.130
+        scp -r /opt/mongodb/replset/arbiter
+        root@192.168.209.130:/opt/mongodb/replset
+      #+END_EXAMPLE
+    + 启动mongodb
+      进入每个mongodb节点的bin目录下
+      #+BEGIN_EXAMPLE
+        # 192.168.209.128 
+        monood -f /opt/mongodb/replset/master/mongodb.cfg
+        # 192.168.209.129 
+        mongod -f /opt/mongodb/replset/slave/mongodb.cfg
+        # 192.168.209.130 
+        mongod -f /opt/mongodb/replset/arbiter/mongodb.cfg
+      #+END_EXAMPLE
+      注意配置文件的路径一定要保证正确，可以是相对路径也可以是绝对路径。
     5.配置主，备，仲裁节点
     可以通过客户端连接mongodb，也可以直接在三个节点中选择一个连接mongodb。
+    #+BEGIN_EXAMPLE
+      #ip  port 
+        mongo 192.168.209.128:27017
+        use admin
+        cfg={_id:"shard002",members:[{_id:0,host:'192.168.209.128:27017',pri
+        ority:9},{_id:1,host:'192.168.209.129:27017',priority:1},{_id:2,host
+        :'192.168.209.130:27017',arbiterOnly:true}]};
+        #
+        rs.initiate(cfg)
+    #+END_EXAMPLE
     注意：cfg是相当于设置一个变量，可以是任意的名字，当然最好不要是mongodb的关键字，conf，
     config都可以。最外层的_id表示replicaset的名字，members里包含的是所有节点的地址以及优先级。优先级最高的即成为主节点，即这里的192.168.209.128:27017。特别注意的是，对于仲裁节点，需要有个特别的配置——arbiterOnly:true。这个千万不能少了，不然主备模式就不能生效。
     配置的生效时间根据不同的机器配置会有长有短，配置不错的话基本上十几秒内就能生效，有的配置需要一两分钟。如果生效了，执行rs.status()命令会看到如下信息：
