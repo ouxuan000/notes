@@ -624,7 +624,7 @@
         mongod -f /opt/mongodb/replset/arbiter/mongodb.cfg
       #+END_EXAMPLE
       注意配置文件的路径一定要保证正确，可以是相对路径也可以是绝对路径。
-    5.配置主，备，仲裁节点
+    + 配置主，备，仲裁节点
     可以通过客户端连接mongodb，也可以直接在三个节点中选择一个连接mongodb。
     #+BEGIN_EXAMPLE
       #ip  port 
@@ -636,42 +636,174 @@
         #
         rs.initiate(cfg)
     #+END_EXAMPLE
-    注意：cfg是相当于设置一个变量，可以是任意的名字，当然最好不要是mongodb的关键字，conf，
-    config都可以。最外层的_id表示replicaset的名字，members里包含的是所有节点的地址以及优先级。优先级最高的即成为主节点，即这里的192.168.209.128:27017。特别注意的是，对于仲裁节点，需要有个特别的配置——arbiterOnly:true。这个千万不能少了，不然主备模式就不能生效。
-    配置的生效时间根据不同的机器配置会有长有短，配置不错的话基本上十几秒内就能生效，有的配置需要一两分钟。如果生效了，执行rs.status()命令会看到如下信息：
-
-如果配置正在生效，其中会包含如下信息：
-
-同时可以查看对应节点的日志，发现正在等待别的节点生效或者正在分配数据文件。
-现在基本上已经完成了集群的所有搭建工作。至于测试工作，可以留给大家自己试试。一个是往主节点插入数据，能从备节点查到之前插入的数据（查询备节点可能会遇到某个问题，可以自己去网上查查看）。二是停掉主节点，备节点能变成主节点提供服务。三是恢复主节点，备节点也能恢复其备的角色，而不是继续充当主的角色。二和三都可以通过rs.status()命令实时查看集群的变化。
-        5.5 、MongoDB数据分片
-和ReplicaSet类似，都需要一个仲裁节点，但是Sharding还需要配置节点和路由节点。就三种集群搭建方式来说，这种是最复杂的。
-配置数据节点
-vi/opt/mongodb/shard/replset/replica1/mongodb.cfg
-vi/opt/mongodb/shard/replset/replica2/mongodb.cfg
-
-vi/opt/mongodb/shard/replset/replica3/mongodb.cfg
-
-2.启动数据节点
-3、使数据节点集群生效
-4、配置configsvr
-/opt/mongodb/shard/configsvr/config1/mongodb.cfg
-/opt/mongodb/shard/configsvr/config2/mongodb.cfg
-/opt/mongodb/shard/configsvr/config3/mongodb.cfg
-5、启动configsvr节点
-6、使configsvr节点集群生效
-配置路由节点
-vi/opt/mongodb/shard/routesvr/mongodb.cfg
-7.启动路由节点
-这里我们没有用配置文件的方式启动，其中的参数意义大家应该都明白。一般来说一个数据节点对应一个配置节点，仲裁节点则不需要对应的配置节点。注意在启动路由节点时，要将配置节点地址写入到启动命令里。
-4.配置ReplicaSet
-这里可能会有点奇怪为什么Sharding会需要配置ReplicaSet。其实想想也能明白，多个节点的数据肯定是相关联的，如果不配一个ReplicaSet，怎么标识是同一个集群的呢。这也是人家mongodb的规定，咱们还是遵守吧。配置方式和之前所说的一样，定一个cfg，然后初始化配置。
-8.配置Sharding
-第一个命令很容易理解，第二个命令是对需要进行Sharding的数据库进行配置，第三个命令是对需要进行Sharding的Collection进行配置，这里的testcon即为Collection的名字。另外还有个key，这个是比较关键的东西，对于查询效率会有很大的影响。
-到这里Sharding也已经搭建完成了，以上只是最简单的搭建方式，其中某些配置仍然使用的是默认配置。如果设置不当，会导致效率异常低下，所以建议大家多看看官方文档再进行默认配置的修改。
-以上三种集群搭建方式首选ReplicaSet，只有真的是大数据，Sharding才能显现威力，毕竟备节点同步数据是需要时间的。Sharding可以将多片数据集中到路由节点上进行一些对比，然后将数据返回给客户端，但是效率还是比较低的说。
-我自己有测试过，不过具体的机器配置已经不记得了。ReplicaSet的ips在数据达到1400W条时基本能达到1000左右，而Sharding在300W时已经下降到500IPS，两者的单位数据大小大概是10kb。大家在应用的时候还是多多做下性能测试，毕竟不像Redis有benchmark。
-        5.6 、MongoDB索引
+      注意：cfg是相当于设置一个变量，可以是任意的名字，当然最好不要是mongodb的关键字，conf，
+      config都可以。最外层的_id表示replicaset的名字，members里包含的是所有节点的地址以及优先级。优先级最高的即成为主节点，即这里的192.168.209.128:27017。特别注意的是，对于仲裁节点，需要有个特别的配置——arbiterOnly:true。这个千万不能少了，不然主备模式就不能生效。
+      配置的生效时间根据不同的机器配置会有长有短，配置不错的话基本上十几秒内就能生效，有的配置需要一两分钟。如果生效了，执行rs.status()命令会看到如下信息：
+      如果配置正在生效，其中会包含如下信息：
+  同时可以查看对应节点的日志，发现正在等待别的节点生效或者正在分配数据文件。
+  现在基本上已经完成了集群的所有搭建工作。至于测试工作，可以留给大家自己试试。一个是往主节点插入数据，能从备节点查到之前插入的数据（查询备节点可能会遇到某个问题，可以自己去网上查查看）。二是停掉主节点，备节点能变成主节点提供服务。三是恢复主节点，备节点也能恢复其备的角色，而不是继续充当主的角色。二和三都可以通过rs.status()命令实时查看集群的变化。
+*** MongoDB数据分片
+    和ReplicaSet类似，都需要一个仲裁节点，但是Sharding还需要配置节点和路由节点。就三种集群搭建方式来说，这种是最复杂的。
+  + 配置数据节点
+    #+BEGIN_EXAMPLE
+    mkdir -p /opt/mongodb/shard/replset/replica1/data
+    mkdir -p /opt/mongodb/shard/replset/replica1/logs
+    mkdir -p /opt/mongodb/shard/replset/replica2/data
+    mkdir -p /opt/mongodb/shard/replset/replica2/logs
+    mkdir -p /opt/mongodb/shard/replset/replica3/data
+    mkdir -p /opt/mongodb/shard/replset/replica3/logs
+    #+END_EXAMPLE
+    + vi/opt/mongodb/shard/replset/replica1/mongodb.cfg
+    #+BEGIN_EXAMPLE
+    dbpath=/opt/mongodb/shard/replset/replica1/data
+    logpath=/opt/mongodb/shard/replset/replica1/logs/mongodb.log
+    logappend=true
+    fork=true
+    bind_ip=192.168.209.128
+    port=27001
+    replSet=shard001
+    shardsvr=true
+    #+END_EXAMPLE
+    + vi/opt/mongodb/shard/replset/replica2/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        dbpath=/opt/mongodb/shard/replset/replica2/data
+        logpath=/opt/mongodb/shard/replset/replica2/logs/mongodb.log
+        logappend=true
+        fork=true
+        bind_ip=192.168.209.128
+        port=27002
+        replSet=shard001
+        shardsvr=true
+      #+END_EXAMPLE
+    + vi/opt/mongodb/shard/replset/replica3/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        dbpath=/opt/mongodb/shard/replset/replica3/data
+        logpath=/opt/mongodb/shard/replset/replica3/logs/mongodb.log
+        logappend=true
+        fork=true
+        bind_ip=192.168.209.128
+        port=27003
+        replSet=shard001
+        shardsvr=true
+      #+END_EXAMPLE
+  + 启动数据节点
+    #+BEGIN_EXAMPLE
+      mongod -f /opt/mongodb/shard/replset/replica1/mongodb.cfg
+      #192.168.209.128:27001
+      mongod -f /opt/mongodb/shard/replset/replica2/mongodb.cfg
+      #192.168.209.128:27002
+      mongod -f /opt/mongodb/shard/replset/replica3/mongodb.cfg
+      #192.168.209.128:27003
+    #+END_EXAMPLE
+  + 使数据节点集群生效
+    #+BEGIN_EXAMPLE
+      mongo 192.168.209.128:27001
+      #ip  port 
+      cfg={_id:"shard001",members:[{_id:0,host:'192.168.209.128:27001'},{_i
+      d:1,host:'192.168.209.128:27002'},{_id:2,host:'192.168.209.128:27003'
+      }]};
+      rs.initiate(cfg) #
+    #+END_EXAMPLE
+  + 配置configsvr
+    #+BEGIN_EXAMPLE
+      mkdir -p /opt/mongodb/shard/configsvr/config1/data
+      mkdir -p /opt/mongodb/shard/configsvr/config1/logs
+      mkdir -p /opt/mongodb/shard/configsvr/config2/data
+      mkdir -p /opt/mongodb/shard/configsvr/config2/logs
+      mkdir -p /opt/mongodb/shard/configsvr/config3/data
+      mkdir -p /opt/mongodb/shard/configsvr/config3/logs
+    #+END_EXAMPLE
+    + /opt/mongodb/shard/configsvr/config1/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        dbpath=/opt/mongodb/shard/configsvr/config1/data
+        configsvr=true
+        port=28001
+        fork=true
+        logpath=/opt/mongodb/shard/configsvr/config1/logs/mongodb.log
+        replSet=configrs
+        logappend=true
+        bind_ip=192.168.209.128
+      #+END_EXAMPLE
+    + /opt/mongodb/shard/configsvr/config2/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        dbpath=/opt/mongodb/shard/configsvr/config2/data
+        configsvr=true
+        port=28002
+        fork=true
+        logpath=/opt/mongodb/shard/configsvr/config2/logs/mongodb.log
+        replSet=configrs
+        logappend=true
+        bind_ip=192.168.209.128
+      #+END_EXAMPLE
+    + /opt/mongodb/shard/configsvr/config3/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        dbpath=/opt/mongodb/shard/configsvr/config3/data
+        configsvr=true
+        port=28003
+        fork=true
+        logpath=/opt/mongodb/shard/configsvr/config3/logs/mongodb.log
+        replSet=configrs
+        logappend=true
+        bind_ip=192.168.209.128
+      #+END_EXAMPLE
+    + 启动configsvr节点
+      #+BEGIN_EXAMPLE
+        mongod -f /opt/mongodb/shard/configsvr/config1/mongodb.cfg
+        #192.168.209.128:28001
+        mongod -f /opt/mongodb/shard/configsvr/config2/mongodb.cfg
+        #192.168.209.128:28002
+        mongod -f /opt/mongodb/shard/configsvr/config3/mongodb.cfg
+        #192.168.209.128:28003
+      #+END_EXAMPLE
+    + 使configsvr节点集群生效
+      #+BEGIN_EXAMPLE
+        mongo 192.168.209.128:28001
+        #ip  port 
+        use admin # admin
+        cfg={_id:"configrs",members:[{_id:0,host:'192.168.209.128:28001'},{_i
+        d:1,host:'192.168.209.128:28002'},{_id:2,host:'192.168.209.128:28003'
+        }]};
+        rs.initiate(cfg) #
+      #+END_EXAMPLE
+    + 配置路由节点
+      #+BEGIN_EXAMPLE
+        mkdir -p /opt/mongodb/shard/routesvr/logs
+        #: 路由节点不需要data目录
+      #+END_EXAMPLE
+      + vi/opt/mongodb/shard/routesvr/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        configdb=configrs/192.168.209.128:28001,192.168.209.128:28002,192.168.209.128:28003
+        port=30000
+        fork=true
+        logpath=/opt/mongodb/shard/routesvr/logs/mongodb.log
+        logappend=true
+        bind_ip=192.168.209.128
+      #+END_EXAMPLE
+    + 启动路由节点
+      #+BEGIN_EXAMPLE
+      ./mongos -f /opt/mongodb/shard/routesvr/mongodb.cfg
+      #192.168.209.128:30000
+      #+END_EXAMPLE
+      这里我们没有用配置文件的方式启动，其中的参数意义大家应该都明白。一般来说一个数据节点对应一个配置节点，仲裁节点则不需要对应的配置节点。注意在启动路由节点时，要将配置节点地址写入到启动命令里。
+    + 配置ReplicaSet
+      这里可能会有点奇怪为什么Sharding会需要配置ReplicaSet。其实想想也能明白，多个节点的数据肯定是相关联的，如果不配一个ReplicaSet，怎么标识是同一个集群的呢。这也是人家mongodb的规定，咱们还是遵守吧。配置方式和之前所说的一样，定一个cfg，然后初始化配置。
+    + 配置Sharding
+      #+BEGIN_EXAMPLE
+      mongo 192.168.209.128:30000 #
+      sh.addShard("shard001/192.168.209.128:27001");
+      sh.addShard("shard002/192.168.209.128:27017");
+      #shard001shard002  replica set   shard 
+      set 
+      use testdb
+      sh.enableSharding("testdb") #testdb is database name
+      sh.shardCollection("testdb.testcon",{"name":"hashed"})
+      db.collection.status()
+      #+END_EXAMPLE
+      第一个命令很容易理解，第二个命令是对需要进行Sharding的数据库进行配置，第三个命令是对需要进行Sharding的Collection进行配置，这里的testcon即为Collection的名字。另外还有个key，这个是比较关键的东西，对于查询效率会有很大的影响。
+      到这里Sharding也已经搭建完成了，以上只是最简单的搭建方式，其中某些配置仍然使用的是默认配置。如果设置不当，会导致效率异常低下，所以建议大家多看看官方文档再进行默认配置的修改。
+      以上三种集群搭建方式首选ReplicaSet，只有真的是大数据，Sharding才能显现威力，毕竟备节点同步数据是需要时间的。Sharding可以将多片数据集中到路由节点上进行一些对比，然后将数据返回给客户端，但是效率还是比较低的说。
+      我自己有测试过，不过具体的机器配置已经不记得了。ReplicaSet的ips在数据达到1400W条时基本能达到1000左右，而Sharding在300W时已经下降到500IPS，两者的单位数据大小大概是10kb。大家在应用的时候还是多多做下性能测试，毕竟不像Redis有benchmark。
+          5.6 、MongoDB索引
 1、索引
         1.1 、创建索引
 
