@@ -450,3 +450,180 @@
         #+BEGIN_EXAMPLE
           db.mycoll.find().sort({$natural:-1})
         #+END_EXAMPLE
+* mongodb 高级命令
+** 用户管理
+*** 添加用户
+    + 为user-demo添加zhangsan用户
+    #+BEGIN_EXAMPLE
+      use testdb
+      db.createUser({user:"zhangsan",pwd:"123",roles:[{ role:"dbAdmin",db:"user-demo"}]})
+    #+END_EXAMPLE
+    + 具体角色有
+    read：允许用户读取指定数据库readWrite：允许用户读写指定数据库
+    dbAdmin：允许用户在指定数据库中执行管理函数，如索引创建、删除，查看统计或访问system.profile userAdmin：允许用户向system.users集合写入，可以找指定数据库里创建、删除和管理用户
+    clusterAdmin：只在admin数据库中可用，赋予用户所有分片和复制集相关函数的管理权限。
+    readAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的读权限
+    readWriteAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的读写权限
+    userAdminAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的userAdmin权限
+    dbAdminAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的dbAdmin权限。
+    root：只在admin数据库中可用。超级账号，超级权限
+*** 查看所有用户
+    #+BEGIN_EXAMPLE
+      db.system.users.find()
+    #+END_EXAMPLE
+    和用户管理相关的操作基本都要在admin数据库下运行，要先use admin;
+    如果在某个单一的数据库下，那只能对当前数据库的权限进行操
+*** 用户删除操作
+*** 查看当前用户权限
+*** 修改密码
+*** 启用用户
+*** 安全检查--auth
+    非testdb是不能操作数据库的,启用自己的用户才能访问
+    非admin数据库的用户不能使用数据库命令，admin数据库中的数据经过认证为管理员用户
+** MongoDB高可用方案实战演
+详解RouteServer（路由服务器）、
+ConfigServer（配置服务器）、ReplicaSet（副本集）、
+Shard（切片）、
+Chunk（分块）MongDB启动与关闭
+*** 命令行启动
+*** 配置文件启动
+    mongoDB基本配置/opt/mongodb/mongodb.cfg
+    环境变量配置
+    Mongodb的三种集群方式的搭建：Master-Slaver/ReplicaSet/Sharding。
+*** MongoDB主从搭建
+    这个是最简答的集群搭建，不过准确说也不能算是集群，只能说是主备。并且官方已经不推荐这种方式， 所以在这里只是简单的介绍下吧，搭建方式也相对简单。
+    主机配置/opt/mongodb/master-slave/master/mongodb.cfg
+    从机配置/opt/mongodb/master-slave/slave/mongodb.cfg
+    启动服务
+    连接测试
+    基本上只要在主节点和备节点上分别执行这两条命令，Master-Slaver就算搭建完成了。我没有试过主节点挂掉后备节点是否能变成主节点，不过既然已经不推荐了，大家就没必要去使用了。
+*** MongoDB副本集
+    中文翻译叫做副本集，不过我并不喜欢把英文翻译成中文，总是感觉怪怪的。其实简单来说就是集群当中包含了多份数据，保证主节点挂掉了，备节点能继续提供数据服务，提供的前提就是数据需要和主节点一致。如下图：
+    Mongodb(M)表示主节点，Mongodb(S)表示备节点，Mongodb(A)表示仲裁节点。主备节点存储数据，仲裁节点不存储数据。客户端同时连接主节点与备节点，不连接仲裁节点。
+    默认设置下，主节点提供所有增删查改服务，备节点不提供任何服务。但是可以通过设置使备节点提供查询服务，这样就可以减少主节点的压力，当客户端进行数据查询时，请求自动转到备节点上。这个设置叫做ReadPreferenceModes，同时Java客户端提供了简单的配置方式，可以不必直接对数据库进行操作。
+    仲裁节点是一种特殊的节点，它本身并不存储数据，主要的作用是决定哪一个备节点在主节点挂掉之后提升为主节点，所以客户端不需要连接此节点。这里虽然只有一个备节点，但是仍然需要一个仲裁节点来提升备节点级别。我开始也不相信必须要有仲裁节点，但是自己也试过没仲裁节点的话，主节点挂了备节点还是备节点，所以咱们还是需要它的。
+    介绍完了集群方案，那么现在就开始搭建了。
+    1.建立数据文件夹
+    一般情况下不会把数据目录建立在mongodb的解压目录下，不过这里方便起见，就建在mongodb解压目录下吧。
+    2.建立配置文件
+    由于配置比较多，所以我们将配置写到文件里。
+    vi/opt/mongodb/replset/master/mongodb.cfg
+    vi/opt/mongodb/replset/slave/mongodb.cfg
+
+    vi/opt/mongodb/replset/arbiter/mongodb.cfg
+    参数解释：
+    dbpath：数据存放目录
+    logpath：日志存放路径logappend：以追加的方式记录日志replSet：replicaset的名字
+    bind_ip：mongodb所绑定的ip地址
+    port：mongodb进程所使用的端口号，默认为27017
+    fork：以后台方式运行进程
+    3、分发到集群下的其他机器
+    4.启动mongodb
+    进入每个mongodb节点的bin目录下
+    注意配置文件的路径一定要保证正确，可以是相对路径也可以是绝对路径。
+    5.配置主，备，仲裁节点
+    可以通过客户端连接mongodb，也可以直接在三个节点中选择一个连接mongodb。
+    注意：cfg是相当于设置一个变量，可以是任意的名字，当然最好不要是mongodb的关键字，conf，
+    config都可以。最外层的_id表示replicaset的名字，members里包含的是所有节点的地址以及优先级。优先级最高的即成为主节点，即这里的192.168.209.128:27017。特别注意的是，对于仲裁节点，需要有个特别的配置——arbiterOnly:true。这个千万不能少了，不然主备模式就不能生效。
+    配置的生效时间根据不同的机器配置会有长有短，配置不错的话基本上十几秒内就能生效，有的配置需要一两分钟。如果生效了，执行rs.status()命令会看到如下信息：
+
+如果配置正在生效，其中会包含如下信息：
+
+同时可以查看对应节点的日志，发现正在等待别的节点生效或者正在分配数据文件。
+现在基本上已经完成了集群的所有搭建工作。至于测试工作，可以留给大家自己试试。一个是往主节点插入数据，能从备节点查到之前插入的数据（查询备节点可能会遇到某个问题，可以自己去网上查查看）。二是停掉主节点，备节点能变成主节点提供服务。三是恢复主节点，备节点也能恢复其备的角色，而不是继续充当主的角色。二和三都可以通过rs.status()命令实时查看集群的变化。
+        5.5 、MongoDB数据分片
+和ReplicaSet类似，都需要一个仲裁节点，但是Sharding还需要配置节点和路由节点。就三种集群搭建方式来说，这种是最复杂的。
+配置数据节点
+vi/opt/mongodb/shard/replset/replica1/mongodb.cfg
+vi/opt/mongodb/shard/replset/replica2/mongodb.cfg
+
+vi/opt/mongodb/shard/replset/replica3/mongodb.cfg
+
+2.启动数据节点
+3、使数据节点集群生效
+4、配置configsvr
+/opt/mongodb/shard/configsvr/config1/mongodb.cfg
+/opt/mongodb/shard/configsvr/config2/mongodb.cfg
+/opt/mongodb/shard/configsvr/config3/mongodb.cfg
+5、启动configsvr节点
+6、使configsvr节点集群生效
+配置路由节点
+vi/opt/mongodb/shard/routesvr/mongodb.cfg
+7.启动路由节点
+这里我们没有用配置文件的方式启动，其中的参数意义大家应该都明白。一般来说一个数据节点对应一个配置节点，仲裁节点则不需要对应的配置节点。注意在启动路由节点时，要将配置节点地址写入到启动命令里。
+4.配置ReplicaSet
+这里可能会有点奇怪为什么Sharding会需要配置ReplicaSet。其实想想也能明白，多个节点的数据肯定是相关联的，如果不配一个ReplicaSet，怎么标识是同一个集群的呢。这也是人家mongodb的规定，咱们还是遵守吧。配置方式和之前所说的一样，定一个cfg，然后初始化配置。
+8.配置Sharding
+第一个命令很容易理解，第二个命令是对需要进行Sharding的数据库进行配置，第三个命令是对需要进行Sharding的Collection进行配置，这里的testcon即为Collection的名字。另外还有个key，这个是比较关键的东西，对于查询效率会有很大的影响。
+到这里Sharding也已经搭建完成了，以上只是最简单的搭建方式，其中某些配置仍然使用的是默认配置。如果设置不当，会导致效率异常低下，所以建议大家多看看官方文档再进行默认配置的修改。
+以上三种集群搭建方式首选ReplicaSet，只有真的是大数据，Sharding才能显现威力，毕竟备节点同步数据是需要时间的。Sharding可以将多片数据集中到路由节点上进行一些对比，然后将数据返回给客户端，但是效率还是比较低的说。
+我自己有测试过，不过具体的机器配置已经不记得了。ReplicaSet的ips在数据达到1400W条时基本能达到1000左右，而Sharding在300W时已经下降到500IPS，两者的单位数据大小大概是10kb。大家在应用的时候还是多多做下性能测试，毕竟不像Redis有benchmark。
+        5.6 、MongoDB索引
+1、索引
+        1.1 、创建索引
+
+创建索引同时指定索引的名字
+
+        1.2 、索引使用需要注意的地方
+1)创建索引的时候注意1是正序创建索引-1是倒序创建索引
+2)索引的创建在提高查询性能的同事会影响插入的性能 对于经常查询少插入的文档可以考虑用索引
+3)符合索引要注意索引的先后顺序
+4)每个键全建立索引不一定就能提高性能呢 索引不是万能的
+5)在做排序工作的时候如果是超大数据量也可以考虑加上索引 用来提高排序的性能
+        1.3 、唯一索引
+解决文档books不能插入重复的数值
+        1.4 、剔除重复值
+如果建议唯一索引之前已经有重复数值如何处理
+        1.5 、后台执行创建索引
+为了解决创建索引锁表的问题，在不影响查询功能，可以在后台运行
+13.6、强制查询已经建立好的索引
+        1.7 、在shell查看数据库已经建立的索引
+        1.8 、查询索引信息和查询状态信息
+        1.9 、批量和精确删除索引
+2、二维索引建立二维索引
+
+5.7、MongoDB数据转存及恢复
+1、导出数据(中断其他操作)
+使用mongoexport命令行
+-d指明使用的库
+-c指明要导出的表
+-o指明要导出的文件名
+-csv指定导出的csv格式
+-q过滤导出
+--type<json|csv|tsv>
+把数据好testdb中的persons导出
+
+导出其他主机数据库的文档
+
+18
+咕泡出品，必属精品www.gupaoedu.com
+
+2、导入数据(中断其他操作)
+
+
+3、运行时备份mongodump.exe
+API:http://cn.docs.mongodb.org/manual/reference/mongodump
+4、运行时恢复mongorestore.exe
+API:http://cn.docs.mongodb.org/manual/reference/mongorestore
+恢复数据库
+
+
+
+
+5、mongoDB是文件数据库这其实就可以用拷贝文件的方式进行备份
+6、上锁和解锁
+
+
+
+7、数据修复
+当停电等不可逆转灾难来临的时候,由于mongodb的存储结构导致会产生垃圾数据,在数据恢复以后这垃圾数据依然存在,这是数据库提供一个自我修复的能力.使用起来很简单
+
+
+
+
+
+
+
+
+
+19
