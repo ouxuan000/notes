@@ -4,6 +4,58 @@
     + 根据哪个字段判断已经接收? (目前使用 budgetvouchid)
     + 统一指标id下数据， 类型不一致的数据如何接收(1. 新增 2. 删除, 3:修改(金额修改后) 分别做什么处理, 如果做了支付业务应该如何操作)
     + 根据数据唯一主键以及数据接收类型过滤掉已经接收过的数据，同时数据库也会使用联合约束进行最底层控制
+    + 转换视图
+      #+BEGIN_EXAMPLE
+      CREATE OR REPLACE VIEW BDG_V_CENTRALMAPLOCAL AS
+        SELECT
+            t.BUDGETVOUID as sourceguid, --ID
+            t.BUDGETNUM as bgtdocno,      --指标文号
+            b.guid as proguid,           --项目
+            a.guid as EXPFUNCGUID,       --功能科目
+            e.guid as expecoguid,        --经济科目
+            t.checkamount as amt,        --金额
+            t.checkamount as curbal,     --剩余金额
+
+            case t.DIVCODE
+              when '617002' then '0BDD95021A90E78115F4F148575FD177'
+              when '617003' then '9474CC84516C0265AAADE6209B664BC2'
+              when '617004' then 'BFC5908776AD39F22864D1FC09D6F4AA'
+              when '617005' then '288C46B9D9DCC9F28E49C1DE60DEADCA'
+              when '617006' then '85EC225C95E68455895A1EAF6F439EC6'
+              when '617007' then '6793A0D2E20947688FDA7ED142BD06E0'
+              when '617008' then '8F36DA73726CBC121602D92A53471632'
+              when '617009' then '0985AD99F5D12320A3144AEBD32EE818'
+              when '617098' then '3D9E7BE82ED118D5466AD22BD54F6CB4'
+              when '617099' then 'B56436E64836F193B5EB17A139686A7B'
+                else ''end
+            AGENCYGUID,
+
+            t.BUDGETSOURCE  BGTSOURCEGUID, --预算来源
+            t.DEPTNAME as FININTORGGUID, --科室
+            d.guid as PAYTYPEGUID,       --支付方式
+            t.SUMMARY as REMARK,         --摘要
+            f.guid as fundtypeguid,      --资金性质
+            h.guid as AGENCYEXPGUID     --项目类别
+
+          FROM BDG_T_RECEIVEBDGDATA   T,   --原始数据
+              BDG_T_PUBPROJECT b,     --项目
+              FASP_T_PUBEXPECO     e,     --经济科目
+              fasp_t_pubexpfunc   a,      --功能科目
+              FASP_V_AGE_LEVEL1PROVINCE g, --位
+              dmb_zffs    d,                --支付方式
+              dmb_zjxz    f,                --资金性质
+              dmb_xmlb    h                 --项目类别
+
+        WHERE nvl(t.receivestatus,0) != '1'
+          AND t.PRJCODE = b.code(+)
+          and t.BSICODE = e.code(+)
+          and t.DIVCODE = g.code(+)
+          and t.FUNCTYPECODE = a.code(+)
+          and t.PAYMETHOD = d.name
+          and t.MONEYATTR = f.name
+          and t.PRJTYPE = h.name
+        ;
+      #+END_EXAMPLE 
 * 指标确认
     + 确认目前只是根据实际业务对接收数据做了修改保存
     + 可以直接再编辑页面选中数据确认，也可以修改保存并确认
@@ -18,7 +70,7 @@
     + 支持重复多次挂接, 重复挂接不走流程只扣减中央指标额度
     + 支持多对多挂接， 挂接关系后台算法进行处理，保存中央指标和单位指标挂接关系到关联表中，并且保存每次挂接的金额, 后续上报会根据改记录进行金额拆分
 * 涉及的业务表及关系
-    + 上级接收数据备份表 p#bdg_t_receivebdgdata, 只增不减
+    + 上级接收数据备份表 p#bdg_t_bdgreceivedata, 只增不减
     + 指标接收业务表，p#bdg_t_bdgreceive 上级接收数据会经过视图(BDG_V_CENTRALMAPLOCAL)转换， 保存到业务表中 
     + 挂接关系表 p#BDG_T_CENTRALLOCALREL (centralid: 中央指标id (budgetvouchid), localid:单位指标id (bdgsub.guid))
 * 配置
@@ -48,3 +100,81 @@
 * 问题记录
     + 地址不通 用wget wsdl地址测试,  能下载才能保证通
     + jar包冲突 http://www.voidcn.com/article/p-dhgfkvyl-bpb.html
+* 指标上报
+  + 转换视图, 数据上报前将业务数据转换为上级财政需要的格式
+    #+BEGIN_EXAMPLE
+    create or replace view bdg_t_report_view as
+      select '肇庆市本级' as "financeName",--单位
+            t4.name as "bsiName",--经济科目名称
+            t4.code as "bsiCode",--经济科目编码
+
+            case when t2.CODE like '900%' then t2.NAME else '肇庆市本级' end as "divName",--单位名称
+            case t2.CODE
+            when '900001' then '617002'
+            when '900002' then '617003'
+            when '900004' then '617004'
+            when '900003' then '617005'
+            when '900006' then '617006'
+            when '900007' then '617007'
+            when '900008' then '617008'
+            when '900005' then '617009'
+            when '900009' then '617098'
+            when '900010' then '617099'
+            else '617001' end "divCode",--单位编码
+
+            t5.name as "functypeName",--功能科目名称
+            t5.code as "functypeCode",--功能科目编码
+            t.CENTRALID as parentVouId,--上级指标ID
+            t.guid as vouId,--本级指标ID
+            t.sourceguid,   --原指标ID
+            t.bgtdocno as ownBudgetNum,--本级指标文号
+            to_char(to_date(t.AUDITDATE, 'yyyymmddhh24miss'),'yyyy-mm-dd hh24:mi:ss')  as approveDate,--下达日期
+            t.year as setyear,--预算年度
+            t.amt as checkAmount,--指标金额
+            t.remark as summary,--摘要
+
+            case
+            when t7.code in('006004','006002') then '追加指标单'
+            when t7.code in('005005','005003') then '追减指标单'
+            when t7.code in('004005','004003') then '调剂指标单'
+            else ' 'end  budgettypeCode,--单据类型
+
+            t6.code as deptCode,--科室编码
+            t6.NAME as deptName,--科室名称
+            case when t2.CODE like '900%' then
+              case when t.CENTRALID is null then '本级' else '下级' end
+                else '本级' end  budgetLevels,--预算级次
+            '1' as changeType,--变更类型
+            '' as sourceVouId,
+            '' as vouCode,
+            '' as moneyAttr,
+            '' as fundType,
+            t.billcode as billNo,
+            '' as prjCategroyCode,
+            '' as prjCategroyName,
+            '' as payMethod,
+            '' as createDate,
+            '' as prjType,
+            '' as payType,
+            '' as useDir,
+            '' as budgetSource,
+            '' as bpName,
+            '' as budgetPro,
+            t.reportstatus
+        from bdg_t_report  t
+            left join FASP_V_AGE_LEVEL1PROVINCE t2--单位
+            on t.AGENCYGUID = t2.guid
+            left join FASP_T_PUBAGENCYEXP       t3--项目类别
+            on t.agencyexpguid = t3.guid
+            left join FASP_T_PUBEXPECO          t4--经济科目
+            on t.expecoguid = t4.GUID
+            left join FASP_T_PUBEXPFUNC         t5--功能科目
+            on t.expfuncguid = t5.guid
+            left join FASP_V_PUBDEPARTMENT      t6--科室
+            on t.FININTORGGUID = t6.guid
+            left join fasp_t_pavoucher          t7
+            on t.VCHTYPEID = t7.GUID
+
+      --where t.reportstatus = '1'
+      ;
+    #+END_EXAMPLE
