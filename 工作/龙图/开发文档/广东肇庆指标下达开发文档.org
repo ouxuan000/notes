@@ -4,6 +4,7 @@
     + 根据哪个字段判断已经接收? (目前使用 budgetvouchid)
     + 统一指标id下数据， 类型不一致的数据如何接收(1. 新增 2. 删除, 3:修改(金额修改后) 分别做什么处理, 如果做了支付业务应该如何操作)
     + 根据数据唯一主键以及数据接收类型过滤掉已经接收过的数据，同时数据库也会使用联合约束进行最底层控制
+    + 后续版本中: 视图中需要写入sffzb(负指标标志), 金额统一转为正数
     + 转换视图
       #+BEGIN_EXAMPLE
       CREATE OR REPLACE VIEW BDG_V_CENTRALMAPLOCAL AS
@@ -64,11 +65,13 @@
     + 生成后的数据可以取消生成
     + 如果做了支付业务后如何取消生成? 做了支付业务需要业务系统先将业务数据处理， 才可以继续取消生成
     + 单位指标是否可以对这些指标进行删除？ 需要级联删除
+    + todo 负指标部分需要特殊处理
 * 挂接
     + 一笔中央指标对多笔(没有挂接过)单位指标进行挂接
     + 已经挂接的数据有余额可以重复挂接， 可以取消挂接， 挂接后有余额不可以进行生成指标，挂接和生成只能选一种操作
     + 支持重复多次挂接, 重复挂接不走流程只扣减中央指标额度
-    + 支持多对多挂接， 挂接关系后台算法进行处理，保存中央指标和单位指标挂接关系到关联表中，并且保存每次挂接的金额, 后续上报会根据改记录进行金额拆分
+    + 支持多对多挂接， 挂接关系后台算法进行处理，保存中央指标和单位指标挂接关系到关联表中，并且保存每次挂接的金额(挂接余额), 后续上报会根据改记录进行金额拆分
+    + 所有金额统一转为正数进行处理(包括负指标)
 * 涉及的业务表及关系
     + 上级接收数据备份表 p#bdg_t_bdgreceivedata, 只增不减
     + 指标接收业务表，p#bdg_t_bdgreceive 上级接收数据会经过视图(BDG_V_CENTRALMAPLOCAL)转换， 保存到业务表中 
@@ -176,5 +179,173 @@
             on t.VCHTYPEID = t7.GUID
 
       --where t.reportstatus = '1'
+      ;
+    #+END_EXAMPLE
+  + 上报数据根据sffzb转换为想要的金额， 目前金额为正数
+* 凭证上报
+  + 上报转换视图
+    #+BEGIN_EXAMPLE
+    create or replace view pay_t_report_view as
+      select --t.sourceguid as parentVouId,
+            t.YEAR as setYear,
+            t.guid as voucherId,--凭证ID
+            t.sourceguid,--原凭证ID
+            --(select guid from bdg_t_bdgsub b where b.TOCTRLID=t.INDICTRLID) as budgetVouId,--指标ID
+            t.BDGREPORTGUID as budgetVouId,--凭证指标ID
+            substr(t8.NAME,1,5) as billtypeCode,--交易凭证类型
+            t.AMT as payAmount,--支付金额
+            t.USAGE as purpose,--用途
+            t.REMARK as remark,--备注
+            to_char(to_date(t.CLEARDATE, 'yyyymmddhh24miss'),'yyyy-mm-dd hh24:mi:ss') as payDate,--回单日期
+            to_char(to_date(t.CREATEDATE, 'yyyymmddhh24miss'),'yyyy-mm-dd hh24:mi:ss') as createDate,--创建日期
+            t2.code entCode,--付款单位编码
+            t2.name as entName,--付款单位名称
+            t5.code as bsCode,--功能科目编码
+            t5.name as bsName,--功能科目名称
+            t7.code as mkCode,--资金性质编码
+            T7.NAME as mkName,--资金性质名称
+            t.GATHERBANKACCTNAME as payeeAccountName,--收款人名称
+            t.GATHERBANKACCTCODE as payeeAccountNo,--收款人账号
+            case when t.GATHERBANKNAME is null then '无' else t.GATHERBANKNAME end payeeAccountBank,--收款人开户银行名称
+            t.PAYMENTBANKACCTCODE as payAccountNo,--付款账户账号
+            t.PAYMENTBANKACCTNAME as payAccountName,--付款账户名称
+            t. PAYMENTBANKNAME as payAccountBank,--付款账户银行名称
+            t6.CODE as pkCode,--支付方式编码
+            t6.NAME as pkName,--支付方式名称
+            t4.code as bsiCode,--经济科目代码
+            t4.name as bsiName,--经济科目名称
+            t.billcode as billNo,--凭证号
+            '1' as changeType, --变更凭证
+
+            /*t2.name as "financeName",
+            t3.name as "bsiName",
+            t3.code as "bsiCode",
+            t4.name as "divName",
+            t4.code as "divCode",
+            t5.name as "functypeName",
+            t5.code as "functypeCode",
+            t.guid as vouId,
+            '' as sourceVouId,
+            '' as vouCode,
+            t.bgtdocno as ownBudgetNum,
+            '' as approveDate,
+            '' as moneyAttr,
+            '' as fundType,
+            '' as prjCategroyCode,
+            '' as prjCategroyName,
+            t.amt as checkAmount,
+            t.remark as summary,
+            '' as payMethod,
+            '' as budgettypeCode,
+            '' as deptCode,
+            '' as deptName,
+            '' as budgetLevels,
+            '' as prjType,
+            '' as payType,
+            '' as useDir,
+            '' as budgetSource,
+            '' as bpName,
+            '' as budgetPro,*/
+            t.reportstatus
+        from pay_t_report  t,
+            FASP_V_AGE_LEVEL1PROVINCE t2,--单位
+            FASP_T_PUBAGENCYEXP       t3,--项目类别
+            FASP_T_PUBEXPECO          t4,--经济科目
+            FASP_T_PUBEXPFUNC         t5,--功能科目
+            FASP_T_PUBPAYTYPE         t6,--支付方式
+            FASP_T_PUBFUNDTYPE        t7,--资金性质
+            fasp_t_pavoucher          t8 --凭证类型
+
+      where /*t.reportstatus = '1' and*/ t.AGENCYGUID = t2.guid(+)
+        and t.agencyexpguid = t3.guid(+)
+        and t.expecoguid = t4.GUID(+)
+        and t.expfuncguid = t5.guid(+)
+        and t.PAYTYPEGUID = t6.GUID(+)
+        and t.FUNDTYPEGUID = t7.GUID(+)
+        and t.VCHTYPEID = t8.GUID(+)
+      ;
+
+    #+END_EXAMPLE
+* 实拨上报
+  + 上报转换视图
+    #+BEGIN_EXAMPLE
+    create or replace view realpay_t_report_view as
+      select --t.sourceguid as parentVouId,
+            t.YEAR as setYear,
+            t.guid as voucherId,--凭证ID
+            t.sourceguid,--原凭证ID
+            --(select guid from bdg_t_bdgsub b where b.TOCTRLID=t.INDICTRLID) as budgetVouId,--指标ID
+            t.BDGREPORTGUID as budgetVouId,--凭证指标ID
+            substr(t8.NAME,1,5) as billtypeCode,--交易凭证类型
+            t.AMT as payAmount,--支付金额
+            t.USAGE as purpose,--用途
+            t.REMARK as remark,--备注
+            to_char(to_date(t.CREATETIME, 'yyyymmddhh24miss'),'yyyy-mm-dd hh24:mi:ss') as payDate,--回单日期
+            to_char(to_date(t.CREATETIME, 'yyyymmddhh24miss'),'yyyy-mm-dd hh24:mi:ss') as createDate,--创建日期
+            t2.code entCode,--付款单位编码
+            t2.name as entName,--付款单位名称
+            t5.code as bsCode,--功能科目编码
+            t5.name as bsName,--功能科目名称
+            t7.code as mkCode,--资金性质编码
+            T7.NAME as mkName,--资金性质名称
+            t.GATHERBANKACCTNAME as payeeAccountName,--收款人名称
+            t.GATHERBANKACCTCODE as payeeAccountNo,--收款人账号
+            case when t.GATHERBANKNAME is null then '无' else t.GATHERBANKNAME end payeeAccountBank,--收款人开户银行名称
+            t.PAYMENTBANKACCTCODE as payAccountNo,--付款账户账号
+            t.PAYMENTBANKACCTNAME as payAccountName,--付款账户名称
+            t. PAYMENTBANKNAME as payAccountBank,--付款账户银行名称
+            t6.CODE as pkCode,--支付方式编码
+            t6.NAME as pkName,--支付方式名称
+            t4.code as bsiCode,--经济科目代码
+            t4.name as bsiName,--经济科目名称
+            t.billcode as billNo,--凭证号
+            '1' as changeType --变更凭证
+
+            /*t2.name as "financeName",
+            t3.name as "bsiName",
+            t3.code as "bsiCode",
+            t4.name as "divName",
+            t4.code as "divCode",
+            t5.name as "functypeName",
+            t5.code as "functypeCode",
+            t.guid as vouId,
+            '' as sourceVouId,
+            '' as vouCode,
+            t.bgtdocno as ownBudgetNum,
+            '' as approveDate,
+            '' as moneyAttr,
+            '' as fundType,
+            '' as prjCategroyCode,
+            '' as prjCategroyName,
+            t.amt as checkAmount,
+            t.remark as summary,
+            '' as payMethod,
+            '' as budgettypeCode,
+            '' as deptCode,
+            '' as deptName,
+            '' as budgetLevels,
+            '' as prjType,
+            '' as payType,
+            '' as useDir,
+            '' as budgetSource,
+            '' as bpName,
+            '' as budgetPro,*/
+            --t.reportstatus
+        from realpay_t_report  t,
+            FASP_V_AGE_LEVEL1PROVINCE t2,--单位
+            FASP_T_PUBAGENCYEXP       t3,--项目类别
+            FASP_T_PUBEXPECO          t4,--经济科目
+            FASP_T_PUBEXPFUNC         t5,--功能科目
+            FASP_T_PUBPAYTYPE         t6,--支付方式
+            FASP_T_PUBFUNDTYPE        t7,--资金性质
+            fasp_t_pavoucher          t8 --凭证类型
+
+      where /*t.reportstatus = '1' and*/ t.AGENCYGUID = t2.guid(+)
+        and t.agencyexpguid = t3.guid(+)
+        and t.expecoguid = t4.GUID(+)
+        and t.expfuncguid = t5.guid(+)
+        and t.PAYTYPEGUID = t6.GUID(+)
+        and t.FUNDTYPEGUID = t7.GUID(+)
+        and t.VCHTYPEID = t8.GUID(+)
       ;
     #+END_EXAMPLE
