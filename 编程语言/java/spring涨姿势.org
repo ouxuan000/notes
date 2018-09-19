@@ -300,10 +300,11 @@
               }
             }
           #+END_SRC
-          + AbstractApplicationContext#refresh()
+          + AbstractApplicationContext#refresh() 模板方法， 继承该类后可自定义实现具体的方法
             #+BEGIN_EXAMPLE
             SpringIOC容器对Bean定义资源的载入是从refresh()函数开始的，refresh()是一个模板方法，
             refresh()方法的作用是：在创建IOC容器前，如果已经有容器存在，则需要把已有的容器销毁和关闭，以保证在refresh之后使用的是新建立起来的IOC容器。refresh的作用类似于对IOC容器的重启，在新建立好的容器中对容器进行初始化，对Bean定义资源进行载入
+            refresh()方法主要为IOC容器Bean的生命周期管理提供条件，SpringIOC容器载入Bean定义资源文件从其子类容器的refreshBeanFactory()方法启动，所以整个refresh()中“ConfigurableListableBeanFactorybeanFactory=obtainFreshBeanFactory();”这句以后代码的都是注册容器的信息源和生命周期事件，载入过程就是从这句代码启动。
             #+END_EXAMPLE
             #+BEGIN_SRC java
             public abstract class AbstractApplicationContext extends DefaultResourceLoader
@@ -350,12 +351,15 @@
                   onRefresh();
 
                   // Check for listener beans and register them.
+                  //为事件传播器注册事件监听器
                   registerListeners();
 
                   // Instantiate all remaining (non-lazy-init) singletons.
+                  //初始化所有剩余的单例Bean
                   finishBeanFactoryInitialization(beanFactory);
 
                   // Last step: publish corresponding event.
+                  //初始化容器的生命周期事件处理器，并发布容器的生命周期事件
                   finishRefresh();
                 }
               }
