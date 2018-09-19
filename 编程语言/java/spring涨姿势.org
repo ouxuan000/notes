@@ -232,4 +232,43 @@
         reader.loadBeanDefinitions(resource);
         https://github.com/microzhao/demo/blob/master/java-beans/src/main/java/com/lx/demo/javabeans/SpringBeanGetDemo.java 
       #+END_SRC
+    + 高富帅ioc容器 FileSystemXmlApplicationContext
+      #+BEGIN_SRC java
+      public class FileSystemXmlApplicationContext extends AbstractXmlApplicationContext {
+    public FileSystemXmlApplicationContext() {
+    }
+
+    public FileSystemXmlApplicationContext(String configLocation) throws BeansException {
+        this(new String[]{configLocation}, true, (ApplicationContext)null);
+    }
+
+    public FileSystemXmlApplicationContext(String... configLocations) throws BeansException {
+        this(configLocations, true, (ApplicationContext)null);
+    }
+
+    public FileSystemXmlApplicationContext(String[] configLocations, ApplicationContext parent) throws BeansException {
+        this(configLocations, true, parent);
+    }
+
+    public FileSystemXmlApplicationContext(String[] configLocations, boolean refresh) throws BeansException {
+        this(configLocations, refresh, (ApplicationContext)null);
+    }
+
+    public FileSystemXmlApplicationContext(String[] configLocations, boolean refresh, @Nullable ApplicationContext parent) throws BeansException {
+        super(parent);
+        this.setConfigLocations(configLocations);
+        if (refresh) {
+            this.refresh();
+        }
+
+    }
+
+    protected Resource getResourceByPath(String path) {
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+
+        return new FileSystemResource(path);
+    }
+      #+END_SRC
 
