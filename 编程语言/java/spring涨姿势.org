@@ -408,17 +408,21 @@
                       @Override
                       protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
                         // Create a new XmlBeanDefinitionReader for the given BeanFactory.
+                        //创建XmlBeanDefinitionReader，即创建Bean读取器，并通过回调设置到容器中去，容器使用该读取器读取Bean定义资源
                         XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
 
                         // Configure the bean definition reader with this context's
                         // resource loading environment.
                         beanDefinitionReader.setEnvironment(this.getEnvironment());
+                        //为Bean读取器设置Spring资源加载器，AbstractXmlApplicationContext的
+                        //祖先父类AbstractApplicationContext继承DefaultResourceLoader，因此，容器本身也是一个资源加载器
                         beanDefinitionReader.setResourceLoader(this);
                         beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
 
                         // Allow a subclass to provide custom initialization of the reader,
                         // then proceed with actually loading the bean definitions.
                         initBeanDefinitionReader(beanDefinitionReader);
+                        // 真正开始加载bean
                         loadBeanDefinitions(beanDefinitionReader);
                       }
 
@@ -435,15 +439,63 @@
                       * @see #getResourcePatternResolver
                       */
                       protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
+                      //获取Bean定义资源的定位
                         Resource[] configResources = getConfigResources();
                         if (configResources != null) {
+                        //XmlBean读取器调用其父类AbstractBeanDefinitionReader读取定位的Bean定义资源
                           reader.loadBeanDefinitions(configResources);
                         }
+                        //如果子类中获取的Bean定义资源定位为空，则获取FileSystemXmlApplicationContext
+                        //构造方法中setConfigLocations方法设置的资源
                         String[] configLocations = getConfigLocations();
                         if (configLocations != null) {
+                        //XmlBean读取器调用其父类AbstractBeanDefinitionReader读取定位的Bean定义资源
                           reader.loadBeanDefinitions(configLocations);
                         }
                       }
 
                   }
                 #+END_SRC
+                + loadBeanDefinitions --> org.springframework.beans.factory.support.AbstractBeanDefinitionReader#loadBeanDefinitions(org.springframework.core.io.Resource...)  委派
+
+                  #+BEGIN_SRC java
+                    public int loadBeanDefinitions(String location, @Nullable Set<Resource> actualResources) throws BeanDefinitionStoreException {
+                      ResourceLoader resourceLoader = getResourceLoader();
+                      if (resourceLoader == null) {
+                        throw new BeanDefinitionStoreException(
+                            "Cannot load bean definitions from location [" + location + "]: no ResourceLoader available");
+                      }
+
+                      if (resourceLoader instanceof ResourcePatternResolver) {
+                        // Resource pattern matching available.
+                        try {
+                          Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
+                          int count = loadBeanDefinitions(resources);
+                          if (actualResources != null) {
+                            Collections.addAll(actualResources, resources);
+                          }
+                          if (logger.isTraceEnabled()) {
+                            logger.trace("Loaded " + count + " bean definitions from location pattern [" + location + "]");
+                          }
+                          return count;
+                        }
+                        catch (IOException ex) {
+                          throw new BeanDefinitionStoreException(
+                              "Could not resolve bean definition resource pattern [" + location + "]", ex);
+                        }
+                      }
+                      else {
+                        // Can only load single resources by absolute URL.
+                        Resource resource = resourceLoader.getResource(location);
+                        int count = loadBeanDefinitions(resource);
+                        if (actualResources != null) {
+                          actualResources.add(resource);
+                        }
+                        if (logger.isTraceEnabled()) {
+                          logger.trace("Loaded " + count + " bean definitions from location [" + location + "]");
+                        }
+                        return count;
+                      }
+                    }
+
+                  #+END_SRC
