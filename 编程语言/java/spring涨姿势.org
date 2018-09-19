@@ -318,7 +318,7 @@
 
                   // Tell the subclass to refresh the internal bean factory.
                   //告诉子类启动refreshBeanFactory()方法，Bean定义资源文件的载入从
-                  //子类的refreshBeanFactory()方法启动
+                  //子类的refreshBeanFactory()方法启动 org.springframework.context.support.AbstractRefreshableApplicationContext#refreshBeanFactory
                   ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
                   // Prepare the bean factory for use in this context.
@@ -364,5 +364,86 @@
                 }
               }
             }
-            #+END_SRC 
+            #+END_SRC
+            + obtainFreshBeanFactory() --> AbstractRefreshableApplicationContext#refreshBeanFactory (委派模式, 功能全部由子类实现)
+              #+BEGIN_SRC java
+             	/**
+              * This implementation performs an actual refresh of this context's underlying
+              * bean factory, shutting down the previous bean factory (if any) and
+              * initializing a fresh bean factory for the next phase of the context's lifecycle.
+              */
+              @Override
+              protected final void refreshBeanFactory() throws BeansException {
+              //有容器 关闭工厂 销毁bean
+                if (hasBeanFactory()) {
+                  destroyBeans();
+                  closeBeanFactory();
+                }
+                try {
+                //创建ioc容器
+                  DefaultListableBeanFactory beanFactory = createBeanFactory();
+                  beanFactory.setSerializationId(getId());
+                  //定制话容器
+                  customizeBeanFactory(beanFactory);
+                  //载入bean定义信息， 委派给子类实现
+                  loadBeanDefinitions(beanFactory);
+                  synchronized (this.beanFactoryMonitor) {
+                    this.beanFactory = beanFactory;
+                  }
+                }
+                catch (IOException ex) {
+                  throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex);
+                }
+              } 
+              #+END_SRC
+              + loadBeanDefinitions(beanFactory) --> org.springframework.context.support.AbstractXmlApplicationContext#loadBeanDefinitions(org.springframework.beans.factory.support.DefaultListableBeanFactory) 委派子类执行
+                #+BEGIN_SRC java
+                public abstract class AbstractXmlApplicationContext extends AbstractRefreshableConfigApplicationContext {
+                      /**
+                      * Loads the bean definitions via an XmlBeanDefinitionReader.
+                      * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
+                      * @see #initBeanDefinitionReader
+                      * @see #loadBeanDefinitions
+                      */
+                      @Override
+                      protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
+                        // Create a new XmlBeanDefinitionReader for the given BeanFactory.
+                        XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
 
+                        // Configure the bean definition reader with this context's
+                        // resource loading environment.
+                        beanDefinitionReader.setEnvironment(this.getEnvironment());
+                        beanDefinitionReader.setResourceLoader(this);
+                        beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
+
+                        // Allow a subclass to provide custom initialization of the reader,
+                        // then proceed with actually loading the bean definitions.
+                        initBeanDefinitionReader(beanDefinitionReader);
+                        loadBeanDefinitions(beanDefinitionReader);
+                      }
+
+                      /**
+                      * Load the bean definitions with the given XmlBeanDefinitionReader.
+                      * <p>The lifecycle of the bean factory is handled by the {@link #refreshBeanFactory}
+                      * method; hence this method is just supposed to load and/or register bean definitions.
+                      * @param reader the XmlBeanDefinitionReader to use
+                      * @throws BeansException in case of bean registration errors
+                      * @throws IOException if the required XML document isn't found
+                      * @see #refreshBeanFactory
+                      * @see #getConfigLocations
+                      * @see #getResources
+                      * @see #getResourcePatternResolver
+                      */
+                      protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
+                        Resource[] configResources = getConfigResources();
+                        if (configResources != null) {
+                          reader.loadBeanDefinitions(configResources);
+                        }
+                        String[] configLocations = getConfigLocations();
+                        if (configLocations != null) {
+                          reader.loadBeanDefinitions(configLocations);
+                        }
+                      }
+
+                  }
+                #+END_SRC
