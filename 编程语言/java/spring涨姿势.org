@@ -656,10 +656,50 @@
                     + registerBeanDefinitions
                       #+BEGIN_SRC java
                       	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
+                        //得到BeanDefinitionDocumentReader来对xml格式的BeanDefinition解析
                           BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
+                          //获得容器中注册的Bean数量
                           int countBefore = getRegistry().getBeanDefinitionCount();
+                          //解析过程入口，这里使用了委派模式，BeanDefinitionDocumentReader只是个接口,
+                          //具体的解析实现过程有实现类DefaultBeanDefinitionDocumentReader完成
                           documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
+                          //统计解析的Bean数量
                           return getRegistry().getBeanDefinitionCount() - countBefore;
                         }
                       #+END_SRC
-                      
+                      + registerBeanDefinitions --> org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader#doRegisterBeanDefinitions
+                        #+BEGIN_SRC java
+                       	/**
+                        * Register each bean definition within the given root {@code <beans/>} element.
+                        */
+                        @SuppressWarnings("deprecation")  // for Environment.acceptsProfiles(String...)
+                        protected void doRegisterBeanDefinitions(Element root) {
+                        //具体的解析过程由BeanDefinitionParserDelegate实现, 该类中实现springxml的各种元素
+                          BeanDefinitionParserDelegate parent = this.delegate;
+                          this.delegate = createDelegate(getReaderContext(), root, parent);
+
+                          if (this.delegate.isDefaultNamespace(root)) {
+                            String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
+                            if (StringUtils.hasText(profileSpec)) {
+                              String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
+                                  profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+                              // We cannot use Profiles.of(...) since profile expressions are not supported
+                              // in XML config. See SPR-12458 for details.
+                              if (!getReaderContext().getEnvironment().acceptsProfiles(specifiedProfiles)) {
+                                if (logger.isDebugEnabled()) {
+                                  logger.debug("Skipped XML bean definition file due to specified profiles [" + profileSpec +
+                                      "] not matching: " + getReaderContext().getResource());
+                                }
+                                return;
+                              }
+                            }
+                          }
+
+                          //自定义解析增强
+                          preProcessXml(root);
+                          parseBeanDefinitions(root, this.delegate);
+                          postProcessXml(root);
+
+                          this.delegate = parent;
+                        } 
+                        #+END_SRC
