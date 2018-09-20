@@ -507,4 +507,66 @@
                   + resourceloader类关系图
                     [[file://spring涨姿势/6.png]] 
                     [[file://spring涨姿势/7.png]]
+                  + getResource --> org.springframework.core.io.DefaultResourceLoader#getResource (待验证，FileSystemXmlApplicationContext最终使用的getResources方法)
+                    #+BEGIN_SRC java
+                   	@Override
+                    public Resource getResource(String location) {
+                      Assert.notNull(location, "Location must not be null");
+
+                      for (ProtocolResolver protocolResolver : this.protocolResolvers) {
+                        Resource resource = protocolResolver.resolve(location, this);
+                        if (resource != null) {
+                          return resource;
+                        }
+                      }
+                      //如果是类路径的方式，那需要使用ClassPathResource来得到bean文件的资源对象
+                      if (location.startsWith("/")) {
+                        return getResourceByPath(location);
+                      }
+                      else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
+                        return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
+                      }
+                      else {
+                        try {
+                          // Try to parse the location as a URL...
+                          //如果是URL方式，使用UrlResource作为bean文件的资源对象
+                          URL url = new URL(location);
+                          return (ResourceUtils.isFileURL(url) ? new FileUrlResource(url) : new UrlResource(url));
+                        }
+                        catch (MalformedURLException ex) {
+                          // No URL -> resolve as resource path.
+                          //如果既不是classpath标识，又不是URL标识的Resource定位，则调用
+                          //容器本身的getResourceByPath方法获取Resource
+                          return getResourceByPath(location);
+                        }
+                      }
+                    } 
+                    #+END_SRC
                   + loadBeanDefinitions -- > org.springframework.beans.factory.xml.XmlBeanDefinitionReader#loadBeanDefinitions(org.springframework.core.io.support.EncodedResource) 委派
+                    #+BEGIN_SRC java
+                   	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
+                      ...
+                      //将资源文件转为InputStream的IO流
+                        InputStream inputStream = encodedResource.getResource().getInputStream();
+                        try {
+                        //从InputStream中得到XML的解析源
+                          InputSource inputSource = new InputSource(inputStream);
+                          if (encodedResource.getEncoding() != null) {
+                            inputSource.setEncoding(encodedResource.getEncoding());
+                          }
+                          return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
+                        }
+                        finally {
+                          inputStream.close();
+                        }
+                      ...
+                    } 
+                    protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource)
+                        throws BeanDefinitionStoreException {
+                        //将XML文件转换为DOM对象，解析过程由documentLoader实现
+                        Document doc = doLoadDocument(inputSource, resource);
+                        //这里是启动对Bean定义解析的详细过程，该解析过程会用到Spring的Bean配置规则
+                        int count = registerBeanDefinitions(doc, resource);
+                        return count;
+                    }
+                    #+END_SRC
