@@ -944,7 +944,9 @@
 
                               return null;
                             }
-
+                          #+END_SRC
+                          + parsePropertyElements
+                            #+BEGIN_SRC java
                             // property属性解析
                             public void parsePropertyElements(Element beanEle, BeanDefinition bd) {
                               NodeList nl = beanEle.getChildNodes();
@@ -981,62 +983,65 @@
                                 this.parseState.pop();
                               }
                             }
+                            #+END_SRC
+                          + parsePropertyValue
+                            #+BEGIN_SRC java
+                              public Object parsePropertyValue(Element ele, BeanDefinition bd, @Nullable String propertyName) {
+                                String elementName = (propertyName != null ?
+                                    "<property> element for property '" + propertyName + "'" :
+                                    "<constructor-arg> element");
 
-                          #+END_SRC
+                                // Should only have one child element: ref, value, list, etc.
+                                //解析property子元素
+                                NodeList nl = ele.getChildNodes();
+                                Element subElement = null;
+                                for (int i = 0; i < nl.getLength(); i++) {
+                                  Node node = nl.item(i);
+                                  //子元素不是description和meta元素
+                                  if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
+                                      !nodeNameEquals(node, META_ELEMENT)) {
+                                    // Child element is what we're looking for.
+                                    if (subElement != null) {
+                                      error(elementName + " must not contain more than one sub-element", ele);
+                                    }
+                                    else {
+                                      subElement = (Element) node;
+                                    }
+                                  }
+                                }
 
-                        + xx
-                         #+BEGIN_SRC java
-                          public Object parsePropertyValue(Element ele, BeanDefinition bd, @Nullable String propertyName) {
-                            String elementName = (propertyName != null ?
-                                "<property> element for property '" + propertyName + "'" :
-                                "<constructor-arg> element");
+                                //属性值不能既是ref又是value
+                                boolean hasRefAttribute = ele.hasAttribute(REF_ATTRIBUTE);
+                                boolean hasValueAttribute = ele.hasAttribute(VALUE_ATTRIBUTE);
+                                if ((hasRefAttribute && hasValueAttribute) ||
+                                    ((hasRefAttribute || hasValueAttribute) && subElement != null)) {
+                                  error(elementName +
+                                      " is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", ele);
+                                }
 
-                            // Should only have one child element: ref, value, list, etc.
-                            NodeList nl = ele.getChildNodes();
-                            Element subElement = null;
-                            for (int i = 0; i < nl.getLength(); i++) {
-                              Node node = nl.item(i);
-                              if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
-                                  !nodeNameEquals(node, META_ELEMENT)) {
-                                // Child element is what we're looking for.
-                                if (subElement != null) {
-                                  error(elementName + " must not contain more than one sub-element", ele);
+                                if (hasRefAttribute) {
+                                  String refName = ele.getAttribute(REF_ATTRIBUTE);
+                                  if (!StringUtils.hasText(refName)) {
+                                    error(elementName + " contains empty 'ref' attribute", ele);
+                                  }
+                                  RuntimeBeanReference ref = new RuntimeBeanReference(refName);
+                                  ref.setSource(extractSource(ele));
+                                  return ref;
+                                }
+                                else if (hasValueAttribute) {
+                                //设置properties的引用关系
+                                  TypedStringValue valueHolder = new TypedStringValue(ele.getAttribute(VALUE_ATTRIBUTE));
+                                  valueHolder.setSource(extractSource(ele));
+                                  return valueHolder;
+                                }
+                                else if (subElement != null) {
+                                //查找子元素
+                                  return parsePropertySubElement(subElement, bd);
                                 }
                                 else {
-                                  subElement = (Element) node;
+                                  // Neither child element nor "ref" or "value" attribute found.
+                                  error(elementName + " must specify a ref or value", ele);
+                                  return null;
                                 }
-                              }
-                            }
-
-                            boolean hasRefAttribute = ele.hasAttribute(REF_ATTRIBUTE);
-                            boolean hasValueAttribute = ele.hasAttribute(VALUE_ATTRIBUTE);
-                            if ((hasRefAttribute && hasValueAttribute) ||
-                                ((hasRefAttribute || hasValueAttribute) && subElement != null)) {
-                              error(elementName +
-                                  " is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", ele);
-                            }
-
-                            if (hasRefAttribute) {
-                              String refName = ele.getAttribute(REF_ATTRIBUTE);
-                              if (!StringUtils.hasText(refName)) {
-                                error(elementName + " contains empty 'ref' attribute", ele);
-                              }
-                              RuntimeBeanReference ref = new RuntimeBeanReference(refName);
-                              ref.setSource(extractSource(ele));
-                              return ref;
-                            }
-                            else if (hasValueAttribute) {
-                              TypedStringValue valueHolder = new TypedStringValue(ele.getAttribute(VALUE_ATTRIBUTE));
-                              valueHolder.setSource(extractSource(ele));
-                              return valueHolder;
-                            }
-                            else if (subElement != null) {
-                              return parsePropertySubElement(subElement, bd);
-                            }
-                            else {
-                              // Neither child element nor "ref" or "value" attribute found.
-                              error(elementName + " must specify a ref or value", ele);
-                              return null;
-                            }
-                          } 
-                         #+END_SRC 
+                              } 
+                            #+END_SRC 
