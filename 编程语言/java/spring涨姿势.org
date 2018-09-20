@@ -867,7 +867,7 @@
                               if (containingBean == null) {
                                 checkNameUniqueness(beanName, aliases, ele);
                               }
-
+                              // 对bean进行详细解析
                               AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
                               if (beanDefinition != null) {
                                 if (!StringUtils.hasText(beanName)) {
@@ -880,6 +880,7 @@
                                       // Register an alias for the plain bean class name, if still possible,
                                       // if the generator returned the class name plus a suffix.
                                       // This is expected for Spring 1.2/2.0 backwards compatibility.
+                                      // 如果没有beanid 自动生存一个beanname来注册bean信息
                                       String beanClassName = beanDefinition.getBeanClassName();
                                       if (beanClassName != null &&
                                           beanName.startsWith(beanClassName) && beanName.length() > beanClassName.length() &&
@@ -898,4 +899,144 @@
 
                               return null;
                             } 
+
+                            //主要对bean中其他属性进行解析， 前面已经对bean id， name做过解析
+                            public AbstractBeanDefinition parseBeanDefinitionElement(
+                                Element ele, String beanName, @Nullable BeanDefinition containingBean) {
+
+                              this.parseState.push(new BeanEntry(beanName));
+
+                              //记录class名称不做实例话， 具体在注入时实例化
+                              String className = null;
+                              if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
+                                className = ele.getAttribute(CLASS_ATTRIBUTE).trim();
+                              }
+                              String parent = null;
+                              if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
+                                parent = ele.getAttribute(PARENT_ATTRIBUTE);
+                              }
+
+                              try {
+                                // 创建bean定义信息，并设置bean的依赖关系等..
+                                AbstractBeanDefinition bd = createBeanDefinition(className, parent);
+
+                                parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
+                                bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
+
+                                parseMetaElements(ele, bd);
+                                parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
+                                parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
+
+                                parseConstructorArgElements(ele, bd);
+                                //<bean><property></property>></bean>
+                                parsePropertyElements(ele, bd);
+                                parseQualifierElements(ele, bd);
+
+                                //设置当前bean的所需资源和依赖对象
+                                bd.setResource(this.readerContext.getResource());
+                                bd.setSource(extractSource(ele));
+
+                                return bd;
+                              }
+                              finally {
+                                this.parseState.pop();
+                              }
+
+                              return null;
+                            }
+
+                            // property属性解析
+                            public void parsePropertyElements(Element beanEle, BeanDefinition bd) {
+                              NodeList nl = beanEle.getChildNodes();
+                              for (int i = 0; i < nl.getLength(); i++) {
+                                Node node = nl.item(i);
+                                //获取property子元素
+                                if (isCandidateElement(node) && nodeNameEquals(node, PROPERTY_ELEMENT)) {
+                                  parsePropertyElement((Element) node, bd);
+                                }
+                              }
+                            }
+                            public void parsePropertyElement(Element ele, BeanDefinition bd) {
+                              String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
+                              if (!StringUtils.hasLength(propertyName)) {
+                                error("Tag 'property' must have a 'name' attribute", ele);
+                                return;
+                              }
+                              this.parseState.push(new PropertyEntry(propertyName));
+                              try {
+                                // 不能有同名property
+                                if (bd.getPropertyValues().contains(propertyName)) {
+                                  error("Multiple 'property' definitions for property '" + propertyName + "'", ele);
+                                  return;
+                                }
+                                //Should only have one child element: ref, value, list, etc
+                                Object val = parsePropertyValue(ele, bd, propertyName);
+                                PropertyValue pv = new PropertyValue(propertyName, val);
+                                //解析property中其他属性
+                                parseMetaElements(ele, pv);
+                                pv.setSource(extractSource(ele));
+                                bd.getPropertyValues().addPropertyValue(pv);
+                              }
+                              finally {
+                                this.parseState.pop();
+                              }
+                            }
+
                           #+END_SRC
+
+                        + xx
+                         #+BEGIN_SRC java
+                          public Object parsePropertyValue(Element ele, BeanDefinition bd, @Nullable String propertyName) {
+                            String elementName = (propertyName != null ?
+                                "<property> element for property '" + propertyName + "'" :
+                                "<constructor-arg> element");
+
+                            // Should only have one child element: ref, value, list, etc.
+                            NodeList nl = ele.getChildNodes();
+                            Element subElement = null;
+                            for (int i = 0; i < nl.getLength(); i++) {
+                              Node node = nl.item(i);
+                              if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
+                                  !nodeNameEquals(node, META_ELEMENT)) {
+                                // Child element is what we're looking for.
+                                if (subElement != null) {
+                                  error(elementName + " must not contain more than one sub-element", ele);
+                                }
+                                else {
+                                  subElement = (Element) node;
+                                }
+                              }
+                            }
+
+                            boolean hasRefAttribute = ele.hasAttribute(REF_ATTRIBUTE);
+                            boolean hasValueAttribute = ele.hasAttribute(VALUE_ATTRIBUTE);
+                            if ((hasRefAttribute && hasValueAttribute) ||
+                                ((hasRefAttribute || hasValueAttribute) && subElement != null)) {
+                              error(elementName +
+                                  " is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", ele);
+                            }
+
+                            if (hasRefAttribute) {
+                              String refName = ele.getAttribute(REF_ATTRIBUTE);
+                              if (!StringUtils.hasText(refName)) {
+                                error(elementName + " contains empty 'ref' attribute", ele);
+                              }
+                              RuntimeBeanReference ref = new RuntimeBeanReference(refName);
+                              ref.setSource(extractSource(ele));
+                              return ref;
+                            }
+                            else if (hasValueAttribute) {
+                              TypedStringValue valueHolder = new TypedStringValue(ele.getAttribute(VALUE_ATTRIBUTE));
+                              valueHolder.setSource(extractSource(ele));
+                              return valueHolder;
+                            }
+                            else if (subElement != null) {
+                              return parsePropertySubElement(subElement, bd);
+                            }
+                            else {
+                              // Neither child element nor "ref" or "value" attribute found.
+                              error(elementName + " must specify a ref or value", ele);
+                              return null;
+                            }
+                          } 
+                         #+END_SRC 
