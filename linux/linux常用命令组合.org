@@ -116,6 +116,7 @@
   #+BEGIN_EXAMPLE
   svn log --search zhaozhiwei -r {2014-11-04}:{2014-11-13} -v
   svn log /home/lx7ly/Oracle/Middleware/user_projects/app/ifmis_dev --search zhaozhiwei -r {2017-09-05}:{2017-09-07} --xml + /home/lx7ly/Documents/loginfo_`date "+%Y%m%d"`.xml
+  more loginfo_20180921.xml| grep -E '<msg>.+</msg>'|sed 's/<msg>//g'|sed 's/<\/msg>//' |uniq > 11.txt
   #+BEGIN_EXAMPLE
 43. 导出替换文件
   #+BEGIN_EXAMPLE
@@ -170,11 +171,11 @@
   find . -type d -name "*fasp"|xargs ls -al|grep '^-'|awk '{print $9}'|xargs grep "bdglevel"//不能访问全路径
   find . -type d -name "business" -exec find {} -type f \;|xargs grep "1500" //可用 * 查找这些目录下文件中带有1500的
   #+END_EXAMPLE
-50. 除了本机正在使用中的最新内核，删除所有旧内核:
+44. 除了本机正在使用中的最新内核，删除所有旧内核:
   #+BEGIN_EXAMPLE
   sudo apt-get remove --purge $(dpkg -l 'linux-*' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/")"'/d;s/^[^ ]* [^ ]* \([^ ]*\).*/\1/;/[0-9]/!d')
   #+END_EXAMPLE
-51. 假如要转换一个文件夹下所有的文件编码，
+45. 假如要转换一个文件夹下所有的文件编码，
   #+BEGIN_EXAMPLE
     # 源目录 src 复制目录结构到utf8目录
     find src -type d -exec mkdir -p utf8/{} \;
@@ -186,17 +187,17 @@
     iconv -f ISO-8859-1 -t UTF-8 test.php -o test.php.utf8
     enca -L zh_CN -x utf-8 bdgrece.txt
   #+END_EXAMPLE
-52. 导出odt文件，发送到开发设计文档目录中
+46. 导出odt文件，发送到开发设计文档目录中
  #+BEGIN_SRC 
 find /home/lx7ly/Documents/notes -name "*.odt" -exec mv {} /home/lx7ly/workspace/BDG-指标管理/03分析设计/02系统设计/V3_0_3_0 \; 
  #+END_SRC
-53. 下载日志文件
+47. 下载日志文件
     + scp -P 22 test@192.168.3.72:/weblogic/Oracle/Middleware/user_projects/domains/pay_domain28004/bin/28004.out /tmp
     + 密码 test
-54. 批量执行命令及awk使用
+48. 批量执行命令及awk使用
     + seq 10|awk '/[0-9]/ {print}'
     + for i in {1..10};do echo $i; done |awk '/[0-9]/ {print "hello"}'
     + while true; do date; sleep 1; done
     + watch -n 1 date
-55. 统计空行
+49. 统计空行
     + awk '/^$/ {++x} END {print x}' 1.txt 
