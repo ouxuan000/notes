@@ -1044,4 +1044,72 @@
                                   return null;
                                 }
                               } 
-                            #+END_SRC 
+                            #+END_SRC
+                          + parsePropertySubElement(Element, BeanDefinition)
+                            #+BEGIN_SRC java
+                            	public Object parsePropertySubElement(Element ele, @Nullable BeanDefinition bd, @Nullable String defaultValueType) {
+                                if (!isDefaultNamespace(ele)) {
+                                  return parseNestedCustomElement(ele, bd);
+                                }
+                                else if (nodeNameEquals(ele, BEAN_ELEMENT)) {
+                                  BeanDefinitionHolder nestedBd = parseBeanDefinitionElement(ele, bd);
+                                  if (nestedBd != null) {
+                                    nestedBd = decorateBeanDefinitionIfRequired(ele, nestedBd, bd);
+                                  }
+                                  return nestedBd;
+                                }
+                                else if (nodeNameEquals(ele, REF_ELEMENT)) {
+                                  // A generic reference to any name of any bean.
+                                  String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+                                  boolean toParent = false;
+                                  if (!StringUtils.hasLength(refName)) {
+                                    // A reference to the id of another bean in a parent context.
+                                    refName = ele.getAttribute(PARENT_REF_ATTRIBUTE);
+                                    toParent = true;
+                                    if (!StringUtils.hasLength(refName)) {
+                                      error("'bean' or 'parent' is required for <ref> element", ele);
+                                      return null;
+                                    }
+                                  }
+                                  if (!StringUtils.hasText(refName)) {
+                                    error("<ref> element contains empty target attribute", ele);
+                                    return null;
+                                  }
+                                  RuntimeBeanReference ref = new RuntimeBeanReference(refName, toParent);
+                                  ref.setSource(extractSource(ele));
+                                  return ref;
+                                }
+                                else if (nodeNameEquals(ele, IDREF_ELEMENT)) {
+                                  return parseIdRefElement(ele);
+                                }
+                                else if (nodeNameEquals(ele, VALUE_ELEMENT)) {
+                                  return parseValueElement(ele, defaultValueType);
+                                }
+                                else if (nodeNameEquals(ele, NULL_ELEMENT)) {
+                                  // It's a distinguished null value. Let's wrap it in a TypedStringValue
+                                  // object in order to preserve the source location.
+                                  TypedStringValue nullHolder = new TypedStringValue(null);
+                                  nullHolder.setSource(extractSource(ele));
+                                  return nullHolder;
+                                }
+                                else if (nodeNameEquals(ele, ARRAY_ELEMENT)) {
+                                  return parseArrayElement(ele, bd);
+                                }
+                                else if (nodeNameEquals(ele, LIST_ELEMENT)) {
+                                  return parseListElement(ele, bd);
+                                }
+                                else if (nodeNameEquals(ele, SET_ELEMENT)) {
+                                  return parseSetElement(ele, bd);
+                                }
+                                else if (nodeNameEquals(ele, MAP_ELEMENT)) {
+                                  return parseMapElement(ele, bd);
+                                }
+                                else if (nodeNameEquals(ele, PROPS_ELEMENT)) {
+                                  return parsePropsElement(ele);
+                                }
+                                else {
+                                  error("Unknown property sub-element: [" + ele.getNodeName() + "]", ele);
+                                  return null;
+                                }
+                              }
+                            #+END_SRC
