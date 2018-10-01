@@ -5,7 +5,7 @@
   + 本人的原始环境为archlinux
 * 操作步骤
 ** 本地环境打包
-    + 注意： 采用本地环境为了省事, 本地环境包含整个的weblogic环境， 及jdk
+    + 注意： 采用本地环境为了省事, 本地环境包含整个的weblogic环境， 及jdk, 如果自己心情好完全可以再搭建一套
     #+BEGIN_EXAMPLE
       tar -zcvf weblogic.tar.gz ~/Oracle #这个目录是weblogic的默认安装及建域目录, 相应的war包也在该目录下
       tar -zcvf jdk.tar.gz ~/applications/jdk1.7 #jdk
@@ -101,12 +101,24 @@
       docker rm pay7003 #删除容器, 先stop再rm
       #+END_EXAMPLE
 *** 连接容器，检查服务
-    #+BEGIN_EXAMPLE
-      docker exec -it pay7003 bash
-      通过该命令可以连接到容器pay7003的bash中， 跟正常操作cenos系统一样, 完成后exit即可
-    #+END_EXAMPLE
-* 杀容器，镜像
+    + 查看现有容器
+      + docker ps -a
+        #+BEGIN_EXAMPLE
+          CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
+          dc2eeca7873e payimage "sh /cmd.sh" 15 hours ago Exited (137) 15 hours ago pay7003 
+        #+END_EXAMPLE
+    + 登录容器
+      #+BEGIN_EXAMPLE
+        docker exec -it pay7003 bash #这里pay7003是容器name， 也可以使用容器id
+        通过该命令可以连接到容器pay7003的bash中， 跟正常操作cenos系统一样, 完成后exit即可
+      #+END_EXAMPLE
+* 容器管理
+** 大杀器片甲不留, 自己玩可以用
   #+BEGIN_EXAMPLE
     docker kill $(docker ps -q) ; docker rm $(docker ps -a -q) ; docker rmi $(docker images -q -a) 
   #+END_EXAMPLE
 
+** 删除镜像
+   #+BEGIN_EXAMPLE
+    docker rmi payimage
+   #+END_EXAMPLE
