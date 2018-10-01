@@ -54,7 +54,7 @@
           #可以安装软件
           #RUN yum install xx
           # 需要打到docker中的文件全部copy到docker对应的目录中， 本地目录是相对当前目录，不能写绝对路径
-          COPY . /home/lx7ly
+          COPY . /home/lx7ly/
           COPY cmd.sh /cmd.sh
           # 容器启动后直接执行给定脚本
           CMD sh /cmd.sh
