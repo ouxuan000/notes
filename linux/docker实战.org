@@ -1,5 +1,5 @@
 * 华为云 centos操作
-** 本地已经正常使用
+** 本地已经正常使用, 需要部署到服务器并且需要用docker启动
 * 杀容器，镜像
   #+BEGIN_EXAMPLE
     docker kill $(docker ps -q) ; docker rm $(docker ps -a -q) ; docker rmi $(docker images -q -a) 
