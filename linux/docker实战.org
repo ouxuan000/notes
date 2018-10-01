@@ -51,6 +51,8 @@
           ENV LANG en_US.UTF-8  
           ENV LC_ALL en_US.UTF-8
           ENV DEBIAN_FRONTEND noninteractive
+          #可以安装软件
+          #RUN yum install xx
           # 需要打到docker中的文件全部copy到docker对应的目录中， 本地目录是相对当前目录，不能写绝对路径
           COPY . /home/lx7ly
           COPY cmd.sh /cmd.sh
@@ -58,22 +60,27 @@
           CMD sh /cmd.sh
           #End
         #+END_EXAMPLE
-    + 制作镜像
-      + 进入目录 /home/lx7ly
-        在目录 /home/lx7ly中目前存在
-        #+BEGIN_EXAMPLE
-          drwxr-xr-x 3 root root 4096 Sep 30 10:49 applications
-          -rwxr-xr-x 1 root root  128 Sep 30 11:17 cmd.sh
-          -rw-r--r-- 1 root root  305 Sep 30 17:07 Dockerfile
-          drwxr-xr-x 3 root root 4096 Jul 14 18:39 Oracle
-        #+END_EXAMPLE
-      + 执行命令 docker build -t payimage .
-      + 查看存在镜像 docker images
-        #+BEGIN_EXAMPLE
-          REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-          payimage            latest              d7b3db0e1d59        15 hours ago        2.22 GB
-          centos              latest              c5507be714a7        7 weeks ago         199.7 MB
-        #+END_EXAMPLE
+      + 制作镜像
+        + 进入目录 /home/lx7ly
+          在目录 /home/lx7ly中目前存在
+          #+BEGIN_EXAMPLE
+            drwxr-xr-x 3 root root 4096 Sep 30 10:49 applications
+            -rwxr-xr-x 1 root root  128 Sep 30 11:17 cmd.sh
+            -rw-r--r-- 1 root root  305 Sep 30 17:07 Dockerfile
+            drwxr-xr-x 3 root root 4096 Jul 14 18:39 Oracle
+          #+END_EXAMPLE
+        + 执行命令 docker build -t payimage .
+          + 最后的点表示dockerfile在当前目录
+        + 查看存在镜像 docker images
+          #+BEGIN_EXAMPLE
+            REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+            payimage            latest              d7b3db0e1d59        15 hours ago        2.22 GB
+            centos              latest              c5507be714a7        7 weeks ago         199.7 MB
+          #+END_EXAMPLE
+    + docker commit命令通过运行中容器制作镜像
+      #+BEGIN_EXAMPLE
+      docker commit pay7003 payimages:v1.0
+      #+END_EXAMPLE
 *** 启动容器
     + cmd.sh
       #+BEGIN_EXAMPLE
@@ -94,6 +101,12 @@
         sh /cmd.sh: 这个是容器启动会执行的命令， 以后docker start 也会执行该文件
       #+END_EXAMPLE
     + 可以省略第一步操作直接制作容器启动
+      #+BEGIN_EXAMPLE
+        docker run itd -v weblogic:weblogic idk:jdk --net=host -p7003:7003 --name=pay7003 centos
+        上面的weblogic前后分别表示本地的目录和远程的目录
+        -v 可以达到dockfile中copy的效果
+        -p 表示端口映射
+      #+END_EXAMPLE
     + 容器管理
       #+BEGIN_EXAMPLE
       docker start pay7003
