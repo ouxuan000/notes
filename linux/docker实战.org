@@ -39,10 +39,72 @@
        #+END_EXAMPLE
 ** 使用docker容器启动
 *** 制作docker镜像
+    + Dockerfile文件
+      + touch /home/lx7ly/Dockerfile
+        #+BEGIN_EXAMPLE
+          #Dockerfile  
+          # 基于centos构建本容器
+          FROM centos
+          # 跟本地映射的端口， 这里相当与访问本地7003会自动转发到容器中7003
+          EXPOSE 7003
+          #设置环境变量，所有操作都是非交互式的
+          ENV LANG en_US.UTF-8  
+          ENV LC_ALL en_US.UTF-8
+          ENV DEBIAN_FRONTEND noninteractive
+          # 需要打到docker中的文件全部copy到docker对应的目录中， 本地目录是相对当前目录，不能写绝对路径
+          COPY . /home/lx7ly
+          COPY cmd.sh /cmd.sh
+          # 容器启动后直接执行给定脚本
+          CMD sh /cmd.sh
+          #End
+        #+END_EXAMPLE
+    + 制作镜像
+      + 进入目录 /home/lx7ly
+        在目录 /home/lx7ly中目前存在
+        #+BEGIN_EXAMPLE
+          drwxr-xr-x 3 root root 4096 Sep 30 10:49 applications
+          -rwxr-xr-x 1 root root  128 Sep 30 11:17 cmd.sh
+          -rw-r--r-- 1 root root  305 Sep 30 17:07 Dockerfile
+          drwxr-xr-x 3 root root 4096 Jul 14 18:39 Oracle
+        #+END_EXAMPLE
+      + 执行命令 docker build -t payimage .
+      + 查看存在镜像 docker images
+        #+BEGIN_EXAMPLE
+          REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+          payimage            latest              d7b3db0e1d59        15 hours ago        2.22 GB
+          centos              latest              c5507be714a7        7 weeks ago         199.7 MB
+        #+END_EXAMPLE
 *** 启动容器
+    + cmd.sh
+      #+BEGIN_EXAMPLE
+        #!/bin/bash
+        domainname=$1 # 这里如果没有其他情况可以写死
+        nohup sh /home/lx7ly/Oracle/Middleware/user_projects/domains/$domainname/startWebLogic.sh > /7003.log & tail -f /7003.log 
+      #+END_EXAMPLE
     + 通过上一步镜像启动
+      #+BEGIN_EXAMPLE
+        docker  run -itd --net=host --name pay7003 payimage sh /cmd.sh
+        命令解释:
+        -i: 
+        -t: 
+        -d: 保持，退出后不关闭docker
+        --name: docker容器的名称
+        payimage: 镜像名称
+        --net=host: 这个必须有，否则启动报错
+        sh /cmd.sh: 这个是容器启动会执行的命令， 以后docker start 也会执行该文件
+      #+END_EXAMPLE
     + 可以省略第一步操作直接制作容器启动
+    + 容器管理
+      #+BEGIN_EXAMPLE
+      docker start pay7003
+      docker stop pay7003
+      docker rm pay7003 #删除容器, 先stop再rm
+      #+END_EXAMPLE
 *** 连接容器，检查服务
+    #+BEGIN_EXAMPLE
+      docker exec -it pay7003 bash
+      通过该命令可以连接到容器pay7003的bash中， 跟正常操作cenos系统一样, 完成后exit即可
+    #+END_EXAMPLE
 * 杀容器，镜像
   #+BEGIN_EXAMPLE
     docker kill $(docker ps -q) ; docker rm $(docker ps -a -q) ; docker rmi $(docker images -q -a) 
