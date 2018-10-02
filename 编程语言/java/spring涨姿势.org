@@ -1539,7 +1539,6 @@
         }
 
       #+END_SRC
-
       + docreatebean
         #+BEGIN_SRC java
           protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final @Nullable Object[] args)
@@ -1651,155 +1650,451 @@
             return exposedObject;
           } 
         #+END_SRC
-      + createBeanInstance(beanName, mbd, args) 生成java对象实例
-        #+BEGIN_SRC java
-          protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, @Nullable Object[] args) {
-            // Make sure bean class is actually resolved at this point.
-            Class<?> beanClass = resolveBeanClass(mbd, beanName);
-
-            if (beanClass != null && !Modifier.isPublic(beanClass.getModifiers()) && !mbd.isNonPublicAccessAllowed()) {
-              throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-                  "Bean class isn't public, and non-public access not allowed: " + beanClass.getName());
-            }
-
-            Supplier<?> instanceSupplier = mbd.getInstanceSupplier();
-            if (instanceSupplier != null) {
-              return obtainFromSupplier(instanceSupplier, beanName);
-            }
-
-            //实例化对象
-            if (mbd.getFactoryMethodName() != null)  {
-              return instantiateUsingFactoryMethod(beanName, mbd, args);
-            }
-
-            // Shortcut when re-creating the same bean...
-            // 使用自动装配进行实例化
-            boolean resolved = false;
-            boolean autowireNecessary = false;
-            if (args == null) {
-              synchronized (mbd.constructorArgumentLock) {
-                if (mbd.resolvedConstructorOrFactoryMethod != null) {
-                  resolved = true;
-                  autowireNecessary = mbd.constructorArgumentsResolved;
-                }
-              }
-            }
-            if (resolved) {
-              if (autowireNecessary) {
-              //配置了自动装配属性， 根据属性类型进行注入
-                return autowireConstructor(beanName, mbd, null, null);
-              }
-              else {
-              // 默认无参构造方法初始化
-                return instantiateBean(beanName, mbd);
-              }
-            }
-
-            // Need to determine the constructor...
-            // 使用bean构造方法初始化
-            Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
-            if (ctors != null ||
-                mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
-                mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args))  {
-                // 根据自动装配属性调用匹配的构造方法进行初始化
-              return autowireConstructor(beanName, mbd, ctors, args);
-            }
-
-            // No special handling: simply use no-arg constructor.
-            return instantiateBean(beanName, mbd);
-          }
- 
-          protected BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition mbd) {
-            try {
-              Object beanInstance;
-              final BeanFactory parent = this;
-              //获取系统安全接口， jdk标准api
-              if (System.getSecurityManager() != null) {
-              // 根据实例化策略创建实力对象
-                beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
-                    getInstantiationStrategy().instantiate(mbd, beanName, parent),
-                    getAccessControlContext());
-              }
-              else {
-              //
-                beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, parent);
-              }
-              BeanWrapper bw = new BeanWrapperImpl(beanInstance);
-              initBeanWrapper(bw);
-              return bw;
-            }
-            catch (Throwable ex) {
-              throw new BeanCreationException(
-                  mbd.getResourceDescription(), beanName, "Instantiation of bean failed", ex);
-            }
-          }
-        #+END_SRC
-        + instantiate -->org.springframework.beans.factory.support.SimpleInstantiationStrategy#instantiate(org.springframework.beans.factory.support.RootBeanDefinition, java.lang.String, org.springframework.beans.factory.BeanFactory)
+        + createBeanInstance(beanName, mbd, args) 生成java对象实例
           #+BEGIN_SRC java
-          	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
-              // Don't override the class with CGLIB if no overrides.
-              if (!bd.hasMethodOverrides()) {
-                Constructor<?> constructorToUse;
-                synchronized (bd.constructorArgumentLock) {
-                // 获取对象的构造或工厂方法
-                  constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
-                  // 如果没有构造或工厂
-                  if (constructorToUse == null) {
-                  //使用jdk反射 来获取构造器
-                    final Class<?> clazz = bd.getBeanClass();
-                    if (clazz.isInterface()) {
-                      throw new BeanInstantiationException(clazz, "Specified class is an interface");
-                    }
-                    try {
-                      if (System.getSecurityManager() != null) {
-                        constructorToUse = AccessController.doPrivileged(
-                            (PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
-                      }
-                      else {
-                        constructorToUse =	clazz.getDeclaredConstructor();
-                      }
-                      bd.resolvedConstructorOrFactoryMethod = constructorToUse;
-                    }
-                    catch (Throwable ex) {
-                      throw new BeanInstantiationException(clazz, "No default constructor found", ex);
-                    }
+            protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, @Nullable Object[] args) {
+              // Make sure bean class is actually resolved at this point.
+              Class<?> beanClass = resolveBeanClass(mbd, beanName);
+
+              if (beanClass != null && !Modifier.isPublic(beanClass.getModifiers()) && !mbd.isNonPublicAccessAllowed()) {
+                throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+                    "Bean class isn't public, and non-public access not allowed: " + beanClass.getName());
+              }
+
+              Supplier<?> instanceSupplier = mbd.getInstanceSupplier();
+              if (instanceSupplier != null) {
+                return obtainFromSupplier(instanceSupplier, beanName);
+              }
+
+              //实例化对象
+              if (mbd.getFactoryMethodName() != null)  {
+                return instantiateUsingFactoryMethod(beanName, mbd, args);
+              }
+
+              // Shortcut when re-creating the same bean...
+              // 使用自动装配进行实例化
+              boolean resolved = false;
+              boolean autowireNecessary = false;
+              if (args == null) {
+                synchronized (mbd.constructorArgumentLock) {
+                  if (mbd.resolvedConstructorOrFactoryMethod != null) {
+                    resolved = true;
+                    autowireNecessary = mbd.constructorArgumentsResolved;
                   }
                 }
-                // 使用构造方法.newinstance实例化
-                return BeanUtils.instantiateClass(constructorToUse);
               }
-              else {
-                // Must generate CGLIB subclass.
-                // 使用cglib进行实例化
-                return instantiateWithMethodInjection(bd, beanName, owner);
-              }
-            }
-          #+END_SRC
-        + instantiateWithMethodInjection --> org.springframework.beans.factory.support.CglibSubclassingInstantiationStrategy.CglibSubclassCreator#instantiate
-          #+BEGIN_SRC java
-          		public Object instantiate(@Nullable Constructor<?> ctor, Object... args) {
-                Class<?> subclass = createEnhancedSubclass(this.beanDefinition);
-                Object instance;
-                if (ctor == null) {
-                  instance = BeanUtils.instantiateClass(subclass);
+              if (resolved) {
+                if (autowireNecessary) {
+                //配置了自动装配属性， 根据属性类型进行注入
+                  return autowireConstructor(beanName, mbd, null, null);
                 }
                 else {
-                  try {
-                    Constructor<?> enhancedSubclassConstructor = subclass.getConstructor(ctor.getParameterTypes());
-                    instance = enhancedSubclassConstructor.newInstance(args);
+                // 默认无参构造方法初始化
+                  return instantiateBean(beanName, mbd);
+                }
+              }
+
+              // Need to determine the constructor...
+              // 使用bean构造方法初始化
+              Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
+              if (ctors != null ||
+                  mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
+                  mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args))  {
+                  // 根据自动装配属性调用匹配的构造方法进行初始化
+                return autowireConstructor(beanName, mbd, ctors, args);
+              }
+
+              // No special handling: simply use no-arg constructor.
+              return instantiateBean(beanName, mbd);
+            }
+
+            protected BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition mbd) {
+              try {
+                Object beanInstance;
+                final BeanFactory parent = this;
+                //获取系统安全接口， jdk标准api
+                if (System.getSecurityManager() != null) {
+                // 根据实例化策略创建实力对象
+                  beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
+                      getInstantiationStrategy().instantiate(mbd, beanName, parent),
+                      getAccessControlContext());
+                }
+                else {
+                //
+                  beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, parent);
+                }
+                BeanWrapper bw = new BeanWrapperImpl(beanInstance);
+                initBeanWrapper(bw);
+                return bw;
+              }
+              catch (Throwable ex) {
+                throw new BeanCreationException(
+                    mbd.getResourceDescription(), beanName, "Instantiation of bean failed", ex);
+              }
+            }
+          #+END_SRC
+          + instantiate -->org.springframework.beans.factory.support.SimpleInstantiationStrategy#instantiate(org.springframework.beans.factory.support.RootBeanDefinition, java.lang.String, org.springframework.beans.factory.BeanFactory)
+            #+BEGIN_SRC java
+              public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
+                // Don't override the class with CGLIB if no overrides.
+                if (!bd.hasMethodOverrides()) {
+                  Constructor<?> constructorToUse;
+                  synchronized (bd.constructorArgumentLock) {
+                  // 获取对象的构造或工厂方法
+                    constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
+                    // 如果没有构造或工厂
+                    if (constructorToUse == null) {
+                    //使用jdk反射 来获取构造器
+                      final Class<?> clazz = bd.getBeanClass();
+                      if (clazz.isInterface()) {
+                        throw new BeanInstantiationException(clazz, "Specified class is an interface");
+                      }
+                      try {
+                        if (System.getSecurityManager() != null) {
+                          constructorToUse = AccessController.doPrivileged(
+                              (PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
+                        }
+                        else {
+                          constructorToUse =	clazz.getDeclaredConstructor();
+                        }
+                        bd.resolvedConstructorOrFactoryMethod = constructorToUse;
+                      }
+                      catch (Throwable ex) {
+                        throw new BeanInstantiationException(clazz, "No default constructor found", ex);
+                      }
+                    }
                   }
-                  catch (Exception ex) {
-                    throw new BeanInstantiationException(this.beanDefinition.getBeanClass(),
-                        "Failed to invoke constructor for CGLIB enhanced subclass [" + subclass.getName() + "]", ex);
+                  // 使用构造方法.newinstance实例化
+                  return BeanUtils.instantiateClass(constructorToUse);
+                }
+                else {
+                  // Must generate CGLIB subclass.
+                  // 使用cglib进行实例化
+                  return instantiateWithMethodInjection(bd, beanName, owner);
+                }
+              }
+            #+END_SRC
+          + instantiateWithMethodInjection --> org.springframework.beans.factory.support.CglibSubclassingInstantiationStrategy.CglibSubclassCreator#instantiate
+            #+BEGIN_SRC java
+                public Object instantiate(@Nullable Constructor<?> ctor, Object... args) {
+                // 创建代理子类
+                  Class<?> subclass = createEnhancedSubclass(this.beanDefinition);
+                  Object instance;
+                  if (ctor == null) {
+                    instance = BeanUtils.instantiateClass(subclass);
+                  }
+                  else {
+                    try {
+                      Constructor<?> enhancedSubclassConstructor = subclass.getConstructor(ctor.getParameterTypes());
+                      instance = enhancedSubclassConstructor.newInstance(args);
+                    }
+                    catch (Exception ex) {
+                      throw new BeanInstantiationException(this.beanDefinition.getBeanClass(),
+                          "Failed to invoke constructor for CGLIB enhanced subclass [" + subclass.getName() + "]", ex);
+                    }
+                  }
+                  // SPR-10785: set callbacks directly on the instance instead of in the
+                  // enhanced class (via the Enhancer) in order to avoid memory leaks.
+                  Factory factory = (Factory) instance;
+                  factory.setCallbacks(new Callback[] {NoOp.INSTANCE,
+                      new LookupOverrideMethodInterceptor(this.beanDefinition, this.owner),
+                      new ReplaceOverrideMethodInterceptor(this.beanDefinition, this.owner)});
+                  return instance;
+                }
+            #+END_SRC
+            + createEnhancedSubclass
+              #+BEGIN_SRC java
+                  private Class<?> createEnhancedSubclass(RootBeanDefinition beanDefinition) {
+                    Enhancer enhancer = new Enhancer();
+                    // bean本身作为基类
+                    enhancer.setSuperclass(beanDefinition.getBeanClass());
+                    enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+                    if (this.owner instanceof ConfigurableBeanFactory) {
+                      ClassLoader cl = ((ConfigurableBeanFactory) this.owner).getBeanClassLoader();
+                      enhancer.setStrategy(new ClassLoaderAwareGeneratorStrategy(cl));
+                    }
+                    enhancer.setCallbackFilter(new MethodOverrideCallbackFilter(beanDefinition));
+                    enhancer.setCallbackTypes(CALLBACK_TYPES);
+                    return enhancer.createClass();
+                  }
+              #+END_SRC
+        + populateBean(beanName, mbd, instanceWrapper) 对bean配置的属性进行注入;
+          #+BEGIN_SRC java
+            protected void populateBean(String beanName, RootBeanDefinition mbd, @Nullable BeanWrapper bw) {
+              if (bw == null) {
+                if (mbd.hasPropertyValues()) {
+                  throw new BeanCreationException(
+                      mbd.getResourceDescription(), beanName, "Cannot apply property values to null instance");
+                }
+                else {
+                  // Skip property population phase for null instance.
+                  return;
+                }
+              }
+
+              // Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
+              // state of the bean before properties are set. This can be used, for example,
+              // to support styles of field injection.
+              boolean continueWithPropertyPopulation = true;
+
+              if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+                for (BeanPostProcessor bp : getBeanPostProcessors()) {
+                  if (bp instanceof InstantiationAwareBeanPostProcessor) {
+                    InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+                    if (!ibp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
+                      continueWithPropertyPopulation = false;
+                      break;
+                    }
                   }
                 }
-                // SPR-10785: set callbacks directly on the instance instead of in the
-                // enhanced class (via the Enhancer) in order to avoid memory leaks.
-                Factory factory = (Factory) instance;
-                factory.setCallbacks(new Callback[] {NoOp.INSTANCE,
-                    new LookupOverrideMethodInterceptor(this.beanDefinition, this.owner),
-                    new ReplaceOverrideMethodInterceptor(this.beanDefinition, this.owner)});
-                return instance;
               }
+
+              if (!continueWithPropertyPopulation) {
+                return;
+              }
+
+              //获取bean定义时设置的属性值
+              PropertyValues pvs = (mbd.hasPropertyValues() ? mbd.getPropertyValues() : null);
+
+              if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME ||
+                  mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
+                MutablePropertyValues newPvs = new MutablePropertyValues(pvs);
+
+                // Add property values based on autowire by name if applicable.
+                if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
+                  autowireByName(beanName, mbd, bw, newPvs);
+                }
+
+                // Add property values based on autowire by type if applicable.
+                if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
+                  autowireByType(beanName, mbd, bw, newPvs);
+                }
+
+                pvs = newPvs;
+              }
+
+
+              if (pvs != null) {
+              // 属性注入
+                applyPropertyValues(beanName, mbd, bw, pvs);
+              }
+            } 
           #+END_SRC
-      + populateBean(beanName, mbd, instanceWrapper) 对bean配置的属性进行注入;
+          + applyPropertyValues
+            #+BEGIN_SRC java
+              protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrapper bw, PropertyValues pvs) {
+                if (pvs.isEmpty()) {
+                  return;
+                }
+
+                if (System.getSecurityManager() != null && bw instanceof BeanWrapperImpl) {
+                // jdk 安全机制
+                  ((BeanWrapperImpl) bw).setSecurityContext(getAccessControlContext());
+                }
+
+                // 封装属性值
+                MutablePropertyValues mpvs = null;
+                List<PropertyValue> original;
+
+                if (pvs instanceof MutablePropertyValues) {
+                  mpvs = (MutablePropertyValues) pvs;
+                  if (mpvs.isConverted()) {
+                    // Shortcut: use the pre-converted values as-is.
+                    try {
+                      bw.setPropertyValues(mpvs);
+                      return;
+                    }
+                    catch (BeansException ex) {
+                      throw new BeanCreationException(
+                          mbd.getResourceDescription(), beanName, "Error setting property values", ex);
+                    }
+                  }
+                  // 获取属性原始类型
+                  original = mpvs.getPropertyValueList();
+                }
+                else {
+                  original = Arrays.asList(pvs.getPropertyValues());
+                }
+
+                // 获取用户自定义类型转换(扩展点)
+                TypeConverter converter = getCustomTypeConverter();
+                if (converter == null) {
+                  converter = bw;
+                }
+                
+                // 创建bean定义属性解析器, 将属性解析到实际对象中
+                BeanDefinitionValueResolver valueResolver = new BeanDefinitionValueResolver(this, beanName, mbd, converter);
+
+                // Create a deep copy, resolving any references for values.
+                List<PropertyValue> deepCopy = new ArrayList<>(original.size());
+                boolean resolveNecessary = false;
+                for (PropertyValue pv : original) {
+                //属性值不需要转换
+                  if (pv.isConverted()) {
+                    deepCopy.add(pv);
+                  }
+                  else {
+                    String propertyName = pv.getName();
+                    // 转换前属性值
+                    Object originalValue = pv.getValue();
+                    Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
+                    // 转换后属性值
+                    Object convertedValue = resolvedValue;
+                    boolean convertible = bw.isWritableProperty(propertyName) &&
+                        !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName);
+                    if (convertible) {
+                    // 使用自定义转换器转换
+                      convertedValue = convertForProperty(resolvedValue, propertyName, bw, converter);
+                    }
+                    // Possibly store converted value in merged bean definition,
+                    // in order to avoid re-conversion for every created bean instance.
+                    // 存储转换属性，避免每次的转换工作
+                    if (resolvedValue == originalValue) {
+                      if (convertible) {
+                        pv.setConvertedValue(convertedValue);
+                      }
+                      deepCopy.add(pv);
+                    }
+                    else if (convertible && originalValue instanceof TypedStringValue &&
+                        !((TypedStringValue) originalValue).isDynamic() &&
+                        !(convertedValue instanceof Collection || ObjectUtils.isArray(convertedValue))) {
+                      pv.setConvertedValue(convertedValue);
+                      deepCopy.add(pv);
+                    }
+                    else {
+                      resolveNecessary = true;
+                      deepCopy.add(new PropertyValue(pv, convertedValue));
+                    }
+                  }
+                }
+                if (mpvs != null && !resolveNecessary) {
+                // 标记属性已经转换过
+                  mpvs.setConverted();
+                }
+
+                // Set our (possibly massaged) deep copy.
+                try {
+                // 属性依赖注入
+                  bw.setPropertyValues(new MutablePropertyValues(deepCopy));
+                }
+                catch (BeansException ex) {
+                  throw new BeanCreationException(
+                      mbd.getResourceDescription(), beanName, "Error setting property values", ex);
+                }
+              }
+ 
+            #+END_SRC
+            + resolveValueIfNecessary
+              #+BEGIN_SRC java
+                public Object resolveValueIfNecessary(Object argName, @Nullable Object value) {
+                  // We must check each value to see whether it requires a runtime reference
+                  // to another bean to be resolved.
+                  if (value instanceof RuntimeBeanReference) {
+                    RuntimeBeanReference ref = (RuntimeBeanReference) value;
+                    return resolveReference(argName, ref);
+                  }
+                  else if (value instanceof RuntimeBeanNameReference) {
+                    String refName = ((RuntimeBeanNameReference) value).getBeanName();
+                    refName = String.valueOf(doEvaluate(refName));
+                    if (!this.beanFactory.containsBean(refName)) {
+                      throw new BeanDefinitionStoreException(
+                          "Invalid bean name '" + refName + "' in bean reference for " + argName);
+                    }
+                    return refName;
+                  }
+                  else if (value instanceof BeanDefinitionHolder) {
+                    // Resolve BeanDefinitionHolder: contains BeanDefinition with name and aliases.
+                    BeanDefinitionHolder bdHolder = (BeanDefinitionHolder) value;
+                    return resolveInnerBean(argName, bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+                  }
+                  else if (value instanceof BeanDefinition) {
+                    // Resolve plain BeanDefinition, without contained name: use dummy name.
+                    BeanDefinition bd = (BeanDefinition) value;
+                    String innerBeanName = "(inner bean)" + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR +
+                        ObjectUtils.getIdentityHexString(bd);
+                    return resolveInnerBean(argName, innerBeanName, bd);
+                  }
+                  else if (value instanceof ManagedArray) {
+                    // May need to resolve contained runtime references.
+                    ManagedArray array = (ManagedArray) value;
+                    Class<?> elementType = array.resolvedElementType;
+                    if (elementType == null) {
+                      String elementTypeName = array.getElementTypeName();
+                      if (StringUtils.hasText(elementTypeName)) {
+                        try {
+                          elementType = ClassUtils.forName(elementTypeName, this.beanFactory.getBeanClassLoader());
+                          array.resolvedElementType = elementType;
+                        }
+                        catch (Throwable ex) {
+                          // Improve the message by showing the context.
+                          throw new BeanCreationException(
+                              this.beanDefinition.getResourceDescription(), this.beanName,
+                              "Error resolving array type for " + argName, ex);
+                        }
+                      }
+                      else {
+                        elementType = Object.class;
+                      }
+                    }
+                    return resolveManagedArray(argName, (List<?>) value, elementType);
+                  }
+                  else if (value instanceof ManagedList) {
+                    // May need to resolve contained runtime references.
+                    return resolveManagedList(argName, (List<?>) value);
+                  }
+                  else if (value instanceof ManagedSet) {
+                    // May need to resolve contained runtime references.
+                    return resolveManagedSet(argName, (Set<?>) value);
+                  }
+                  else if (value instanceof ManagedMap) {
+                    // May need to resolve contained runtime references.
+                    return resolveManagedMap(argName, (Map<?, ?>) value);
+                  }
+                  else if (value instanceof ManagedProperties) {
+                    Properties original = (Properties) value;
+                    Properties copy = new Properties();
+                    original.forEach((propKey, propValue) -> {
+                      if (propKey instanceof TypedStringValue) {
+                        propKey = evaluate((TypedStringValue) propKey);
+                      }
+                      if (propValue instanceof TypedStringValue) {
+                        propValue = evaluate((TypedStringValue) propValue);
+                      }
+                      if (propKey == null || propValue == null) {
+                        throw new BeanCreationException(
+                            this.beanDefinition.getResourceDescription(), this.beanName,
+                            "Error converting Properties key/value pair for " + argName + ": resolved to null");
+                      }
+                      copy.put(propKey, propValue);
+                    });
+                    return copy;
+                  }
+                  else if (value instanceof TypedStringValue) {
+                    // Convert value to target type here.
+                    TypedStringValue typedStringValue = (TypedStringValue) value;
+                    Object valueObject = evaluate(typedStringValue);
+                    try {
+                      Class<?> resolvedTargetType = resolveTargetType(typedStringValue);
+                      if (resolvedTargetType != null) {
+                        return this.typeConverter.convertIfNecessary(valueObject, resolvedTargetType);
+                      }
+                      else {
+                        return valueObject;
+                      }
+                    }
+                    catch (Throwable ex) {
+                      // Improve the message by showing the context.
+                      throw new BeanCreationException(
+                          this.beanDefinition.getResourceDescription(), this.beanName,
+                          "Error converting typed String value for " + argName, ex);
+                    }
+                  }
+                  else if (value instanceof NullBean) {
+                    return null;
+                  }
+                  else {
+                    return evaluate(value);
+                  }
+                } 
+              #+END_SRC
+            + setPropertyValues
