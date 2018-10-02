@@ -306,3 +306,172 @@ spring.mvc.servlet
   ```
 
   #### 
+* Spring MVC 设计原理及手写实现
+** 组件介绍
+    + DispatcherServlet 是 SpringMVC 中的前端控制器(Front Controller),负责接收 Request并将 Request 转发给对应的处理组件.
+    + HanlerMapping 是 SpringMVC 中完成 url 到 Controller 映射的组件.DispatcherServlet接收 Request,然后从 HandlerMapping 查找处理 Request 的 Controller.
+    + Cntroller 处理 Request,并返回 ModelAndView 对象,Controller 是 SpringMVC 中负责处理 Request 的组件(类似于 Struts2 中的 Action),ModelAndView 是封装结果视图的组件.
+    + 视图解析器解析 ModelAndView 对象并返回对应的视图给客户端
+** Spring MVC 的工作机制
+    在容器初始化时会建立所有 url 和 Controller 的对应关系,保存到 Map<url,Controller>中.Tomcat 启动时会通知 Spring 初始化容器(加载 Bean 的定义信息和初始化所有单例 Bean),然后SpringMVC 会遍历容器中的 Bean,获取每一个 Controller 中的所有方法访问的 url,然后将 url 和Controller 保存到一个 Map 中;
+    这样就可以根据 Request 快速定位到 Controller,因为最终处理 Request 的是 Controller 中的方法,Map 中只保留了 url 和 Controller 中的对应关系,所以要根据 Request 的 url 进一步确认Controller 中 的 Method, 这 一 步 工 作 的 原 理 就 是 拼 接 Controller 的 url(Controller 上@RequestMapping 的值)和方法的 url(Method 上@RequestMapping 的值),与 request 的 url 进行匹配,找到匹配的那个方法;
+    确定处理请求的 Method后,接下来的任务就是参数绑定,把 Request中参数绑定到方法的形式参数上,这一步是整个请求处理过程中最复杂的一个步骤。 SpringMVC 提供了两种 Request 参数与方法形参的绑定方法:
+    +  通过注解进行绑定,@RequestParam
+    +  通过参数名称进行绑定.
+    使用注解进行绑定,我们只要在方法参数前面声明@RequestParam("a"),就可以将 Request 中参数 a 的值绑定到方法的该参数上.使用参数名称进行绑定的前提是必须要获取方法中参数的名称,Java反射只提供了获取方法的参数的类型,并没有提供获取参数名称的方法.SpringMVC 解决这个问题的方法是用 asm 框架读取字节码文件,来获取方法的参数名称.asm 框架是一个字节码操作框架,关于 asm 更多介绍可以参考它的官网。个人建议,使用注解来完成参数绑定,这样就可以省去 asm 框架的读取字节码的操作。
+** Spring MVC 源码分析
+   根据工作机制中三部分来分析 SpringMVC 的源代码.。
+    其一,ApplicationContext 初始化时建立所有 url 和 Controller 类的对应关系(用 Map 保存);
+    其二,根据请求 url 找到对应的 Controller,并从 Controller 中找到处理请求的方法;
+    其三,request 参数绑定到方法的形参,执行方法处理请求,并返回结果视图
+    + 建立 Map<urls,Controller>的关系
+      +ApplicationObjectSupport# setApplicationContext --> org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMapping#initApplicationContext
+      #+BEGIN_SRC java
+        public void initApplicationContext() throws ApplicationContextException {
+          super.initApplicationContext();
+          detectHandlers();
+        } 
+      #+END_SRC
+      + detectHandlers
+        #+BEGIN_SRC java
+
+        //建立当前 ApplicationContext 中的所有 Controller 和 url 的对应关系
+       	protected void detectHandlers() throws BeansException {
+          ApplicationContext applicationContext = obtainApplicationContext();
+
+          // 获取 ApplicationContext 容器中所有 bean 的 Name
+          String[] beanNames = (this.detectHandlersInAncestorContexts ?
+              BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, Object.class) :
+              applicationContext.getBeanNamesForType(Object.class));
+
+          // Take any bean name that we can determine URLs for.
+          // 遍历 beanNames,并找到这些 bean 对应的 url
+          for (String beanName : beanNames) {
+          // 找 bean 上的所有 url(Controller 上的 url+方法上的 url),该方法由对应的子类实现
+            String[] urls = determineUrlsForHandler(beanName);
+            if (!ObjectUtils.isEmpty(urls)) {
+              // URL paths found: Let's consider it a handler.
+              // 保存 urls 和 beanName 的对应关系,put it to Map<urls,beanName>,该方法在父类 AbstractUrlHandlerMapping 中实现
+              registerHandler(urls, beanName);
+            }
+          }
+
+          if ((logger.isDebugEnabled() && !getHandlerMap().isEmpty()) || logger.isTraceEnabled()) {
+            logger.debug("Detected " + getHandlerMap().size() + " mappings in " + formatMappingName());
+          }
+        } 
+        #+END_SRC
+        + determineUrlsForHandler
+          #+BEGIN_SRC java
+            protected abstract String[] determineUrlsForHandler(String beanName);
+          #+END_SRC
+          determineUrlsForHandler(String beanName)方法的作用是获取每个 Controller 中的 url,不同子类有不同的实现,这是一个典型的模板设计模式.因为开发中我们用的最多的就是用注解来配置ontroller 中 的 url,BeanNameUrlHandlerMapping 是 AbstractDetectingUrlHandlerMapping子类,处理注解形式的 url 映射.所以我们这里以 BeanNameUrlHandlerMapping 来进行分析.我们看BeanNameUrlHandlerMapping 是如何查 beanName 上所有映射的 url
+          #+BEGIN_SRC java
+            protected String[] determineUrlsForHandler(String beanName) {
+              List<String> urls = new ArrayList<>();
+              if (beanName.startsWith("/")) {
+                urls.add(beanName);
+              }
+              String[] aliases = obtainApplicationContext().getAliases(beanName);
+              for (String alias : aliases) {
+                if (alias.startsWith("/")) {
+                  urls.add(alias);
+                }
+              }
+              return StringUtils.toStringArray(urls);
+            } 
+          #+END_SRC
+          到这里 HandlerMapping 组件就已经建立所有 url 和 Controller 的对应关系。
+    + 根据请求 url 找到对应的 Controller,并从 Controller 中找到处理请求的方法;
+      第二个步骤是由请求触发的,所以入口为 DispatcherServlet 的核心方为 doService(),doService()中的核心逻辑由 doDispatch()实现,我们查看 doDispatch()的源代码
+      + dodispatch
+        #+BEGIN_SRC java
+        //中央控制器,控制请求的转发
+          protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+            HttpServletRequest processedRequest = request;
+            HandlerExecutionChain mappedHandler = null;
+            boolean multipartRequestParsed = false;
+
+            WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+
+            try {
+              ModelAndView mv = null;
+              Exception dispatchException = null;
+
+              try {
+              //检查是否是文件上传的请求
+                processedRequest = checkMultipart(request);
+                multipartRequestParsed = (processedRequest != request);
+
+                // Determine handler for the current request.
+                // 2.取得处理当前请求的 Controller,这里也称为 hanlder,处理器,
+                // 第一个步骤的意义就在这里体现了.这里并不是直接返回 Controller,
+                // 而是返回的 HandlerExecutionChain 请求处理器链对象,
+                // 该对象封装了 handler 和 interceptors.
+                mappedHandler = getHandler(processedRequest);
+                if (mappedHandler == null) {
+                  noHandlerFound(processedRequest, response);
+                  return;
+                }
+
+                // Determine handler adapter for the current request.
+                HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+
+                // Process last-modified header, if supported by the handler.
+                String method = request.getMethod();
+                boolean isGet = "GET".equals(method);
+                if (isGet || "HEAD".equals(method)) {
+                  long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
+                  if (new ServletWebRequest(request, response).checkNotModified(lastModified) && isGet) {
+                    return;
+                  }
+                }
+
+                if (!mappedHandler.applyPreHandle(processedRequest, response)) {
+                  return;
+                }
+
+                // Actually invoke the handler.
+                mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+
+                if (asyncManager.isConcurrentHandlingStarted()) {
+                  return;
+                }
+
+                applyDefaultViewName(processedRequest, mv);
+                mappedHandler.applyPostHandle(processedRequest, response, mv);
+              }
+              catch (Exception ex) {
+                dispatchException = ex;
+              }
+              catch (Throwable err) {
+                // As of 4.3, we're processing Errors thrown from handler methods as well,
+                // making them available for @ExceptionHandler methods and other scenarios.
+                dispatchException = new NestedServletException("Handler dispatch failed", err);
+              }
+              processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
+            }
+            catch (Exception ex) {
+              triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
+            }
+            catch (Throwable err) {
+              triggerAfterCompletion(processedRequest, response, mappedHandler,
+                  new NestedServletException("Handler processing failed", err));
+            }
+            finally {
+              if (asyncManager.isConcurrentHandlingStarted()) {
+                // Instead of postHandle and afterCompletion
+                if (mappedHandler != null) {
+                  mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
+                }
+              }
+              else {
+                // Clean up any resources used by a multipart request.
+                if (multipartRequestParsed) {
+                  cleanupMultipart(processedRequest);
+                }
+              }
+            }
+          } 
+        #+END_SRC
+          
