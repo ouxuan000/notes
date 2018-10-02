@@ -1989,8 +1989,10 @@
                 public Object resolveValueIfNecessary(Object argName, @Nullable Object value) {
                   // We must check each value to see whether it requires a runtime reference
                   // to another bean to be resolved.
+                  // 对引用类型解析
                   if (value instanceof RuntimeBeanReference) {
                     RuntimeBeanReference ref = (RuntimeBeanReference) value;
+                    // 引用类型属性进行解析
                     return resolveReference(argName, ref);
                   }
                   else if (value instanceof RuntimeBeanNameReference) {
@@ -2004,6 +2006,7 @@
                   }
                   else if (value instanceof BeanDefinitionHolder) {
                     // Resolve BeanDefinitionHolder: contains BeanDefinition with name and aliases.
+                    // 对bean类型属性解析， 主要是内部类
                     BeanDefinitionHolder bdHolder = (BeanDefinitionHolder) value;
                     return resolveInnerBean(argName, bdHolder.getBeanName(), bdHolder.getBeanDefinition());
                   }
@@ -2014,14 +2017,17 @@
                         ObjectUtils.getIdentityHexString(bd);
                     return resolveInnerBean(argName, innerBeanName, bd);
                   }
+                  // 解析数组类型
                   else if (value instanceof ManagedArray) {
                     // May need to resolve contained runtime references.
                     ManagedArray array = (ManagedArray) value;
+                    // 获取数组元素类型
                     Class<?> elementType = array.resolvedElementType;
                     if (elementType == null) {
                       String elementTypeName = array.getElementTypeName();
                       if (StringUtils.hasText(elementTypeName)) {
                         try {
+                        // 反射机制创建制定类型对象
                           elementType = ClassUtils.forName(elementTypeName, this.beanFactory.getBeanClassLoader());
                           array.resolvedElementType = elementType;
                         }
@@ -2033,9 +2039,11 @@
                         }
                       }
                       else {
+                      //如果没有获取到数组或元素类型, 则返回object
                         elementType = Object.class;
                       }
                     }
+                    // 创建制定类型数组
                     return resolveManagedArray(argName, (List<?>) value, elementType);
                   }
                   else if (value instanceof ManagedList) {
@@ -2069,6 +2077,7 @@
                     });
                     return copy;
                   }
+                  // 解析字符串类型属性
                   else if (value instanceof TypedStringValue) {
                     // Convert value to target type here.
                     TypedStringValue typedStringValue = (TypedStringValue) value;
@@ -2097,4 +2106,162 @@
                   }
                 } 
               #+END_SRC
-            + setPropertyValues
+            + setPropertyValues --> org.springframework.beans.AbstractPropertyAccessor#setPropertyValues(org.springframework.beans.PropertyValues, boolean, boolean)
+              #+BEGIN_SRC java
+              	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
+                    throws BeansException {
+
+                  List<PropertyAccessException> propertyAccessExceptions = null;
+                  List<PropertyValue> propertyValues = (pvs instanceof MutablePropertyValues ?
+                      ((MutablePropertyValues) pvs).getPropertyValueList() : Arrays.asList(pvs.getPropertyValues()));
+                  for (PropertyValue pv : propertyValues) {
+                    try {
+                      // This method may throw any BeansException, which won't be caught
+                      // here, if there is a critical failure such as no matching field.
+                      // We can attempt to deal only with less serious exceptions.
+                      setPropertyValue(pv);
+                    }
+                    catch (NotWritablePropertyException ex) {
+                      if (!ignoreUnknown) {
+                        throw ex;
+                      }
+                      // Otherwise, just ignore it and continue...
+                    }
+                    catch (NullValueInNestedPathException ex) {
+                      if (!ignoreInvalid) {
+                        throw ex;
+                      }
+                      // Otherwise, just ignore it and continue...
+                    }
+                    catch (PropertyAccessException ex) {
+                      if (propertyAccessExceptions == null) {
+                        propertyAccessExceptions = new ArrayList<>();
+                      }
+                      propertyAccessExceptions.add(ex);
+                    }
+                  }
+
+                  // If we encountered individual exceptions, throw the composite exception.
+                  if (propertyAccessExceptions != null) {
+                    PropertyAccessException[] paeArray = propertyAccessExceptions.toArray(new PropertyAccessException[0]);
+                    throw new PropertyBatchUpdateException(paeArray);
+                  }
+                }
+              #+END_SRC
+              + setPropertyValue --> org.springframework.beans.AbstractNestablePropertyAccessor#setPropertyValue(org.springframework.beans.AbstractNestablePropertyAccessor.PropertyTokenHolder, org.springframework.beans.PropertyValue)
+                #+BEGIN_SRC java
+                  protected void setPropertyValue(PropertyTokenHolder tokens, PropertyValue pv) throws BeansException {
+                    if (tokens.keys != null) {
+                      processKeyedProperty(tokens, pv);
+                    }
+                    else {
+                      processLocalProperty(tokens, pv);
+                    }
+                  } 
+                #+END_SRC
+                + processKeyedProperty
+                  #+BEGIN_SRC java
+                    private void processKeyedProperty(PropertyTokenHolder tokens, PropertyValue pv) {
+                      Object propValue = getPropertyHoldingValue(tokens);
+                      PropertyHandler ph = getLocalPropertyHandler(tokens.actualName);
+                      if (ph == null) {
+                        throw new InvalidPropertyException(
+                            getRootClass(), this.nestedPath + tokens.actualName, "No property handler found");
+                      }
+                      Assert.state(tokens.keys != null, "No token keys");
+                      String lastKey = tokens.keys[tokens.keys.length - 1];
+
+                      // 注入array类型属性值
+                      if (propValue.getClass().isArray()) {
+                        Class<?> requiredType = propValue.getClass().getComponentType();
+                        int arrayIndex = Integer.parseInt(lastKey);
+                        Object oldValue = null;
+                        try {
+                          if (isExtractOldValueForEditor() && arrayIndex < Array.getLength(propValue)) {
+                            oldValue = Array.get(propValue, arrayIndex);
+                          }
+                          Object convertedValue = convertIfNecessary(tokens.canonicalName, oldValue, pv.getValue(),
+                              requiredType, ph.nested(tokens.keys.length));
+                          int length = Array.getLength(propValue);
+                          if (arrayIndex >= length && arrayIndex < this.autoGrowCollectionLimit) {
+                            Class<?> componentType = propValue.getClass().getComponentType();
+                            Object newArray = Array.newInstance(componentType, arrayIndex + 1);
+                            System.arraycopy(propValue, 0, newArray, 0, length);
+                            setPropertyValue(tokens.actualName, newArray);
+                            propValue = getPropertyValue(tokens.actualName);
+                          }
+                          Array.set(propValue, arrayIndex, convertedValue);
+                        }
+                        catch (IndexOutOfBoundsException ex) {
+                          throw new InvalidPropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
+                              "Invalid array index in property path '" + tokens.canonicalName + "'", ex);
+                        }
+                      }
+
+                      else if (propValue instanceof List) {
+                        Class<?> requiredType = ph.getCollectionType(tokens.keys.length);
+                        List<Object> list = (List<Object>) propValue;
+                        int index = Integer.parseInt(lastKey);
+                        Object oldValue = null;
+                        if (isExtractOldValueForEditor() && index < list.size()) {
+                          oldValue = list.get(index);
+                        }
+                        Object convertedValue = convertIfNecessary(tokens.canonicalName, oldValue, pv.getValue(),
+                            requiredType, ph.nested(tokens.keys.length));
+                        int size = list.size();
+                        if (index >= size && index < this.autoGrowCollectionLimit) {
+                          for (int i = size; i < index; i++) {
+                            try {
+                              list.add(null);
+                            }
+                            catch (NullPointerException ex) {
+                              throw new InvalidPropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
+                                  "Cannot set element with index " + index + " in List of size " +
+                                  size + ", accessed using property path '" + tokens.canonicalName +
+                                  "': List does not support filling up gaps with null elements");
+                            }
+                          }
+                          list.add(convertedValue);
+                        }
+                        else {
+                          try {
+                            list.set(index, convertedValue);
+                          }
+                          catch (IndexOutOfBoundsException ex) {
+                            throw new InvalidPropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
+                                "Invalid list index in property path '" + tokens.canonicalName + "'", ex);
+                          }
+                        }
+                      }
+
+                      else if (propValue instanceof Map) {
+                        Class<?> mapKeyType = ph.getMapKeyType(tokens.keys.length);
+                        Class<?> mapValueType = ph.getMapValueType(tokens.keys.length);
+                        Map<Object, Object> map = (Map<Object, Object>) propValue;
+                        // IMPORTANT: Do not pass full property name in here - property editors
+                        // must not kick in for map keys but rather only for map values.
+                        TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
+                        Object convertedMapKey = convertIfNecessary(null, null, lastKey, mapKeyType, typeDescriptor);
+                        Object oldValue = null;
+                        if (isExtractOldValueForEditor()) {
+                          oldValue = map.get(convertedMapKey);
+                        }
+                        // Pass full property name and old value in here, since we want full
+                        // conversion ability for map values.
+                        Object convertedMapValue = convertIfNecessary(tokens.canonicalName, oldValue, pv.getValue(),
+                            mapValueType, ph.nested(tokens.keys.length));
+                        map.put(convertedMapKey, convertedMapValue);
+                      }
+
+                      else {
+                        throw new InvalidPropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
+                            "Property referenced in indexed property path '" + tokens.canonicalName +
+                            "' is neither an array nor a List nor a Map; returned value was [" + propValue + "]");
+                      }
+                    } 
+                  #+END_SRC
+  + 总结
+    通过对上面注入依赖代码的分析， 我们已经明白了 Spring IOC 容器是如何将属性的值注入到 Bean 实例对象中去的：
+      + 对于集合类型的属性， 将其属性值解析为目标类型的集合后直接赋值给属性。
+      + 对于非集合类型的属性， 大量使用了 JDK 的反射和内省机制， 通过属性的 getter 方法(readerMethod)获取指定属性注入以前的值， 同时调用属性的 setter 方法(writer Method)为属性设置注入后的值。 
+** DI 基于annotation注入
