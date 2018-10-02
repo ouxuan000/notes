@@ -653,7 +653,7 @@
                             return docBuilder;
                           }
                       #+END_SRC
-                    + registerBeanDefinitions(注册)
+                    + registerBeanDefinitions(加载)
                       #+BEGIN_SRC java
                       	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
                         //得到BeanDefinitionDocumentReader来对xml格式的BeanDefinition解析
@@ -1146,17 +1146,20 @@
                               }
                             } 
                             #+END_SRC
-                        + registerBeanDefinition -->org.springframework.beans.factory.support.BeanDefinitionReaderUtils#registerBeanDefinition (bdHolder, getReaderContext().getRegistry());
+                        + registerBeanDefinition(注册) -->org.springframework.beans.factory.support.BeanDefinitionReaderUtils#registerBeanDefinition (bdHolder, getReaderContext().getRegistry());
                           #+BEGIN_SRC java
                           	public static void registerBeanDefinition(
                               BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry)
                               throws BeanDefinitionStoreException {
 
                               // Register bean definition under primary name.
+                              // 获取解析的beandefinition名称
                               String beanName = definitionHolder.getBeanName();
+                              //向 ioc容器中注册beandefination
                               registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
                               // Register aliases for bean name, if any.
+                              // 如果beandefination有别名就注册别名
                               String[] aliases = definitionHolder.getAliases();
                               if (aliases != null) {
                                 for (String alias : aliases) {
@@ -1165,3 +1168,95 @@
                               }
                             }
                           #+END_SRC
+                          + registerBeanDefinition(beanName, definitionHolder.getBeanDefinition()) --> org.springframework.beans.factory.support.DefaultListableBeanFactory#registerBeanDefinition
+                            #+BEGIN_SRC java
+
+                              /** Map of bean definition objects, keyed by bean name. */
+                              //这个就是真正的ioc容器
+                              private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256); 
+
+                            	@Override
+                                public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
+                                    throws BeanDefinitionStoreException {
+
+                                  Assert.hasText(beanName, "Bean name must not be empty");
+                                  Assert.notNull(beanDefinition, "BeanDefinition must not be null");
+
+                                  if (beanDefinition instanceof AbstractBeanDefinition) {
+                                    try {
+                                      ((AbstractBeanDefinition) beanDefinition).validate();
+                                    }
+                                    catch (BeanDefinitionValidationException ex) {
+                                      throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
+                                          "Validation of bean definition failed", ex);
+                                    }
+                                  }
+
+                                  BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+                                  if (existingDefinition != null) {
+                                    if (!isAllowBeanDefinitionOverriding()) {
+                                      throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
+                                    }
+                                    else if (existingDefinition.getRole() < beanDefinition.getRole()) {
+                                      // e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
+                                      if (logger.isInfoEnabled()) {
+                                        logger.info("Overriding user-defined bean definition for bean '" + beanName +
+                                            "' with a framework-generated bean definition: replacing [" +
+                                            existingDefinition + "] with [" + beanDefinition + "]");
+                                      }
+                                    }
+                                    else if (!beanDefinition.equals(existingDefinition)) {
+                                      if (logger.isDebugEnabled()) {
+                                        logger.debug("Overriding bean definition for bean '" + beanName +
+                                            "' with a different definition: replacing [" + existingDefinition +
+                                            "] with [" + beanDefinition + "]");
+                                      }
+                                    }
+                                    else {
+                                      if (logger.isTraceEnabled()) {
+                                        logger.trace("Overriding bean definition for bean '" + beanName +
+                                            "' with an equivalent definition: replacing [" + existingDefinition +
+                                            "] with [" + beanDefinition + "]");
+                                      }
+                                    }
+                                    this.beanDefinitionMap.put(beanName, beanDefinition);
+                                  }
+                                  else {
+                                    if (hasBeanCreationStarted()) {
+                                      // Cannot modify startup-time collection elements anymore (for stable iteration)
+                                      //注册过程中通过线程同步保证数据一致性
+                                      synchronized (this.beanDefinitionMap) {
+                                        this.beanDefinitionMap.put(beanName, beanDefinition);
+                                        List<String> updatedDefinitions = new ArrayList<>(this.beanDefinitionNames.size() + 1);
+                                        updatedDefinitions.addAll(this.beanDefinitionNames);
+                                        updatedDefinitions.add(beanName);
+                                        this.beanDefinitionNames = updatedDefinitions;
+                                        if (this.manualSingletonNames.contains(beanName)) {
+                                          Set<String> updatedSingletons = new LinkedHashSet<>(this.manualSingletonNames);
+                                          updatedSingletons.remove(beanName);
+                                          this.manualSingletonNames = updatedSingletons;
+                                        }
+                                      }
+                                    }
+                                    else {
+                                      // Still in startup registration phase
+                                      this.beanDefinitionMap.put(beanName, beanDefinition);
+                                      this.beanDefinitionNames.add(beanName);
+                                      this.manualSingletonNames.remove(beanName);
+                                    }
+                                    this.frozenBeanDefinitionNames = null;
+                                  }
+
+                                  //检查同名bean是否注册过
+                                  if (existingDefinition != null || containsSingleton(beanName)) {
+                                  //注册过的重置
+                                    resetBeanDefinition(beanName);
+                                  }
+                                }
+                            #+END_SRC
+      + 总结ioc容器加载过程
+        1. 初始化的入口在容器实现中的refresh()调用来完成。        
+        2. 对bean定义载入IOC容器使用的方法是loadBeanDefinition,        
+          其中的大致过程如下：通过ResourceLoader来完成资源文件位置的定位，DefaultResourceLoader是默认的实现，同时上下文本身就给出了ResourceLoader的实现，可以从类路径，文件系统,URL等方式来定为资源位置。如果是XmlBeanFactory作为IOC容器，那么需要为它指定bean定义的资源，也就是说bean定义文件时通过抽象成Resource来被IOC容器处理的，容器通过        BeanDefinitionReader来完成定义信息的解析和Bean信息的注册,往往使用的是        XmlBeanDefinitionReader来解析bean的xml定义文件-实际的处理过程是委托给        BeanDefinitionParserDelegate来完成的，从而得到bean的定义信息，这些信息在Spring中使用        BeanDefinition对象来表示-这个名字可以让我们想到        loadBeanDefinition,RegisterBeanDefinition这些相关方法-他们都是为处理BeanDefinitin服        务的，容器解析得到BeanDefinition以后，需要把它在IOC容器中注册，这由IOC实现        BeanDefinitionRegistry接口来实现。注册过程就是在IOC容器内部维护的一个HashMap来保存得        到的BeanDefinition的过程。这个HashMap是IOC容器持有Bean信息的场所，以后对Bean的操作        都是围绕这个HashMap来实现的。        然后我们就可以通过BeanFactory和ApplicationContext来享受到SpringIOC的服务了,在使用        IOC容器的时候，我们注意到除了少量粘合代码，绝大多数以正确IOC风格编写的应用程序代码完全不        用关心如何到达工厂，因为容器将把这些对象与容器管理的其他对象钩在一起。基本的策略是把工厂放        到已知的地方，最好是放在对预期使用的上下文有意义的地方，以及代码将实际需要访问工厂的地方。        Spring本身提供了对声明式载入web应用程序用法的应用程序上下文,并将其存储在ServletContext        中的框架实现。
+      + beanfactory 和 factorybean
+        BeanFactory和FactoryBean，其中BeanFactory指的是IOC容器的编程抽象，比如ApplicationContext，XmlBeanFactory等，这些都是IOC容器的具体表现，需要使用什么样的容器由客户决定,但Spring为我们提供了丰富的选择。FactoryBean只是一个可以在IOC而容器中被管理的一个Bean,是对各种处理过程和资源使用的抽象,FactoryBean在需要时产生另一个对象，而不返回FactoryBean本身,我们可以把它看成是一个抽象工厂，对它的调用返回的是工厂生产的产品。所有的FactoryBean都实现特殊的org.springframework.beans.factory.FactoryBean接口，当使用容器中FactoryBean的时候，该容器不会返回FactoryBean本身,而是返回其生成的对象。Spring包括了大部分的通用资源和服务访问抽象的FactoryBean的实现，其中包括:对JNDI查询的处理，对代理对象的处理，对事务性代理的处理，对RMI代理的处理等，这些我们都可以看成是具体的工厂,看成是Spring为我们建立好的工厂。也就是说Spring通过使用抽象工厂模式为我们准备了一系列工厂来生产一些特定的对象,免除我们手工重复的工作，我们要使用时只需要在IOC容器里配置好就能很方便的使用了。
