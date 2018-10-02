@@ -2458,8 +2458,8 @@
       在初始化注解容器时指定要自动扫描的路径， 如果容器创建以后向给定路径动态添加了注解 Bean， 则需要手动调用容器扫描的方法， 然后手动刷新容器， 使得容器对所注册的 Bean 进行处理。接下来， 将会对两种处理方式详细分析其实现过程。
     + AnnotationConfigApplicationContext 注册注解 Bean：
     当创建注解处理容器时， 如果传入的初始参数是具体的注解 Bean 定义类时， 注解容器读取并注册。
-    + AnnotationConfigApplicationContext 通 过 调 用 注 解 Bean 定 义 读 取 器AnnotatedBeanDefinitionReader 的 register 方法向容器注册指定的注解 Bean， 注解 Bean 定义读取器向容器注册注解 Bean 的源码如下：
-      + registerBean -->org.springframework.context.annotation.AnnotatedBeanDefinitionReader#doRegisterBean
+    + AnnotationConfigApplicationContext 通过调用注解Bean定义读取器AnnotatedBeanDefinitionReader 的 register 方法向容器注册指定的注解 Bean， 注解 Bean 定义读取器向容器注册注解 Bean 的源码如下：
+      + registerBean(注册) -->org.springframework.context.annotation.AnnotatedBeanDefinitionReader#doRegisterBean
         #+BEGIN_SRC java
        	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
             @Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
@@ -2514,5 +2514,150 @@
           //向 IOC 容器注册注解 Bean 类定义对象
           BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
         }
-
         #+END_SRC
+        + resolveScopeMetadata --> org.springframework.context.annotation.AnnotationScopeMetadataResolver#resolveScopeMetadata
+          #+BEGIN_SRC java
+          //解析注解 Bean 定义类中的作用域元信息
+         	public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
+            ScopeMetadata metadata = new ScopeMetadata();
+            if (definition instanceof AnnotatedBeanDefinition) {
+              AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
+              //从注解 Bean 定义类的属性中查找属性为”Scope”的值， 即@Scope 注解的值
+              //annDef.getMetadata().getAnnotationAttributes 方法将 Bean中所有的注解和注解的值存放在一个 map 集合中
+              AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(
+                  annDef.getMetadata(), this.scopeAnnotationType);
+                  //将获取到的@Scope 注解的值设置到要返回的对象中
+              if (attributes != null) {
+                metadata.setScopeName(attributes.getString("value"));
+                //获取@Scope 注解中的 proxyMode 属性值， 在创建代理对象时会用到
+                ScopedProxyMode proxyMode = attributes.getEnum("proxyMode");
+                //如果@Scope 的 proxyMode 属性为 DEFAULT 或者 NO
+                if (proxyMode == ScopedProxyMode.DEFAULT) {
+
+                //设置 proxyMode 为 NO
+                  proxyMode = this.defaultProxyMode;
+                }
+                metadata.setScopedProxyMode(proxyMode);
+              }
+            }
+            //为返回的元数据设置 proxyMode
+            return metadata;
+          } 
+          #+END_SRC
+        + processCommonDefinitionAnnotations --> org.springframework.context.annotation.AnnotationConfigUtils#processCommonDefinitionAnnotations(AnnotatedBeanDefinition, AnnotatedTypeMetadata)
+          #+BEGIN_SRC java
+            static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd, AnnotatedTypeMetadata metadata) {
+              AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
+              if (lazy != null) {
+              //如果 Bean 定义中有@Lazy 注解， 则将该 Bean 预实例化属性设置为@lazy 注解的值
+                abd.setLazyInit(lazy.getBoolean("value"));
+              }
+              else if (abd.getMetadata() != metadata) {
+                lazy = attributesFor(abd.getMetadata(), Lazy.class);
+                if (lazy != null) {
+                  abd.setLazyInit(lazy.getBoolean("value"));
+                }
+              }
+              //如果 Bean 定义中有@Primary 注解， 则为该 Bean 设置为 autowiring 自动依赖注入装配的首选对象
+              if (metadata.isAnnotated(Primary.class.getName())) {
+                abd.setPrimary(true);
+              }
+
+              //如果 Bean 定义中有@ DependsOn 注解， 则为该 Bean 设置所依赖的 Bean 名称，
+              //容器将确保在实例化该 Bean 之前首先实例化所依赖的 Bean
+              AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
+              if (dependsOn != null) {
+                abd.setDependsOn(dependsOn.getStringArray("value"));
+              }
+
+              AnnotationAttributes role = attributesFor(metadata, Role.class);
+              if (role != null) {
+                abd.setRole(role.getNumber("value").intValue());
+              }
+              AnnotationAttributes description = attributesFor(metadata, Description.class);
+              if (description != null) {
+                abd.setDescription(description.getString("value"));
+              }
+            } 
+          #+END_SRC
+        + applyScopedProxyMode --> org.springframework.context.annotation.AnnotationConfigUtils#applyScopedProxyMode
+          #+BEGIN_SRC java
+          //根据作用域为 Bean 应用引用的代码模式
+            static BeanDefinitionHolder applyScopedProxyMode(
+                ScopeMetadata metadata, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
+                //获取注解 Bean 定义类中@Scope 注解的 proxyMode 属性值
+              ScopedProxyMode scopedProxyMode = metadata.getScopedProxyMode();
+              //如果配置的@Scope 注解的 proxyMode 属性值为 NO， 则不应用代理模式
+              if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
+                return definition;
+              }
+              //获取配置的@Scope 注解的 proxyMode 属性值， 如果为 TARGET_CLASS
+              //则返回 true， 如果为 INTERFACES， 则返回 false
+              boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
+              return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
+            } 
+          #+END_SRC
+        + registerBeanDefinition --> org.springframework.beans.factory.support.BeanDefinitionReaderUtils#registerBeanDefinition
+      + scan(扫描包) --> org.springframework.context.annotation.ClassPathBeanDefinitionScanner#scan
+        #+BEGIN_SRC java
+          //为容器创建一个类路径 Bean 定义扫描器， 并指定是否使用默认的扫描过滤规则。
+          //即 Spring 默认扫描配置： @Component、 @Repository、 @Service、 @Controller
+          //注解的 Bean， 同时也支持 JavaEE6 的@ManagedBean 和 JSR-330 的@Named 注解
+          public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters) {
+            this(registry, useDefaultFilters, getOrCreateEnvironment(registry));
+          }
+
+          public int scan(String... basePackages) {
+          //获取容器中已经注册的 Bean 个数
+            int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
+
+            //启动扫描器扫描给定包
+            doScan(basePackages);
+
+            // Register annotation config processors, if necessary.
+            //注册注解配置(Annotation config)处理器
+            if (this.includeAnnotationConfig) {
+              AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
+            }
+            //返回注册的 Bean 个数 
+            return (this.registry.getBeanDefinitionCount() - beanCountAtScanStart);
+          } 
+        #+END_SRC
+        + doscan
+          #+BEGIN_SRC java
+         	/**
+            * Perform a scan within the specified base packages,
+            * returning the registered bean definitions.
+            * <p>This method does <i>not</i> register an annotation config processor
+            * but rather leaves this up to the caller.
+            * @param basePackages the packages to check for annotated classes
+            * @return set of beans registered if any for tooling registration purposes (never {@code null})
+            */
+            protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
+              Assert.notEmpty(basePackages, "At least one base package must be specified");
+              Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
+              for (String basePackage : basePackages) {
+                Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+                for (BeanDefinition candidate : candidates) {
+                  ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+                  candidate.setScope(scopeMetadata.getScopeName());
+                  String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+                  if (candidate instanceof AbstractBeanDefinition) {
+                    postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
+                  }
+                  if (candidate instanceof AnnotatedBeanDefinition) {
+                    AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
+                  }
+                  if (checkCandidate(beanName, candidate)) {
+                    BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+                    definitionHolder =
+                        AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+                    beanDefinitions.add(definitionHolder);
+                    registerBeanDefinition(definitionHolder, this.registry);
+                  }
+                }
+              }
+              return beanDefinitions;
+            }
+
+          #+END_SRC
