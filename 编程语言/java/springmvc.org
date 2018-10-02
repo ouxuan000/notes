@@ -415,9 +415,11 @@ spring.mvc.servlet
                 }
 
                 // Determine handler adapter for the current request.
+                //3. 获取处理 request 的处理器适配器 handler adapter
                 HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
                 // Process last-modified header, if supported by the handler.
+                // 处理 last-modified 请求头
                 String method = request.getMethod();
                 boolean isGet = "GET".equals(method);
                 if (isGet || "HEAD".equals(method)) {
@@ -432,12 +434,14 @@ spring.mvc.servlet
                 }
 
                 // Actually invoke the handler.
+                // 4.实际的处理器处理请求,返回结果视图对象
                 mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
                 if (asyncManager.isConcurrentHandlingStarted()) {
                   return;
                 }
 
+                // 结果视图对象的处理
                 applyDefaultViewName(processedRequest, mv);
                 mappedHandler.applyPostHandle(processedRequest, response, mv);
               }
@@ -461,6 +465,7 @@ spring.mvc.servlet
             finally {
               if (asyncManager.isConcurrentHandlingStarted()) {
                 // Instead of postHandle and afterCompletion
+                // 请求成功响应之后的方法
                 if (mappedHandler != null) {
                   mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
                 }
@@ -474,4 +479,59 @@ spring.mvc.servlet
             }
           } 
         #+END_SRC
-          
+        + ha.handle --> org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter#handle --> org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#handleInternal
+
+          反射调用处理请求的方法， 返回结果视图
+          #+BEGIN_SRC java
+            protected ModelAndView handleInternal(HttpServletRequest request,
+                HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+
+              ModelAndView mav;
+              checkRequest(request);
+
+              // Execute invokeHandlerMethod in synchronized block if required.
+              if (this.synchronizeOnSession) {
+                HttpSession session = request.getSession(false);
+                if (session != null) {
+                  Object mutex = WebUtils.getSessionMutex(session);
+                  synchronized (mutex) {
+                    mav = invokeHandlerMethod(request, response, handlerMethod);
+                  }
+                }
+                else {
+                  // No HttpSession available -> no mutex necessary
+                  mav = invokeHandlerMethod(request, response, handlerMethod);
+                }
+              }
+              else {
+                // No synchronization on session demanded at all...
+                mav = invokeHandlerMethod(request, response, handlerMethod);
+              }
+
+              if (!response.containsHeader(HEADER_CACHE_CONTROL)) {
+                if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
+                  applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);
+                }
+                else {
+                  prepareResponse(response);
+                }
+              }
+
+              return mav;
+            }
+
+          #+END_SRC
+        + org.springframework.web.servlet.handler.AbstractHandlerMapping#getHandler
+          #+BEGIN_SRC java
+            protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+              String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+              this.mappingRegistry.acquireReadLock();
+              try {
+                HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
+                return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
+              }
+              finally {
+                this.mappingRegistry.releaseReadLock();
+              }
+            } 
+          #+END_SRC
