@@ -2507,9 +2507,11 @@
           for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
             customizer.customize(abd);
           }
-
+          //创建一个指定 Bean 名称的 Bean 定义对象， 封装注解 Bean 定义类数据
           BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+          //根据注解 Bean 定义类中配置的作用域， 创建相应的代理对象
           definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+          //向 IOC 容器注册注解 Bean 类定义对象
           BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
         }
 
