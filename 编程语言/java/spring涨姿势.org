@@ -1546,6 +1546,7 @@
               throws BeanCreationException {
 
             // Instantiate the bean.
+            // 封装创建的bean对象
             BeanWrapper instanceWrapper = null;
             if (mbd.isSingleton()) {
               instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
@@ -1554,6 +1555,7 @@
               instanceWrapper = createBeanInstance(beanName, mbd, args);
             }
             final Object bean = instanceWrapper.getWrappedInstance();
+            //获取实例化对象类型
             Class<?> beanType = instanceWrapper.getWrappedClass();
             if (beanType != NullBean.class) {
               mbd.resolvedTargetType = beanType;
@@ -1575,6 +1577,7 @@
 
             // Eagerly cache singletons to be able to resolve circular references
             // even when triggered by lifecycle interfaces like BeanFactoryAware.
+            // 防止循环引用
             boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
                 isSingletonCurrentlyInCreation(beanName));
             if (earlySingletonExposure) {
@@ -1582,13 +1585,16 @@
                 logger.trace("Eagerly caching bean '" + beanName +
                     "' to allow for resolving potential circular references");
               }
+              // 尽早持有对象引用
               addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
             }
 
             // Initialize the bean instance.
             Object exposedObject = bean;
             try {
+            // 封装实例对象，并将xml配置中属性赋值给对象
               populateBean(beanName, mbd, instanceWrapper);
+              //初始化bean
               exposedObject = initializeBean(beanName, exposedObject, mbd);
             }
             catch (Throwable ex) {
@@ -1602,14 +1608,18 @@
             }
 
             if (earlySingletonExposure) {
+            //获取指定名称单例bean对象
               Object earlySingletonReference = getSingleton(beanName, false);
               if (earlySingletonReference != null) {
                 if (exposedObject == bean) {
+                //当前实例化bean初始化完成
                   exposedObject = earlySingletonReference;
                 }
+                //发生循环引用不允许创建
                 else if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)) {
                   String[] dependentBeans = getDependentBeans(beanName);
                   Set<String> actualDependentBeans = new LinkedHashSet<>(dependentBeans.length);
+                  // 获取当前bean所依赖的其他bean
                   for (String dependentBean : dependentBeans) {
                     if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
                       actualDependentBeans.add(dependentBean);
@@ -1629,6 +1639,7 @@
             }
 
             // Register bean as disposable.
+            //注册完成依赖注入的bean
             try {
               registerDisposableBeanIfNecessary(beanName, bean, mbd);
             }
@@ -1640,3 +1651,155 @@
             return exposedObject;
           } 
         #+END_SRC
+      + createBeanInstance(beanName, mbd, args) 生成java对象实例
+        #+BEGIN_SRC java
+          protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, @Nullable Object[] args) {
+            // Make sure bean class is actually resolved at this point.
+            Class<?> beanClass = resolveBeanClass(mbd, beanName);
+
+            if (beanClass != null && !Modifier.isPublic(beanClass.getModifiers()) && !mbd.isNonPublicAccessAllowed()) {
+              throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+                  "Bean class isn't public, and non-public access not allowed: " + beanClass.getName());
+            }
+
+            Supplier<?> instanceSupplier = mbd.getInstanceSupplier();
+            if (instanceSupplier != null) {
+              return obtainFromSupplier(instanceSupplier, beanName);
+            }
+
+            //实例化对象
+            if (mbd.getFactoryMethodName() != null)  {
+              return instantiateUsingFactoryMethod(beanName, mbd, args);
+            }
+
+            // Shortcut when re-creating the same bean...
+            // 使用自动装配进行实例化
+            boolean resolved = false;
+            boolean autowireNecessary = false;
+            if (args == null) {
+              synchronized (mbd.constructorArgumentLock) {
+                if (mbd.resolvedConstructorOrFactoryMethod != null) {
+                  resolved = true;
+                  autowireNecessary = mbd.constructorArgumentsResolved;
+                }
+              }
+            }
+            if (resolved) {
+              if (autowireNecessary) {
+              //配置了自动装配属性， 根据属性类型进行注入
+                return autowireConstructor(beanName, mbd, null, null);
+              }
+              else {
+              // 默认无参构造方法初始化
+                return instantiateBean(beanName, mbd);
+              }
+            }
+
+            // Need to determine the constructor...
+            // 使用bean构造方法初始化
+            Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
+            if (ctors != null ||
+                mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
+                mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args))  {
+                // 根据自动装配属性调用匹配的构造方法进行初始化
+              return autowireConstructor(beanName, mbd, ctors, args);
+            }
+
+            // No special handling: simply use no-arg constructor.
+            return instantiateBean(beanName, mbd);
+          }
+ 
+          protected BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition mbd) {
+            try {
+              Object beanInstance;
+              final BeanFactory parent = this;
+              //获取系统安全接口， jdk标准api
+              if (System.getSecurityManager() != null) {
+              // 根据实例化策略创建实力对象
+                beanInstance = AccessController.doPrivileged((PrivilegedAction<Object>) () ->
+                    getInstantiationStrategy().instantiate(mbd, beanName, parent),
+                    getAccessControlContext());
+              }
+              else {
+              //
+                beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, parent);
+              }
+              BeanWrapper bw = new BeanWrapperImpl(beanInstance);
+              initBeanWrapper(bw);
+              return bw;
+            }
+            catch (Throwable ex) {
+              throw new BeanCreationException(
+                  mbd.getResourceDescription(), beanName, "Instantiation of bean failed", ex);
+            }
+          }
+        #+END_SRC
+        + instantiate -->org.springframework.beans.factory.support.SimpleInstantiationStrategy#instantiate(org.springframework.beans.factory.support.RootBeanDefinition, java.lang.String, org.springframework.beans.factory.BeanFactory)
+          #+BEGIN_SRC java
+          	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
+              // Don't override the class with CGLIB if no overrides.
+              if (!bd.hasMethodOverrides()) {
+                Constructor<?> constructorToUse;
+                synchronized (bd.constructorArgumentLock) {
+                // 获取对象的构造或工厂方法
+                  constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
+                  // 如果没有构造或工厂
+                  if (constructorToUse == null) {
+                  //使用jdk反射 来获取构造器
+                    final Class<?> clazz = bd.getBeanClass();
+                    if (clazz.isInterface()) {
+                      throw new BeanInstantiationException(clazz, "Specified class is an interface");
+                    }
+                    try {
+                      if (System.getSecurityManager() != null) {
+                        constructorToUse = AccessController.doPrivileged(
+                            (PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
+                      }
+                      else {
+                        constructorToUse =	clazz.getDeclaredConstructor();
+                      }
+                      bd.resolvedConstructorOrFactoryMethod = constructorToUse;
+                    }
+                    catch (Throwable ex) {
+                      throw new BeanInstantiationException(clazz, "No default constructor found", ex);
+                    }
+                  }
+                }
+                // 使用构造方法.newinstance实例化
+                return BeanUtils.instantiateClass(constructorToUse);
+              }
+              else {
+                // Must generate CGLIB subclass.
+                // 使用cglib进行实例化
+                return instantiateWithMethodInjection(bd, beanName, owner);
+              }
+            }
+          #+END_SRC
+        + instantiateWithMethodInjection --> org.springframework.beans.factory.support.CglibSubclassingInstantiationStrategy.CglibSubclassCreator#instantiate
+          #+BEGIN_SRC java
+          		public Object instantiate(@Nullable Constructor<?> ctor, Object... args) {
+                Class<?> subclass = createEnhancedSubclass(this.beanDefinition);
+                Object instance;
+                if (ctor == null) {
+                  instance = BeanUtils.instantiateClass(subclass);
+                }
+                else {
+                  try {
+                    Constructor<?> enhancedSubclassConstructor = subclass.getConstructor(ctor.getParameterTypes());
+                    instance = enhancedSubclassConstructor.newInstance(args);
+                  }
+                  catch (Exception ex) {
+                    throw new BeanInstantiationException(this.beanDefinition.getBeanClass(),
+                        "Failed to invoke constructor for CGLIB enhanced subclass [" + subclass.getName() + "]", ex);
+                  }
+                }
+                // SPR-10785: set callbacks directly on the instance instead of in the
+                // enhanced class (via the Enhancer) in order to avoid memory leaks.
+                Factory factory = (Factory) instance;
+                factory.setCallbacks(new Callback[] {NoOp.INSTANCE,
+                    new LookupOverrideMethodInterceptor(this.beanDefinition, this.owner),
+                    new ReplaceOverrideMethodInterceptor(this.beanDefinition, this.owner)});
+                return instance;
+              }
+          #+END_SRC
+      + populateBean(beanName, mbd, instanceWrapper) 对bean配置的属性进行注入;
