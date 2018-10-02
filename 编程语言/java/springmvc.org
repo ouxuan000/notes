@@ -524,9 +524,11 @@ spring.mvc.servlet
         + org.springframework.web.servlet.handler.AbstractHandlerMapping#getHandler
           #+BEGIN_SRC java
             protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+            // 如果请求 url 为,http://localhost:8080/web/hello.json, 则 lookupPath=web/hello.json
               String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
               this.mappingRegistry.acquireReadLock();
               try {
+              // 遍历 Controller 上的所有方法,获取 url 匹配的方法
                 HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
                 return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
               }
@@ -535,3 +537,64 @@ spring.mvc.servlet
               }
             } 
           #+END_SRC
+        + invokeHandlerMethod
+          #+BEGIN_SRC java
+          //获取处理请求的方法,执行并返回结果视图 
+            protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
+                HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+
+              ServletWebRequest webRequest = new ServletWebRequest(request, response);
+              try {
+                WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
+                ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
+
+                ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+                if (this.argumentResolvers != null) {
+                  invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+                }
+                if (this.returnValueHandlers != null) {
+                  invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+                }
+                invocableMethod.setDataBinderFactory(binderFactory);
+                invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+
+                ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+                mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
+                modelFactory.initModel(webRequest, mavContainer, invocableMethod);
+                mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
+
+                AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
+                asyncWebRequest.setTimeout(this.asyncRequestTimeout);
+
+                WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+                asyncManager.setTaskExecutor(this.taskExecutor);
+                asyncManager.setAsyncWebRequest(asyncWebRequest);
+                asyncManager.registerCallableInterceptors(this.callableInterceptors);
+                asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
+
+                if (asyncManager.hasConcurrentResult()) {
+                  Object result = asyncManager.getConcurrentResult();
+                  mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
+                  asyncManager.clearConcurrentResult();
+                  LogFormatUtils.traceDebug(logger, traceOn -> {
+                    String formatted = LogFormatUtils.formatValue(result, !traceOn);
+                    return "Resume with async result [" + formatted + "]";
+                  });
+                  invocableMethod = invocableMethod.wrapConcurrentResult(result);
+                }
+
+                invocableMethod.invokeAndHandle(webRequest, mavContainer);
+                if (asyncManager.isConcurrentHandlingStarted()) {
+                  return null;
+                }
+
+                return getModelAndView(mavContainer, modelFactory, webRequest);
+              }
+              finally {
+                webRequest.requestCompleted();
+              }
+            }
+          #+END_SRC
+** springmvc 最佳实践
+  1.Controller 如果能保持单例,尽量使用单例,这样可以减少创建对象和回收对象的开销.也就是,如果 Controller的类变量和实例变量可以以方法形参声明的尽量以方法的形参声明,不要以类变量实例变量声明,这样可以避免线程安全问题.
+  2.处理 Request 的方法中的形参务必加上@RequestParam 注解,这样可以避免 SpringMVC 使用asm 框架读取 class 文件获取方法参数名的过程.即便 SpringMVC 对读取出的方法参数名进行了缓存,如果不要读取 class 文件当然是更加好.
