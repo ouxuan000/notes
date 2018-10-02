@@ -507,7 +507,7 @@
                   + resourceloader类关系图
                     [[file://spring涨姿势/6.png]] 
                     [[file://spring涨姿势/7.png]]
-                  + getResource --> org.springframework.core.io.DefaultResourceLoader#getResource (待验证，FileSystemXmlApplicationContext最终使用的getResources方法)
+                  + getResource(定位) --> org.springframework.core.io.DefaultResourceLoader#getResource (待验证，FileSystemXmlApplicationContext最终使用的getResources方法)
                     #+BEGIN_SRC java
                    	@Override
                     public Resource getResource(String location) {
@@ -653,7 +653,7 @@
                             return docBuilder;
                           }
                       #+END_SRC
-                    + registerBeanDefinitions
+                    + registerBeanDefinitions(注册)
                       #+BEGIN_SRC java
                       	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
                         //得到BeanDefinitionDocumentReader来对xml格式的BeanDefinition解析
