@@ -164,6 +164,37 @@
            <dubbo:reference id="orderService" interface="com.lx.demo.IOrderService" protocol="dubbo" version="1.0.1"/>
        #+END_EXAMPLE
 
+** 多协议支持
+*** 引入hessian协议
+    + dubbo-provider中加入
+      #+BEGIN_EXAMPLE
+         <dubbo:protocol name="hessian" port="8080"/> 
+    <!--使用hessian协议接口暴露服务， 兼容第三方系统可能使用hessian协议-->
+    <!--<dubbo:service id="orderServiceHessian" interface="com.lx.demo.IOrderService" ref="orderService" protocol="hessian"/>-->
+      #+END_EXAMPLE
+    + pom.xml引入hessian的jar包
+      #+BEGIN_EXAMPLE
+              <!--引入hession支持-->
+        <dependency>
+            <groupId>com.caucho</groupId>
+            <artifactId>hessian</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
+        </dependency>
+      #+END_EXAMPLE
+    + dubbo-consumer修改协议为hessian
+      #+BEGIN_EXAMPLE
+          <dubbo:reference id="orderServiceLocal"
+                     interface="com.lx.demo.IOrderService"
+                     protocol="hessian"
+                     version="1.0.0"/>
+      #+END_EXAMPLE
 ** 主机绑定, dubbo服务发布后都是一个个ip地址
    + 源码com.alibaba.dubbo.config.ServiceConfig.doExportUrlsFor1Protocol
    + 在发布一个Dubbo服务的时候，会生成一个dubbo://ip:port的协议地址，那么这个IP是根据什么生成的呢？大家可以在ServiceConfig.java代码中找到如下代码;可以发现，在生成绑定的主机的时候，会通过一层一层的判断，直到获取到合法的ip地址。
