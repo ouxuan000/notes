@@ -558,6 +558,11 @@ Dubbo是基于Java原生SPI机制思想的一个改进，所以，先从JAVA SPI
 *** dubbo配置
     + 入口 serviceconfig 一期视频, 基于spring的自定义注解
     
+*** dubbo核心设计
+    + exporter
+    + invoker
+    + protocol
+    + SPI(改造的spi，有key)
 * 一些小问题
 ** Main方法怎么启动的
    + main方法里封装了获取配置文件及启动过程, 其实就是封装了官方文档中provicer启动逻辑
