@@ -162,6 +162,7 @@ spring.mvc.servlet
       + 处理状态码 <error-code>
       + 处理异常类型 <exception-type>
       + 处理服务：<location>
+    + 代码路径: https://github.com/microzhao/demo/tree/master/servlet
 *** Spring Web MVC 异常处理
     + @ExceptionHandler
       + 优点：易于理解，尤其是全局异常处理
