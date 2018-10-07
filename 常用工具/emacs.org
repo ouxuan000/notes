@@ -8,7 +8,8 @@
        
 * arch linux, 好用的一b
     1. 打开org文件时候， 会报错 org-projectfilexx, 直接在 elph目录下找到这个org-projecxx目录， 进去后执行git-fetch，ok
-    2. spacemacs 打开自动折行M-x spacemacs/toggle-visual-line-navigation-on
-    3. m+q 折行快捷键， spac+t+L
+    2. m+q 折行快捷键， spac+t+L
+    3. spacemacs 打开自动折行M-x spacemacs/toggle-visual-line-navigation-on
     4. emacs -nw 命令行启动
     5. 导出其他格式 c-c c-e o
+    6. todo
