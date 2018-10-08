@@ -167,15 +167,18 @@ spring.mvc.servlet
     + @ExceptionHandler
       + 优点：易于理解，尤其是全局异常处理
       + 不足：很难完全掌握所有的异常类型
+      + https://docs.spring.io/spring/docs/5.0.0.RELEASE/spring-framework-reference/web.html
     注:
       + @RestControllerAdvice = @ControllerAdvice + @ResponseBody
       + @ControllerAdvice 专门拦截（AOP） @Controller
+      + 代码路径:https://github.com/microzhao/demo/tree/master/springmvc/exception-on-springmvc
 *** Spring Boot 错误处理页面
     + 实现 ErrorPageRegistrar
-        + 状态码：比较通用，不需要理解Spring WebMVC 异常体系
-        + 不足：页面处理的路径必须固定
+      + 状态码：比较通用，不需要理解Spring WebMVC 异常体系
+      + 不足：页面处理的路径必须固定
     + 注册 ErrorPage 对象
     + 实现 ErrorPage 对象中的Path 路径Web服务
+    + 代码路径:https://github.com/microzhao/demo/tree/master/springmvc/exception-on-springmvc
 ** 视图技术
 *** View
 *** render 方法
