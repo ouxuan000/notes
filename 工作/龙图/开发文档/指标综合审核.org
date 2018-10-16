@@ -15,3 +15,9 @@
       --zbsyamt
       select t.* from BDG_T_BDGSUB t where t.indictrlid = '3F4B9A7EC76EF9DA5A87E29A88EE3A3E' and bdglevel = '3001'
     #+END_SRC
+* 单据定义增加显示待办选项
+  + 山西需求， 勾选后最好同时勾选隐藏页签
+  + 勾选后门户待办会展示当前审核查询页面的数据， 程序控制显示单据条件， 自定义条件需要在主列表区配置
+    例: update busfw_t_uitable t set t.defquery = 'TO_CHAR(SYSDATE+7, ''yyyymmdd'') > t.stopdate and wfstatus <> ''011''' where t.key = '实际配置key';
+    表示距离截止日期小于七天 
+  + 页面待办展示条数与主列表保持一致
