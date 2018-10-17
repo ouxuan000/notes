@@ -1,0 +1,16 @@
+* 开发环境初始化
+  + start.spring.io 填入相关以来后下载
+  + spring-boot-cli工具
+    + archlinux  yaourt -S spring-boot-cli
+    + 一个简单的web项目(groovy)
+      #+BEGIN_SRC groovy
+        @RestController
+        public class HelloController {
+
+            @RequestMapping(value = "/hello")
+            public String sayHello() {
+                return "Hello，Spring Boot！";
+            }
+        }
+      #+END_SRC
+      + spring run hello.groovy 运行即可访问http://localhost:8080/hello
