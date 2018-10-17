@@ -14,3 +14,12 @@
         }
       #+END_SRC
       + spring run hello.groovy 运行即可访问http://localhost:8080/hello
+    + help 指令可以获取更多对指令的帮助信息
+      + spring help run
+    + 当前目录下 *.groovy 文件打包成可执行的 jar 文件：
+      + spring jar myapp.jar  *.groovy
+    + 初始化一个web项目
+      + 用来查看springboot支持哪些自动依赖
+        + spring init --list 
+      + 初始化项目并指定依赖
+        + spring init --dependencies=web,data-jpa my-project 
