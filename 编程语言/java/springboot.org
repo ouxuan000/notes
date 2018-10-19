@@ -23,3 +23,5 @@
         + spring init --list 
       + 初始化项目并指定依赖
         + spring init --dependencies=web,data-jpa my-project 
+      + spring init 默认压缩包都为demo.zip, 可以使用下面命令直接解压到指定目录
+        spring init -x myapp
