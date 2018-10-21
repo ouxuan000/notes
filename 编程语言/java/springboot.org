@@ -1,0 +1,27 @@
+* 开发环境初始化
+  + start.spring.io 填入相关以来后下载
+  + spring-boot-cli工具
+    + archlinux  yaourt -S spring-boot-cli
+    + 一个简单的web项目(groovy)
+      #+BEGIN_SRC groovy
+        @RestController
+        public class HelloController {
+
+            @RequestMapping(value = "/hello")
+            public String sayHello() {
+                return "Hello，Spring Boot！";
+            }
+        }
+      #+END_SRC
+      + spring run hello.groovy 运行即可访问http://localhost:8080/hello
+    + help 指令可以获取更多对指令的帮助信息
+      + spring help run
+    + 当前目录下 *.groovy 文件打包成可执行的 jar 文件：
+      + spring jar myapp.jar  *.groovy
+    + 初始化一个web项目
+      + 用来查看springboot支持哪些自动依赖
+        + spring init --list 
+      + 初始化项目并指定依赖
+        + spring init --dependencies=web,data-jpa my-project 
+      + spring init 默认压缩包都为demo.zip, 可以使用下面命令直接解压到指定目录
+        spring init -x myapp

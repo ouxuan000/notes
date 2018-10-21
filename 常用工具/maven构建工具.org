@@ -203,7 +203,7 @@
   #+END_EXAMPLE
   2. 生成web项目模块
   #+BEGIN_EXAMPLE
-  mvn archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DarchetypeArtifactId=maven-archetype-webapp -DgroupId=com.lx.ssm -DartifactId=web
+  mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp -DgroupId=com.lx.ssm -DartifactId=web
   #+END_EXAMPLE
 * 好用的插件
   + 这个插件效果类似spring-boot, 打成的jar包可以直接运行, 配置后直接执行 mvn -Dmaven.test.skip -U clean package, 然后在打好的路径下 java -jar xxx.jar
