@@ -1607,3 +1607,7 @@ emacs
     #+BEGIN_EXAMPLE
     cat  /sys/class/backlight/intel_backlight/max_brightness
     #+END_EXAMPLE
+* 键盘按键编码
+  + xev | grep -A2 --line-buffered '^KeyRelease' | sed -n '/keycode /s/^.*keycode \([0-9]*\).* (.*, \(.*\)).*$/\1 \2/p'
+  + 输入上面命令后按键就会输出对应的编码
+  + 参考: https://wiki.archlinux.org/index.php/Extra_keyboard_keys
