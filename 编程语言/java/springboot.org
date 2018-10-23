@@ -1,3 +1,4 @@
+* 参考springboot实战
 * 开发环境初始化
   + start.spring.io 填入相关以来后下载
   + spring-boot-cli工具
@@ -25,3 +26,9 @@
         + spring init --dependencies=web,data-jpa my-project 
       + spring init 默认压缩包都为demo.zip, 可以使用下面命令直接解压到指定目录
         spring init -x myapp
+* springboot自动化配置
+  + springbootautoconfig.jar
+  + 自定义condition
+  + spring4开始的条件配置
+* 自定义配置
+  + spring-boot-security默认会校验一个单用户登录， 需要自定义覆盖其实现

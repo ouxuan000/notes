@@ -75,7 +75,12 @@ openbox –reconfigure done
 ##### 屏保
 >xscreensaver
 #####护眼模式 xflux
-yaourt -S xflux
+yaourt -S xflux xflux
+执行 systemctl --user enable xfluxd
+#+BEGIN_EXAMPLE
+Created symlink /home/lx7ly/.config/systemd/user/default.target.wants/xfluxd.service → /usr/lib/systemd/user/xfluxd.service.
+#+END_EXAMPLE
+配置文件在/etc/xfluxd.conf
 ##### 音量调节
 volumeicon
 pacman -S alsa-utils包含 xmixer

@@ -1602,3 +1602,12 @@ emacs
     + 发现dhcpcd和静态配置同时存在，关闭dhcp.service
     +  参考archlinx官方文档网络配置， 动态dhcp 和static不要同时配置
     + nmcli命令查看网络配置
+* 屏幕亮度
+  + 最大亮度查看
+    #+BEGIN_EXAMPLE
+    cat  /sys/class/backlight/intel_backlight/max_brightness
+    #+END_EXAMPLE
+* 键盘按键编码
+  + xev | grep -A2 --line-buffered '^KeyRelease' | sed -n '/keycode /s/^.*keycode \([0-9]*\).* (.*, \(.*\)).*$/\1 \2/p'
+  + 输入上面命令后按键就会输出对应的编码
+  + 参考: https://wiki.archlinux.org/index.php/Extra_keyboard_keys
