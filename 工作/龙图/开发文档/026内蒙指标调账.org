@@ -1,0 +1,17 @@
+* 需求说明
+  + 内蒙指标调账不记录总账
+  + 对当前保存数据只在业务中做一正一负的明细数据
+* 设计
+** 新增
+   + 新增的数据需要根据去向科目过滤，单据定义需配置交易令, 例： 如果对单位指标调账，可以配置单位指标下达交易令即可
+   + 保存时会根据当前数据组织成多个明细一正一负对应
+   + 正常业务需要重写gov.mof.fasp2.bdg.adjaccountneimeng.BdgAdjaccountBO#beforeSaveBill
+   + 按明细操作时重写gov.mof.fasp2.bdg.adjaccountneimeng.BdgAdjaccountBO#dealWithSub
+     + 根据当前数据拆分成每个主单分别带有一对正负明细
+** 修改
+   + 修改默认在列表加入amt > 0过滤条件
+   + 修改保存时后台对负数据进行不齐，防止误判
+     + gov.mof.fasp2.bdg.adjaccountneimeng.BdgAdjaccountBO#beforeUpdateBill
+** 编辑
+   + 目前展示主子单， 主单金额为0, 明细为一正一负， 分别对应调入， 调出
+   + 如果是多个明细,明细列表需要配置排序方式 group by adjgroupid, 处理正负数不挨着看的不舒服
