@@ -520,3 +520,5 @@ spring.mvc.servlet
    + dodispatch中会产生model + view然后view通过rander进行渲染， model作为数据填充
 ** javax.servlet.http.HttpServlet#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    + service方法调度不同的页面请求, 通过传入url, redirect或者forward到不同的页面， 与springmvc中mapping(url)类似, 只不过servlet中jsp的数据需要自己来实现rander的过程
+** servlet-springmvc-springboot页面跳转不同实现方式
+   + https://github.com/microzhao/demo/tree/master/springmvc/servlet-springmvc-springboot
