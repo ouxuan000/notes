@@ -80,3 +80,15 @@
      + spring jar readlist.jar .
      + java -jar readlist.jar
      + 浏览器访问:http://localhost:8080
+* springboot自定义路径&springboot中多
+** org.springframework.web.servlet.view.InternalResourceViewResolver
+   + https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html
+   #+BEGIN_EXAMPLE
+   <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+   #+END_EXAMPLE
+   未结合springboot时， 可以通过上述配置来跳转页面
+** springboot中的默认路径及自定义成上述路径
