@@ -92,3 +92,8 @@
    #+END_EXAMPLE
    未结合springboot时， 可以通过上述配置来跳转页面
 ** springboot中的默认路径及自定义成上述路径
+   + https://blog.csdn.net/u010502101/article/details/78867730
+   + spring-configuration-metadata.json (在idea项目中搜索 spring.mvc.view.prefix)
+     + org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
+       + 这个里面设置读取跳转页面的前缀后缀
+** 采用代码实现分别采用servlet, springmvc, springboot访问web-inf/jsp下的index.jsp页面
