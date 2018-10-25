@@ -502,3 +502,4 @@ spring.mvc.servlet
 ** springmvc 最佳实践
   1.Controller 如果能保持单例,尽量使用单例,这样可以减少创建对象和回收对象的开销.也就是,如果 Controller的类变量和实例变量可以以方法形参声明的尽量以方法的形参声明,不要以类变量实例变量声明,这样可以避免线程安全问题.
   2.处理 Request 的方法中的形参务必加上@RequestParam 注解,这样可以避免 SpringMVC 使用asm 框架读取 class 文件获取方法参数名的过程.即便 SpringMVC 对读取出的方法参数名进行了缓存,如果不要读取 class 文件当然是更加好.
+* springmvc 与 servlet
