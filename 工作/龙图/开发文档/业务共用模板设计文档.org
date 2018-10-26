@@ -84,3 +84,5 @@
     + 将url中所有请求参数统一放入到config中, 正常情况也无只需要再js中传入获取及可
   + gov.mof.fasp2.bdg.common.impl.CommonService#getBgtdocnoByRuleID 根据规则id或去文号信息
   + gov.mof.fasp2.bdg.common.impl.CommonService#cache2db  暂存
+* CommonPage
+  + gov.mof.fasp2.bdg.common.impl.CommonPage#initCommonConsole 界面初始化得一些配置信息, 各个业务集成该类并调用该方法
