@@ -1,0 +1,19 @@
+* 缓存管理页面
+** 获取缓存信息 gov.mof.fasp2.buscore.framework.cache.service.CacheManager#getCacheinfo
+** 刷新所有缓存 gov.mof.fasp2.buscore.framework.cache.service.CacheManager#refreshCaches
+* 注册缓存
+** 自定义标签, buscore-context.xml
+   #+BEGIN_EXAMPLE
+   	<!--列表区缓存接口  -->
+    <buscore_cache:domain id="busfw.cache.ui.uidatatable" maxsize="10000" partition="true"
+      initbeanid="busfw.cacheinit.uicacheserver.uidatatable" />
+    <bean id="busfw.cacheinit.uicacheserver.uidatatable"
+      class="gov.mof.fasp2.busfw.ui.datatable.DatatableCacheServer">
+      <property name="cacher">
+        <ref bean="busfw.cache.ui.uidatatable"></ref>
+      </property>
+    </bean>
+   #+END_EXAMPLE
+   + spring自定义标签配置文件
+    + /WebRoot/WEB-INF/lib/devlop_framework.jar!/META-INF/spring.schemas
+    + /WebRoot/WEB-INF/lib/devlop_framework.jar!/META-INF/spring.handlers
