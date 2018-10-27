@@ -24,3 +24,4 @@ albert &
 xscreensaver &
 volumeicon &
 nohup nm-applet > /dev/null &
+copyq &

@@ -120,3 +120,19 @@ export QT_IM_MODULE="fcitx"
 
 
 
+* 亮度调整
+  + yaourt -Ss xbacklight
+  + rc.xml加入快捷键
+    #+BEGIN_EXAMPLE
+      <keybind key="XF86MonBrightnessUp">  
+        <action name="Execute">
+          <command>xbacklight +10</command>
+        </action>
+      </keybind>
+
+      <keybind key="XF86MonBrightnessDown">  
+        <action name="Execute">
+          <command>xbacklight -10</command>
+        </action>
+      </keybind> 
+    #+END_EXAMPLE
