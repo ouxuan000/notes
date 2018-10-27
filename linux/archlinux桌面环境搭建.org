@@ -84,6 +84,7 @@ Created symlink /home/lx7ly/.config/systemd/user/default.target.wants/xfluxd.ser
 ##### 音量调节
 volumeicon
 pacman -S alsa-utils包含 xmixer
++ 默认安装后时没有声音得，可以打开网易云音乐， 然后alsamixer进行调整， 插入耳机时候要打开headphone
 #####锁屏
 yaourt -S xlockmore
 #####默认分辨率
@@ -117,7 +118,6 @@ export QT_IM_MODULE="fcitx"
      plugins=(z git zsh-autosuggestions)
    + 重启或者 source .zshrc
    + 注意:1、你如果分开设置oh-my-zsh和autosuggestions，那么你的terminal的autosuggestions不会起作用的，所以你要把autosuggestions作为zsh的插件放到~/.zsh/plugins/下面，然后再在～/.zshrc文件中加入这个插件plugins=(git zsh-autosuggestions)
-
 
 
 * 亮度调整
