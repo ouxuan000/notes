@@ -2,6 +2,7 @@
   + 安装emacs (ivy)
   + git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
 * 常用功能按键
+  + 快捷键帮助命令 spac ?
   + 帮助文档文档 spac h spac
   + 从space(空格键开始)
   + 修改配置文件 spac f e d， 修改后刷新缓存:spac f e R
@@ -24,6 +25,22 @@
   + c-x r t spacemacs中vim block模式有问题，可以用这个加前缀标题
   + 表格计算
     + c-c ' 录入计算方式, 然后通过c-u c-c c-c来计算
+  + emacs内部命令
+    + alt + x 或者spac + :
+    + 输入genenv 然后按提示操作
+  + 窗口分隔
+    + 横切 spac + w + -
+    + 竖切 spac + w + /
+    + 最大化 spac + w + m
+  + 代码注释 spac  ;
+  + shell相关
+    + 打开shell窗口 
+    + 执行shell命令 spac  !
+  + 查找并切换到buffer/recent-file
+    + spac b b
+  + 退出 spac qq
+  + 当前buffer里搜索 spac ss
+  + 代码对齐 spac x a
 * 填坑
   + Specs Emacs org mode不能用，报错 orgproject  cd. .emacs.d el org project file.  Gitfetch 
 * java list输出转标准json
