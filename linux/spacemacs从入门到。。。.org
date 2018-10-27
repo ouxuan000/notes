@@ -2,6 +2,7 @@
   + 安装emacs (ivy)
   + git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
 * 常用功能按键
+  + 启动后按o， 然后根据前面字母跳转不同得项目或文件
   + 快捷键帮助命令 spac ?
   + 帮助文档文档 spac h spac
   + 从space(空格键开始)
@@ -48,3 +49,9 @@
   + 去掉空格 %s/\s //g
   + 在jsonkey value俩边加引号 %s/[^=,{},]*/"&/g
   + 去掉换行 %s/\n//g
+* python开发环境
+  + 插件: 打开python auto-complete syncheck
+  + 快捷键
+    + 查看document  ,hh
+    + 方法调用链路 ,gu
+    + 查看变量定义 ,ga
