@@ -375,6 +375,8 @@ you should place your code here."
            ((stuck "") ;; review stuck projects as designated by org-stuck-projects
             (tags-todo "PROJECT") ;; review all projects (assuming you use todo keywords to designate projects)
             ))))
+  (global-unset-key (kbd "C-SPC"))
+  (global-set-key (kbd "M-SPC") 'set-mark-command)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
