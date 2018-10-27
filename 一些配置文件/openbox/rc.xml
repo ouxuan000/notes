@@ -42,7 +42,7 @@
                   'Active' - where the active window is -->
   </placement>
   <theme>
-    <name>Bland</name>
+    <name>Surreal</name>
     <titleLayout>NLIMC</titleLayout>
     <!--
       available characters are NDSLIMC, each can occur at most once.
@@ -375,7 +375,18 @@
     <!-- power-->
     <keybind key="XF86PowerOff">
       <action name="ShowMenu">
-          <menu>exit-menu</menu>
+        <menu>exit-menu</menu>
+      </action>
+    </keybind>
+    <!--light-->
+    <keybind key="XF86MonBrightnessUp">
+      <action name="Execute">
+        <command>xbacklight +10</command>
+      </action>
+    </keybind>
+    <keybind key="XF86MonBrightnessDown">
+      <action name="Execute">
+        <command>xbacklight -10</command>
       </action>
     </keybind>
   </keyboard>
@@ -833,5 +844,7 @@
 
   # end of the example
 -->
+    <application name="URxvt"><decor>no</decor><focus>yes</focus><position><x>center</x><y>20</y></position><layer>below</layer><desktop>all</desktop><maximized>true</maximized> #Only if you want a full size terminal.
+    </application>
   </applications>
 </openbox_config>
