@@ -35,7 +35,7 @@
     + 最大化 spac + w + m
   + 代码注释 spac  ;
   + shell相关
-    + 打开shell窗口 alt x shell
+    + 打开shell窗口 alt x shelL
     + 执行shell命令 spac  !
   + 查找并切换到buffer/recent-file
     + spac b b
