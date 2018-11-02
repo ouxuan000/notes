@@ -1611,3 +1611,9 @@ emacs
   + xev | grep -A2 --line-buffered '^KeyRelease' | sed -n '/keycode /s/^.*keycode \([0-9]*\).* (.*, \(.*\)).*$/\1 \2/p'
   + 输入上面命令后按键就会输出对应的编码
   + 参考: https://wiki.archlinux.org/index.php/Extra_keyboard_keys
+* fc命令
+  + 输出上次执行的命令
+* type
+  + 查看文件类型
+  + 查看命令来源
+    + type -a ll # 一个别名
