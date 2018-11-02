@@ -1,0 +1,7 @@
+* 需求
+  + 该功能主要为了外部系统与内部要素进行对照
+* v3040版本该功能升级
+  + 左侧外部值集不再使用平台值集， 需要实施人员扩展, 配置表为 bdg_T_left开头 + 要素code + 操作类型(例: bdg_t_leftfundtype2)
+  + 右侧值集为: bdg_t_+ 要素code + 操作类型 (例: bdg_t_fundtype2)
+  + 要素编码查看 select ELEMENTNAME name,FASPELEMENTCODE code from BDG_T_ELEMENTS where status='1' order by code desc, 其中faspelementcode即为要素编码
+  + 操作类型: 一般为2， 门头沟项目专项资金时为3
