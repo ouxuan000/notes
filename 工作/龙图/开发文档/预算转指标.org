@@ -37,31 +37,52 @@
       + 是否应该全部清理
 *** api
     #+BEGIN_SRC java
-      /**
-      * 对外提供预算转指标接口
-      */
-      public interface IBgtToBdg {
+        /**
+        * 对外提供预算转指标接口
+        */
+        public interface IBgtToBdg
+        {
 
-          /**
-          * 预算转指标
-          * @param userid
-          * @param province
-          * @param year
-          * @param data 传入数据list中必须是map或者map的子类
-          * @return 返回值为map, 包含成功和失败的list{"0":[{"":""},{}...], "1":[{"":""},{}]} , 0是成功， 1是失败
-          * @throws Exception
-          */
-          Map create(String userid, String province, String year, List<? extends Map> data) throws Exception;
+            /**
+            * 预算转指标
+            * @param userId
+            * @param province
+            * @param year
+            * @param data 传入数据list中必须是map或者map的子类
+            * @return 返回值为map, 包含成功和失败的list{"0":[{"":""},{}...], "1":[{"":""},{}]} , 0是成功， 1是失败
+            * @throws Exception
+            */
+            Map create(String userId, String province, String year, List<? extends Map> data);
 
-          /**
-          * 撤销预算转指标
-          * @param userid
-          * @param province
-          * @param year
-          * @param data 传入数据list中必须是map或者map的子类
-          * @return 返回值为map, 包含成功和失败的list{"0":[{"":""},{}...], "1":[{"":""},{}]} , 0是成功， 1是失败
-          * @throws Exception
-          */
-          Map cancelCreate(String userid,String province,String year,List<? extends Map> data) throws Exception;
-      }
+            /**
+            * 撤销预算转指标
+            * @param userId
+            * @param province
+            * @param year
+            * @param data 传入数据list中必须是map或者map的子类
+            * @return 返回值为map, 包含成功和失败的list{"0":[{"":""},{}...], "1":[{"":""},{}]} , 0是成功， 1是失败
+            * @throws Exception
+            */
+            Map cancelCreate(String userId, String province, String year, List<? extends Map> data);
+
+            /**
+            * 预算数据直接生成额度
+            * @param userId
+            * @param province
+            * @param year
+            * @param data
+            * @return
+            */
+            Map dbCtrl(String userId, String province, String year, List<? extends Map> data);
+
+            /**
+            * 预算数据撤销生成额度
+            * @param userId
+            * @param province
+            * @param year
+            * @param data
+            * @return
+            */
+            Map cancelDbCtrl(String userId, String province, String year, List<? extends Map> data);
+        }
     #+END_SRC
