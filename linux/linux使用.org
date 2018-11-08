@@ -15,5 +15,6 @@
 * 打印机设置(hp5200)
   参考地址:https://www.cnblogs.com/hugetong/p/6055223.html
   + pacman -S hplip
+  + systemctl status org.cups.cupsd.service (这个一定要启动)
   + hpsetup -i 192.168.2.218(打印机地址)
   + 根据提示完成即可
