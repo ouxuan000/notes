@@ -39,6 +39,7 @@
       }
     #+END_SRC
   + 完整代码: https://github.com/microzhao/demo/tree/master/java-core/src/main/java/com/lx/demo/j8
+* 当一个接口只有一个实现时可以作为函数进行传递
 * 默认实现 default
   + java8提供了接口默认实现 default, 类似便利类
   + 多个实现意味着多继承， 如何避免?
