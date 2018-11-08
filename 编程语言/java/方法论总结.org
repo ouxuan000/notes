@@ -1,6 +1,6 @@
 * 能动手就不吵吵
   + 学习编程最主要的就是撸代码，撸多了就灰飞烟灭
-  + stop cheap, show me your code
+  + talk is cheap, show me your code
 * 博览群书
   + 看的多了了解多了慢慢思路就会多
   + 从一开始就钻细节的是智障
