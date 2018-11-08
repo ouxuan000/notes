@@ -44,7 +44,9 @@
   + java8提供了接口默认实现 default, 类似便利类
   + 多个实现意味着多继承， 如何避免?
 * optional
-* predicate(谓词) java提供返回boolean得接口
+* predicate(谓词) -->test java提供返回boolean得接口
+* Consumer -->accept (forEach)
+* Function
 * java8开始可以利用多核
 * 策略模式进化之路(封装变化，扩展开放, 参数化配置)
   + 参考 java8实战第二章
