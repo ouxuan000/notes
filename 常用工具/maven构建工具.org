@@ -184,7 +184,6 @@
 * 依赖调解
   1. 路径最短
   2. 第一声明(文件中位置)
-
 * 生命周期和插件
   1. 命令的输入代表了生命周期[clean:{清理项目}, default:{构建项目 compile, xxxx}, site:{建立站点}] (抽象: 生命周期只定义， 具体插件实现), 三套生命周期相互独立, 例如: mvn compile不会clean， 只有mvn clean compile才会去clean
 * 最佳实践:
@@ -205,6 +204,7 @@
   #+BEGIN_EXAMPLE
   mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp -DgroupId=com.lx.ssm -DartifactId=web
   #+END_EXAMPLE
+  3. 常用插件https://www.cnblogs.com/pixy/p/4977550.html
 * 好用的插件
   + 这个插件效果类似spring-boot, 打成的jar包可以直接运行, 配置后直接执行 mvn -Dmaven.test.skip -U clean package, 然后在打好的路径下 java -jar xxx.jar
   #+BEGIN_EXAMPLE
