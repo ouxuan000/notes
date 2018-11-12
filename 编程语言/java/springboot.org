@@ -171,6 +171,13 @@
     答：会的，当然可以过滤掉一些不关紧要的异常noRollbackFor()
   *4. spring 分布式事务 生产环境实现方式有哪些?*
     答：https://docs.spring.io/spring-boot/docs/2.0.0.M5/reference/htmlsingle/#boot-features-jta
+  *5. spring老项目迁移springboot*
+    答: 老的xml采用@ImportResource引入
+  *6. 嵌入式tomcat调优*
+    答:  通过application.properties调整参数
+    或者通过TomcatContextCustomizer，使用api方式调整 
+  *7. 同时使用webmvc和webflux时, webflux不会工作，但是如果只引入webflux会兼容mvc的annotation, 参考公开课springannotation驱动编程*
+  *8. controller是非线程安全的，所以后续处理都要线程安全，所以userrepostory中会使用atomiclong*
 * Spring Boot Bean Validator
 ** Bean Validation 1.1 JSR-303
 ** Maven 依赖
@@ -229,5 +236,4 @@
   6. 面试的看法
     答：具备一定的水平
     不该问的不要问，因为面试官的水平可能还不及于你！
-
 
