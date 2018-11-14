@@ -230,27 +230,73 @@
     @NotEmpty   被注释的字符串的必须非空    
     @Range(min=,max=,message=)  被注释的元素必须在合适的范围内
     原文：https://blog.csdn.net/u013815546/article/details/77248003 
-
 ** 自定义 Bean Validation
   + 需求：
     + 通过员工的卡号来校验，需要通过工号的前缀和后缀来判断
-    + 前缀必须以"GUPAO-"
+    + 前缀必须以"LX-"
     + 后缀必须是数字
     + 需要通过 Bean Validator 检验
   + 实现步骤
     1. 复制成熟 Bean Validation Annotation的模式
       #+BEGIN_SRC java
-      @Target(FIELD)
-      @Retention(RUNTIME)
-      @Documented
-      @Constraint(validatedBy = {})
-      public @interface ValidCardNumber {
-      }
+        /**
+          * 参考: {@link Email}
+          *
+          *  加入国际化配置{@link ValidationMessages_zh_CN.properties}
+          */
+          @Documented
+          @Target({FIELD})
+          @Retention(RetentionPolicy.RUNTIME)
+          @Constraint(validatedBy = {CardValidator.class})
+          public @interface Card {
+              String message() default "{javax.validation.constraints.Card.message}";
+
+              Class<?>[] groups() default {};
+
+              Class<? extends Payload>[] payload() default {};
+          }
       #+END_SRC
-    2.  参考和理解`@Constraint`
+    2. 参考和理解`@Constraint`
     3. 实现`ConstraintValidator` 接口
     4. 将实现`ConstraintValidator` 接口 定义到`@Constraint#validatedBy`
+       #+BEGIN_SRC java
+        /**
+          *
+          */
+          public class CardValidator implements ConstraintValidator<Card, String> {
+              @Override
+              public void initialize(Card constraintAnnotation) {
+
+              }
+
+              Pattern compile = Pattern.compile("[0-9]{6}");
+              /**
+              *  需求: 传入卡号形式必须是 LX-6位数字
+              *  curl -H "Accept:application/json" -H "Content-Type:application/json" -X POST -d '{"id":1,"name":"lisi","email":"11@qq.com","phone":"18234837162","cardNum":"LX-123456"}' http://127.0.0.1:8080/user/save
+              * @param value 传入数据
+              * @param constraintValidatorContext
+              * @return
+              */
+              @Override
+              public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
+
+                  String[] strings = StringUtils.delimitedListToStringArray(value, "-");
+                  if(strings.length != 2){
+                      return false;
+                  }
+                  String prefix = strings[0];
+                  String suffix = strings[1];
+
+                  boolean isValidatedPrefix = Objects.equals(prefix, "LX");
+                  boolean isValidatedSuffix = compile.matcher(suffix).matches();
+                  return isValidatedPrefix && isValidatedSuffix;
+              }
+          } 
+       #+END_SRC
     5. 给`@ValidCardNumber` 添加 `message` 参数
+    6. 加入国际化(这个看心情)
+       + resoure目录中加入ValidationMessages_zh_CN.properties等
+    7. 代码路径:https://github.com/microzhao/demo/tree/master/springboot/springboot-validate
 ** 问答列表
   1. JSON校验如何办？
     答：尝试变成 Bean 的方式
