@@ -109,6 +109,8 @@
     + 传统的 Servlet 采用 HttpServletRequest、HttpServletResponse
     + WebFlux 采用：ServerRequest、ServerResponse（不再限制于 Servlet 容器，可以选择自定义实现，比如 Netty Web Server）
 * Spring Boot JDBC
+** 初始化项目
+   + ➜  ~ spring init -aspringboot-jdbc -gcom.lx.demo -dwebflux,web,mysql,jdbc -j1.8 -x ./springboot-jdbc
 ** 单数据源的场景
 ** 数据连接池技术
 *** [Apache Commons DBCP](http://commons.apache.org/proper/commons-dbcp/)
