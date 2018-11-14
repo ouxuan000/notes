@@ -185,13 +185,23 @@
    + ➜  ~ spring init -aspringboot-validate -gcom.lx.demo -dweb -j1.8 -x springboot-validate
 ** Bean Validation 1.1 JSR-303
 ** Maven 依赖
-    #+BEGIN_EXAMPLE
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-validation</artifactId>
-    </dependency>
-    #+END_EXAMPLE
+    + 2.10版本测试只需要引入web即可, 子依赖中会引入所需要的验证
+      #+BEGIN_EXAMPLE
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+      #+END_EXAMPLE
     + 命名规则（Since Spring Boot 1.4）：Spring Boot 大多数情况采用 `starter`(启动器，包含一些自动装配的Spring 组件），官方的命名规则：`spring-boot-starter-{name}`，业界或者民间：`{name}-spring-boot-starter`
+** demo
+   + 需要在bean中假如一些校验的annotation
+   + 在controller中需要假如@Validated
+     #+BEGIN_SRC java
+        @PostMapping("/user/save")
+        public User saveUser(@Validated @RequestBody User user){
+            return user;
+        }
+     #+END_SRC
 ** 常用验证技术
   + Spring Assert API
   + JVM/Java assert 断言
