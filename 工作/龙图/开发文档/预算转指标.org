@@ -70,6 +70,7 @@
 
             /**
             * 预算数据直接生成额度
+            * 传入数据中isdbctrl 必须是1
             * @param userId
             * @param province
             * @param year
