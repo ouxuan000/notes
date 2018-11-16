@@ -1,7 +1,14 @@
 * 有其他语言基础
   + python只有一些语法和api的东西和其他编程语言不一样
 * 直接撸 
-  + 测试
+  + test
+    + 复杂正则表达式可以使用注释
+      #+BEGIN_EXAMPLE
+      re.compile(r'''
+        正则片段1 #注释1
+        正则片段2 #注释2
+      ''',re.VERBOSE)
+      #+END_EXAMPLE
   + 网站
   + 自动化
 * 问题列表
