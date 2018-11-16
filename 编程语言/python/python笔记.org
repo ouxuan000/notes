@@ -49,3 +49,7 @@
           main()
           ''''"''")''"'')")"'')")"'')")'''')'''''''''''')''
     #+END_SRC
+
+  2. linux剪贴板调用没有实现
+     + https://pyperclip.readthedocs.io/en/latest/introduction.html#not-implemented-error
+  3. xx
