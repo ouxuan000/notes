@@ -42,7 +42,7 @@
    Ctrl＋Shift＋Backspace可以跳转到上次编辑的地
    CTRL+ALT+ left/right 前后导航编辑过的地方
    ALT+7  靠左窗口显示当前文件的结构
-   Ctrl+F12 浮动显示当前文件的结构
+   Ctrl+F12 浮动显示当前文件的结构, 查找当前类中的方法
    ALT+F7 找到你的函数或者变量或者类的所有引用到的地方
    CTRL+ALT+F7  找到你的函数或者变量或者类的所有引用到的地方
    Ctrl+Shift+Alt+N 查找类中的方法或变量
