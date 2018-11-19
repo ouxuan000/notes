@@ -1,38 +1,55 @@
-1、importError: No module named MySQLdb  
-    python连接mysql数据库 对于Linux来说，有多重包管理系统和安装机制。如果使用的是包含某种包管理器的Linux，那么可以很轻松的安装Python MySQLdb库。
-    Linux Fedora, CentOS系统：yum install MySQL-python
-    Linux Ubuntu操作系统：apt-get install python-mysqldb
+* 有其他语言基础
+  + python只有一些语法和api的东西和其他编程语言不一样
+* 直接撸 
+  + test
+    + 复杂正则表达式可以使用注释
+      #+BEGIN_EXAMPLE
+      re.compile(r'''
+        正则片段1 #注释1
+        正则片段2 #注释2
+      ''',re.VERBOSE)
+      #+END_EXAMPLE
+  + 网站
+  + 自动化
+* 问题列表
+  1. importError: No module named MySQLdb  
+      python连接mysql数据库 对于Linux来说，有多重包管理系统和安装机制。如果使用的是包含某种包管理器的Linux，那么可以很轻松的安装Python MySQLdb库。
+      Linux Fedora, CentOS系统：yum install MySQL-python
+      Linux Ubuntu操作系统：apt-get install python-mysqldb
+      下面的代码演示了如何创建一个表，插入和访问数据等简单操作：
+    #+BEGIN_SRC python
+      #!/usr/bin/env python
+          import MySQLdb
+          def main():
+              print '*** Connecting to database'
+              cxn=MySQLdb.connect(host='192.168.1.108', user='root', passwd='123456', db='test')
+              if not cxn:
+                  print 'ERROR: connection not supported, exiting'
+                  return
 
-    下面的代码演示了如何创建一个表，插入和访问数据等简单操作：
-#!/usr/bin/env python
+                  cur=cxn.cursor()
 
-    import MySQLdb
+              print '*** Creating users table'
+              cur.execute('CREATE TABLE users(login VARCHAR(8), uid INT)')
+              print '*** Inserting some users'
+              cur.execute("INSERT INTO users VALUES('john', 7000)")
+              cur.execute("INSERT INTO users VALUES('jane', 7001)")
+              cur.execute("INSERT INTO users VALUES('bob', 7200)")
 
-    def main():
-        print '*** Connecting to database'
-        cxn=MySQLdb.connect(host='192.168.1.108', user='root', passwd='123456', db='test')
-        if not cxn:
-            print 'ERROR: connection not supported, exiting'
-            return
+              print '*** Search for users starting with j'
+              cur.execute("SELECT * FROM users WHERE login LIKE 'j%'")
+              for data in cur.fetchall():
+                  print '%s\t%s' % data
 
-            cur=cxn.cursor()
+              cur.close()
+              cxn.commit()
+          cxn.close()
 
-        print '*** Creating users table'
-        cur.execute('CREATE TABLE users(login VARCHAR(8), uid INT)')
-        print '*** Inserting some users'
-        cur.execute("INSERT INTO users VALUES('john', 7000)")
-        cur.execute("INSERT INTO users VALUES('jane', 7001)")
-        cur.execute("INSERT INTO users VALUES('bob', 7200)")
+              if __name__ == '__main__':
+          main()
+          ''''"''")''"'')")"'')")"'')")'''')'''''''''''')''
+    #+END_SRC
 
-        print '*** Search for users starting with j'
-        cur.execute("SELECT * FROM users WHERE login LIKE 'j%'")
-        for data in cur.fetchall():
-            print '%s\t%s' % data
-
-        cur.close()
-        cxn.commit()
-    cxn.close()
-
-        if __name__ == '__main__':
-    main()
-    ''''"''")''"'')")"'')")"'')")'''')'''''''''''')''
+  2. linux剪贴板调用没有实现
+     + https://pyperclip.readthedocs.io/en/latest/introduction.html#not-implemented-error
+  3. xx

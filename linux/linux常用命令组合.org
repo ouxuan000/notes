@@ -33,64 +33,74 @@
     + ifconfig eth0 |grep "inet addr:" |awk ‘{print \$2}'|cut -c 6-
     + ifconfig | grep ‘inet addr:'| grep -v '127.0.0.1' |cut -d: -f2 | awk ‘'{ print \$1}'
 12. 内存的大小
-    + free -m |grep "Mem" | awk ‘{print $2}’
-13. 查看80端口的连接，并排序
+    + 总内存
+      + free -m |grep "Mem" | awk ‘{print $2}’
+      + free -m | awk ‘/Mem/{print $2}’
+    + 使用内存
+      + free -m |grep "Mem" | awk ‘{print $3-$6-$7}’
+    + 内存占用最多服务排序
+      + ps -aux | sort -k4nr | head -10
+      + top + (大写M)
+13. cpu占用
+    + ps -aux | sort -k3nr | head 5
+    + tom + (大写P)
+14. 查看80端口的连接，并排序
     + netstat -an -t | grep ":80" | grep ESTABLISHED | awk ‘{printf “%s %s\n”,$5,$6}’ | sort
-14. 查看Apache的并发请求数及其TCP连接状态
+15. 查看Apache的并发请求数及其TCP连接状态
     + netstat -n | awk ‘/^tcp/ {++S[$NF]} END {for(a in S) print a, S[a]}’
-15. 统计一下服务器下面所有的jpg的文件的大小
+16. 统计一下服务器下面所有的jpg的文件的大小
     + find / -name *.jpg -exec wc -c {} \;|awk ‘{print \$1}’|awk ‘{a+=\$1}END{print a}’
-16. CPU的数量
+17. CPU的数量
     + cat /proc/cpuinfo |grep -c processor
-17. CPU负载
-    + cat /proc/loadavg
 18. CPU负载
+    + cat /proc/loadavg
+19. CPU负载
     + mpstat 1 1
-19. 内存空间
+20. 内存空间
     + free
-20. 磁盘空间
+21. 磁盘空间
     + df -h
-21. 如发现某个分区空间接近用尽，可以进入该分区的挂载点，用以下命令找出占用空间最多的文件或目录
+22. 如发现某个分区空间接近用尽，可以进入该分区的挂载点，用以下命令找出占用空间最多的文件或目录
     + du -cks * | sort -rn | head -n 10
-22. 磁盘I/O负载
+23. 磁盘I/O负载
     + iostat -x 1 2
-23. 网络负载
+24. 网络负载
     + sar -n DEV
-24. 网络错误
+25. 网络错误
     + netstat -i
     + cat /proc/net/dev
-25. 网络连接数目
+26. 网络连接数目
     + netstat -an | grep -E “^(tcp)” | cut -c 68- | sort | uniq -c | sort -n
-26. 进程总数
+27. 进程总数
     + ps aux | wc -l
-27. 查看进程树
+28. 查看进程树
     + ps aufx
-28. 可运行进程数目
+29. 可运行进程数目
     + vmwtat 1 5
-29. 检查DNS Server工作是否正常，这里以61.139.2.69为例
+30. 检查DNS Server工作是否正常，这里以61.139.2.69为例
     + dig www.baidu.com @61.139.2.69
-30. 检查当前登录的用户个数
+31. 检查当前登录的用户个数
     + who | wc -l
-31. 日志查看、搜索
+32. 日志查看、搜索
     + cat /var/log/rflogview/*errors
     + grep -i error /var/log/messages
     + grep -i fail /var/log/messages
     + tail -f -n 2000 /var/log/messages
-32. 内核日志
+33. 内核日志
     + dmesg
-33. 时间
+34. 时间
     + date
-34. 已经打开的句柄数
+35. 已经打开的句柄数
     + lsof | wc -l
-35. 网络抓包，直接输出摘要信息到文件。
+36. 网络抓包，直接输出摘要信息到文件。
     + tcpdump -c 10000 -i eth0 -n dst port 80 > /root/pkts
-36. 然后检查IP的重复数 并从小到大排序 注意 “-t\ +0″ 中间是两个空格，less命令的用法。
+37. 然后检查IP的重复数 并从小到大排序 注意 “-t\ +0″ 中间是两个空格，less命令的用法。
     + less pkts | awk {‘printf \$3″\n”‘} | cut -d. -f 1-4 | sort | uniq -c | awk {‘printf $1″ “\$2″\n”‘} | sort -n -t\ +0
-37. kudzu查看网卡型号
+38. kudzu查看网卡型号
     + kudzu –probe –class=network
-38. 删除各domain中的日志文件
+39. 删除各domain中的日志文件
     + find /home/lx7ly/Oracle/Middleware/user_projects/domains -mtime + 3 -name "*.log.*" -type f -exec rm {} \; 
-39. 支付银行打标签
+40. 支付银行打标签
     + svn update /home/lx7ly/Oracle/Middleware/user_projects/app/ifmis3.0
     + svn update /home/lx7ly/Documents/codetag/01-pay
     + cp -Ru /home/lx7ly/Oracle/Middleware/user_projects/app/ifmis3.0/PAY /home/lx7ly/Documents/codetag/01-pay/V3_0_3_0/code
@@ -98,12 +108,12 @@
     + cp -Ru /home/lx7ly/Oracle/Middleware/user_projects/app/ifmis3.0/WebRoot/pay /home/lx7ly/Documents/codetag/01-pay/V3_0_3_0/code/WebRoot
     + cp -Ru /home/lx7ly/Oracle/Middleware/user_projects/app/ifmis3.0/WebRoot/bank /home/lx7ly/Documents/codetag/01-pay/V3_0_3_0/code/WebRoot
     + svn status /home/lx7ly/Documents/codetag/01-pay |grep -v '^\?' | tr '\?' ' '|sed 's/\ //' |xargs svn commit -m "";
-40. svn 代码提交
+41. svn 代码提交
   #+BEGIN_EXAMPLE
   svn status |grep '^\?' |tr '\?' ' '|sed 's/\ //g'|xargs svn add
   svn status |grep '^A' |tr 'A' ' '|sed 's/\ //g'|xargs svn commit -m "调帐编辑页面"
   #+END_EXAMPLE
-41. find grep
+42. find grep
   #+BEGIN_EXAMPLE
   查找目录下的所有文件中是否含有某个字符串 
   find .|xargs grep -ri "IBM" 
@@ -171,11 +181,11 @@
   find . -type d -name "*fasp"|xargs ls -al|grep '^-'|awk '{print $9}'|xargs grep "bdglevel"//不能访问全路径
   find . -type d -name "business" -exec find {} -type f \;|xargs grep "1500" //可用 * 查找这些目录下文件中带有1500的
   #+END_EXAMPLE
-44. 除了本机正在使用中的最新内核，删除所有旧内核:
+43. 除了本机正在使用中的最新内核，删除所有旧内核:
   #+BEGIN_EXAMPLE
   sudo apt-get remove --purge $(dpkg -l 'linux-*' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/")"'/d;s/^[^ ]* [^ ]* \([^ ]*\).*/\1/;/[0-9]/!d')
   #+END_EXAMPLE
-45. 假如要转换一个文件夹下所有的文件编码，
+44. 假如要转换一个文件夹下所有的文件编码，
   #+BEGIN_EXAMPLE
     # 源目录 src 复制目录结构到utf8目录
     find src -type d -exec mkdir -p utf8/{} \;
@@ -187,17 +197,17 @@
     iconv -f ISO-8859-1 -t UTF-8 test.php -o test.php.utf8
     enca -L zh_CN -x utf-8 bdgrece.txt
   #+END_EXAMPLE
-46. 导出odt文件，发送到开发设计文档目录中
+45. 导出odt文件，发送到开发设计文档目录中
  #+BEGIN_SRC 
 find /home/lx7ly/Documents/notes -name "*.odt" -exec mv {} /home/lx7ly/workspace/BDG-指标管理/03分析设计/02系统设计/V3_0_3_0 \; 
  #+END_SRC
-47. 下载日志文件
+46. 下载日志文件
     + scp -P 22 test@192.168.3.72:/weblogic/Oracle/Middleware/user_projects/domains/pay_domain28004/bin/28004.out /tmp
     + 密码 test
-48. 批量执行命令及awk使用
+47. 批量执行命令及awk使用
     + seq 10|awk '/[0-9]/ {print}'
     + for i in {1..10};do echo $i; done |awk '/[0-9]/ {print "hello"}'
     + while true; do date; sleep 1; done
     + watch -n 1 date
-49. 统计空行
+48. 统计空行
     + awk '/^$/ {++x} END {print x}' 1.txt 

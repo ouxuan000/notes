@@ -43,7 +43,11 @@
   + 当前buffer里搜索 spac ss
   + 代码对齐 spac x a
   + 项目中搜索文件 spac p f
+<<<<<<< HEAD
   + 上一个buffer spac+tab
+=======
+  + ctrl-h m 查看打开的模式设置
+>>>>>>> 598e1e887789d983f0b6ae355e8f44013d657814
 * 填坑
   + Specs Emacs org mode不能用，报错 orgproject  cd. .emacs.d el org project file.  Gitfetch 
 * java list输出转标准json
