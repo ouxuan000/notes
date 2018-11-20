@@ -586,3 +586,15 @@ select regexp_replace('1001-ad3Df38Fd,1002-6fG3Hdg,1003-Ku45SdGf78','([0-9]*)-([
     (select t3.uikey from fasp_T_papage t3 where t3.menutype = '''|| t2.guid ||''' and t3.vchtypeid = '''||t.guid||''' and t3.type = ''editform'') and lower(t.columncode) = lower(t2.columncode)) where t.key = 
     (select t.uikey from fasp_T_papage t where t.menutype = '''|| t2.guid ||''' and t.vchtypeid = '''||t.guid||''' and t.type = ''datatable'');' from fasp_t_pavoucher t, fasp_t_pabusinessmodelmenu t2 where t2.menucode = 'add' and t.mouldid = t2.mouldid and  t.mouldid in ('50BA23DJCKDNCK63BJDKCJ39A6A05186');
   #+END_EXAMPLE
+* 执行情况表查询字段报错
+  #+BEGIN_SRC sql
+    --FASP_T_GLCTRL
+    update pay_150001.p#busfw_T_uitable t set t.tablecode = 'FASP_T_GLCTRL' where t.key in(
+    select t.uikey from pay_150001.p#fasp_t_papage t where t.mouldid = '54BA8884B0AE248FE0530603A8C030CC' and t.type = 'maindatatable'
+    );
+
+    --BDG_T_BDGSUB
+    update pay_150001.p#busfw_T_uitable t set t.tablecode = 'BDG_T_BDGSUB' where t.key in(
+    select t.uikey from pay_150001.p#fasp_t_papage t where t.mouldid = '54BA8884B0AE248FE0530603A8C030CC' and t.type = 'datatable'
+    ); 
+  #+END_SRC
