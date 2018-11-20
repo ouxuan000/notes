@@ -1,4 +1,7 @@
 * 快捷键
+        export XMODIFIERS="@im=fcitx"
+        export GTK_IM_MODULE="fcitx"
+        export QT_IM_MODULE="fcitx"
 ** 自动代码
 
    常用的有fori/sout/psvm+Tab即可生成循环、System.out、main方法等boilerplate样板代码
