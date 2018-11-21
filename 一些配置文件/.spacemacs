@@ -409,6 +409,7 @@ you should place your code here."
     )
   (evil-leader/set-key "o y" 'copy-to-clipboard)
   (evil-leader/set-key "o p" 'paste-from-clipboard)
+  (seq make-backup-files nil)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
