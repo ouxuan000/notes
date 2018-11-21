@@ -45,7 +45,11 @@
   + 项目中搜索文件 spac p f
   + 上一个buffer spac+tab
   + ctrl-h m 查看打开的模式设置
-  + ctrl-h i emacs中的info可以查看各种工具的信息
+  + 帮助
+    + ctrl-h i emacs中的info可以查看各种工具的信息
+    + C-h k 寻找快捷键的帮助信息
+    + C-h v 寻找变量的帮助信息
+    + C-h f 寻找函数的帮助信息
 * 填坑
   + Specs Emacs org mode不能用，报错 orgproject  cd. .emacs.d el org project file.  Gitfetch 
 * java list输出转标准json
