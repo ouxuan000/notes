@@ -1,4 +1,5 @@
 * springboot 2.1.0.REALEASE
+  + 参考文档: https://cloud.spring.io/spring-cloud-static/Finchley.SR2/single/spring-cloud.html
 * Spring Cloud Config Client
 ** 预备知识
 *** 发布/订阅模式
