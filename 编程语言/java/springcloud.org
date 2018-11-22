@@ -196,201 +196,113 @@
    1. spring会默认加载demo-default.properties
    2. 客户端连接成功会输出日志 Fetching config from server at : http://127.0.0.1:9090
 4. 代码路径: https://github.com/microzhao/demo/tree/master/spring-cloud/spring-cloud-config-client
-** @RefreshScope 用法
+** 刷新客户端配置
+   + 通过修改demo-dev.properties中my.name的value观察客户端变化
+*** @RefreshScope 用法
+   #+BEGIN_SRC java
+   @RestController
+   @RefreshScope
+   public class EchoController {
 
-```java
-@RestController
-@RefreshScope
-public class EchoController {
+       @Value("${my.name}")
+       private String myName;
 
-    @Value("${my.name}")
-    private String myName;
-
-    @GetMapping("/my-name")
-    public String getName(){
-        return myName;
-    }
-
-}
-```
-
-
-
-通过调用`/refresh` Endpoint 控制客户端配置更新
-
-
-
-*** 实现定时更新客户端
-
-```java
-@Scheduled(fixedRate = 5 * 1000, initialDelay = 3 * 1000)
-	public void autoRefresh() {
-
-		Set<String> updatedPropertyNames = contextRefresher.refresh();
-
-		updatedPropertyNames.forEach( propertyName ->
-				System.err.printf("[Thread :%s] 当前配置已更新，具体 Key：%s , Value : %s \n",
-				Thread.currentThread().getName(),
-				propertyName,
-				environment.getProperty(propertyName)
-				));
-	}
-```
-
-
-
-
-** 健康检查
-
-
-
-*** 意义
-
-比如应用可以任意地输出业务健康、系统健康等指标
-
-
-
-端点URI：`/health`
-
-实现类：`HealthEndpoint`
-
-健康指示器：`HealthIndicator`，
-
-`HealthEndpoint`：`HealthIndicator` ，一对多
-
-
-
-*** 自定义实现`HealthIndicator`
-
-1. 实现`AbstractHealthIndicator`
-
-   ```java
-   public class MyHealthIndicator extends AbstractHealthIndicator {
-
-       @Override
-       protected void doHealthCheck(Health.Builder builder)
-               throws Exception {
-           builder.up().withDetail("MyHealthIndicator","Day Day Up");
+       @GetMapping("/my-name")
+       public String getName(){
+           return myName;
        }
+
    }
-   ```
+   #+END_SRC
+   通过调用`/refresh` Endpoint 控制客户端配置更新
+   *注意*, 这里必须使用post请求 curl -X POST http://127.0.0.1:8080/actuator/refresh
+*** 实现定时更新客户端
+    + 2.1版本springboot中，需要先在配置类@EnableScheduling
+      + https://docs.spring.io/spring-boot/docs/2.1.1.BUILD-SNAPSHOT/reference/htmlsingle/ 搜索Scheduled看到后随便试的。。
+    #+BEGIN_SRC java
+      @Scheduled(fixedRate = 5 * 1000, initialDelay = 3 * 1000)
+        public void autoRefresh() {
+          Set<String> updatedPropertyNames = contextRefresher.refresh();
+          updatedPropertyNames.forEach( propertyName ->
+              System.err.printf("[Thread :%s] 当前配置已更新，具体 Key：%s , Value : %s \n",
+              Thread.currentThread().getName(),
+              propertyName,
+              environment.getProperty(propertyName)
+              ));
+        }
+    #+END_SRC
+    + 代码路径: 
+** 健康检查
+*** 意义
+    比如应用可以任意地输出业务健康、系统健康等指标
+    端点URI：`/health`
+    实现类：`HealthEndpoint`
+    健康指示器：`HealthIndicator`，
+    `HealthEndpoint`：`HealthIndicator` ，一对多
+*** 自定义实现`HealthIndicator`
+1. 实现`AbstractHealthIndicator`
+   #+BEGIN_SRC java
+    public class MyHealthIndicator extends AbstractHealthIndicator {
 
-   ​
-
+        @Override
+        protected void doHealthCheck(Health.Builder builder)
+                throws Exception {
+            builder.up().withDetail("MyHealthIndicator","Day Day Up");
+        }
+    }
+   #+END_SRC
 2.  暴露 `MyHealthIndicator` 为 `Bean`
-
-   ```java
-   @Bean
-   public MyHealthIndicator myHealthIndicator(){
-     return new MyHealthIndicator();
-   }	
-   ```
-
+   #+BEGIN_SRC java
+    @Bean
+    public MyHealthIndicator myHealthIndicator(){
+      return new MyHealthIndicator();
+    }	
+   #+END_SRC
 3. 关闭安全控制
-
-   ```properties
-   management.security.enabled = false
-   ```
-
-   ​
-
-
-
+   #+BEGIN_SRC properties
+    management.security.enabled = false
+   #+END_SRC
 **** 其他内容
+    REST API = /users , /withdraw
+    HATEOAS =  REST 服务器发现的入口，类似 UDDI (Universal Description Discovery and Integration)
+    HAL
+    /users
+    /withdraw
 
+    Spring Boot 激活 `actuator` 需要增加 Hateoas 的依赖：
 
-
-REST API = /users , /withdraw
-
-HATEOAS =  REST 服务器发现的入口，类似 UDDI (Universal Description Discovery and Integration)
-
-HAL
-
-/users
-/withdraw
-...
-
-
-
-Spring Boot 激活 `actuator` 需要增加 Hateoas 的依赖：
-
-```xml
-<dependency>
-  <groupId>org.springframework.hateoas</groupId>
-  <artifactId>spring-hateoas</artifactId>
-</dependency>
-```
-
-以客户端为例：
-
-```json
-{
-    "links": [{
-        "rel": "self",
-        "href": "http://localhost:8080/actuator"
-    }, {
-        "rel": "heapdump",
-        "href": "http://localhost:8080/heapdump"
-    }, {
-        "rel": "beans",
-        "href": "http://localhost:8080/beans"
-    }, {
-        "rel": "resume",
-        "href": "http://localhost:8080/resume"
-    }, {
-        "rel": "autoconfig",
-        "href": "http://localhost:8080/autoconfig"
-    }, {
-        "rel": "refresh",
-        "href": "http://localhost:8080/refresh"
-    }, {
-        "rel": "env",
-        "href": "http://localhost:8080/env"
-    }, {
-        "rel": "auditevents",
-        "href": "http://localhost:8080/auditevents"
-    }, {
-        "rel": "mappings",
-        "href": "http://localhost:8080/mappings"
-    }, {
-        "rel": "info",
-        "href": "http://localhost:8080/info"
-    }, {
-        "rel": "dump",
-        "href": "http://localhost:8080/dump"
-    }, {
-        "rel": "loggers",
-        "href": "http://localhost:8080/loggers"
-    }, {
-        "rel": "restart",
-        "href": "http://localhost:8080/restart"
-    }, {
-        "rel": "metrics",
-        "href": "http://localhost:8080/metrics"
-    }, {
-        "rel": "health",
-        "href": "http://localhost:8080/health"
-    }, {
-        "rel": "configprops",
-        "href": "http://localhost:8080/configprops"
-    }, {
-        "rel": "pause",
-        "href": "http://localhost:8080/pause"
-    }, {
-        "rel": "features",
-        "href": "http://localhost:8080/features"
-    }, {
-        "rel": "trace",
-        "href": "http://localhost:8080/trace"
-    }]
-}
-```
-
-
+    #+BEGIN_SRC xml
+    <dependency>
+      <groupId>org.springframework.hateoas</groupId>
+      <artifactId>spring-hateoas</artifactId>
+    </dependency>
+    #+END_SRC
+    以客户端为例：
+    #+BEGIN_SRC json
+    {
+        "links": [{
+            "rel": "self",
+            "href": "http://localhost:8080/actuator"
+        }, {
+            "rel": "heapdump",
+            "href": "http://localhost:8080/heapdump"
+        }, {
+            "rel": "beans",
+            "href": "http://localhost:8080/beans"
+        }, {
+            "rel": "resume",
+            "href": "http://localhost:8080/resume"
+        }, {
+            "rel": "autoconfig",
+            "href": "http://localhost:8080/autoconfig"
+        }, {
+            "rel": "refresh",
+            "href": "http://localhost:8080/refresh"
+        }]
+    }
+    #+END_SRC
 ** 问答
-
 1. 小马哥，你们服务是基于啥原因采用的springboot 的， 这么多稳定性的问题？
-
    答：Spring Boot 业界比较稳定的微服务中间件，不过它使用是易学难精！
 
 2. 小马哥 为什么要把配置项放到 git上，为什么不放到具体服务的的程序里边 ；git在这里扮演什么样的角色 ;是不是和 zookeeper 一样
