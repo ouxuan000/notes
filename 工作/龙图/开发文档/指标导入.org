@@ -12,3 +12,8 @@
   + 如果是界面使用多级导入仍然需要保证当前单据正常导入可用
   + 导入数据时根据配置，构建数据
   + 数据从顶级到低级依次处理，顶层新增并终审，底层新增或终审(根据配置中wfstatus是否有值)
+  + 问题列表
+    1. 多级导入配置页面合并信息项同步问题
+       #+BEGIN_SRC sql
+        update p#busfw_t_uicolumn t set t.issource = 0, t.format='', t.type='s' where lower(t.columncode) = 'uniteinfo' and t.key in (select uikey from p#fasp_T_papage t2 where t2.mouldid = '5817ED1B9AAC1043E0530603A8C00AD9') 
+       #+END_SRC
