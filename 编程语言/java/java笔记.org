@@ -937,3 +937,5 @@
 * java涨姿势
   + java中一般s结尾的是工具类
     + executors objects collections
+* 为什么JettyEmbeddedServletContainerFactory系统没有引入eclipse的包也可以使用
+    + 这个是编译时使用的，实际运行时可以不需要
