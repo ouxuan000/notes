@@ -48,6 +48,7 @@
     + C-h k 寻找快捷键的帮助信息
     + C-h v 寻找变量的帮助信息
     + C-h f 寻找函数的帮助信息
+  + 关闭buffer, ctrl-x k buffer
 * 填坑
   + Specs Emacs org mode不能用，报错 orgproject  cd. .emacs.d el org project file.  Gitfetch 
 * java list输出转标准json
