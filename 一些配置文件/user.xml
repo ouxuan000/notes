@@ -53,4 +53,10 @@
       <option name="JAVA_CODE" value="true" />
     </context>
   </template>
+  <template name="&lt;date&gt;" value="$date$" description="currentdate" toReformat="false" toShortenFQNames="true">
+    <variable name="date" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="OTHER" value="true" />
+    </context>
+  </template>
 </templateSet>

@@ -36,8 +36,13 @@
     + 预算数据中如果需要控制的必须有isdbctrl要素, 要素为1时数据走控制逻辑
     + 记账时通过预算传入transguid作为业务唯一id
     + 现场需要配置交易令, 交易令编码固定
-      + bgt2bdg001: 追减和直接通过接口产生额度时使用该交易令
-      + bgt2bdg002: 追加时使用
+      + bgt2bdg001: 
+        + 正常预算转指标追减 (gov.mof.fasp2.bdg.remoteapi.hessian.IBgtToBdg#create adjustype==2)
+        + 直接通过接口产生额度时使用该交易令 (gov.mof.fasp2.bdg.remoteapi.hessian.IBgtToBdg#dbCtrl adjustype != 2)
+      + bgt2bdg002: 
+        + 追加时使用(gov.mof.fasp2.bdg.remoteapi.hessian.IBgtToBdg#create adjustype != 2)
+        + 通过dbctrl接口追减时使用 (gov.mof.fasp2.bdg.remoteapi.hessian.IBgtToBdg#dbCtrl adjustype == 2)
+      + *取消逻辑和正常逻辑使用交易令相同只是方向不同*
 *** api
     #+BEGIN_SRC java
         /**
