@@ -50,3 +50,7 @@
     #+END_EXAMPLE
   + 执行情况表支持来源去向
     + 执行情况表数据来源为总账, guid会对应bdgsub的toctrlid, 通过关联业务查询来源去向
+
+* 常见问题
+  + 界面配置了要素没值
+    + 分别检查BGG_tmp_srcto表，及fasp_t_diccolumn中是否都添加了该字段
