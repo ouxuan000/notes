@@ -17,3 +17,5 @@
        #+BEGIN_SRC sql
         update p#busfw_t_uicolumn t set t.issource = 0, t.format='', t.type='s' where lower(t.columncode) = 'uniteinfo' and t.key in (select uikey from p#fasp_T_papage t2 where t2.mouldid = '5817ED1B9AAC1043E0530603A8C00AD9') 
        #+END_SRC
+    2. 导入提示没有匹配到来源
+       + 检查导入模板配置, 界面那个末级过程指的是最顶级的比如无来源的那个单据,业务过程指的是下级的单据
