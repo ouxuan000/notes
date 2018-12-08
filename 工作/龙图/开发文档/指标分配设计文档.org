@@ -1,3 +1,6 @@
+* 业务需求
+  + 主要处理指标上级对下级分配额度, 包括总指标对处室， 处室对单位的分配
+  + 该模板操作的数据全部是有来源的，并且是新增页面支持多来源
 * 按明细操作后修改逻辑处理
 ** 增加明细后同时增加主子单
 ** 删除明细会同时删除明细及对应的主单
@@ -9,3 +12,32 @@
   defoption:'{"11":{"planvch":"6ABEACA411B7A9B7C190665ED482FDCC", "reqvch":"982D8D6D4576143642DF37FD7E1219E7", "paymentvch":"DF5FE54C4A0B8C8BAEE7E55F2FE3DB7D", "planwf":"910", "reqwf":"011", "paymentwf":"931"},"12":{"planvch":"6ABEACA411B7A9B7C190665ED482FDCC","reqvch":"8974B99DBC7B37EA034353F022A5637B", "paymentvch":"1BD5684AA28434C81183BC88BAFC9258", "planwf":"910", "reqwf":"011", "paymentwf":"931"}}'
 * 保存并继续逻辑修改
   + 指标分配保存并继续处理， 如果钱用完刷新数据， 如果有余额，与上次操作保持一致
+* 与选中明细相同颜色改为相同, 先清除原来所有选中， 再将fromcrlid匹配的选中
+  #+BEGIN_SRC javascript
+    //与选中明细相同颜色改为相同, 先清除原来所有选中， 再将fromcrlid匹配的选中
+    var recordSet = datatable.getRecordSet();
+    var datatableAllData = recordSet.query();
+    if (datatableAllData.length > 0) {
+        for(var i = 0; i < datatableAllData.length; i++){
+            datatableAllData[i].check = 0;
+        }
+    }
+    var datatableSelRow = recordSet.query({fromctrlid: d.fromctrlid});
+    if (datatableSelRow.length > 0) {
+        for(var i = 0; i < datatableSelRow.length; i++){
+            datatableSelRow[i].check = 1;
+        }
+    }
+    datatable.reflash();
+  #+END_SRC
+```
+* 追加市县功能
+  1. 建立一张基础的表 (这个表跟追加市县页面明细区对应， )， 只有三个字段 agencyguid, agencyname, ordernum（后续字段各地实施自己扩展）
+  2. 进去页面查询额度， 查询明细， 先根据上面建立的表查出所有单位，以及表中所有默认值， 然后根据选中额度覆盖， 明细区如果一个字段值修改， 所有选中行同步修改
+  3. insert into p#BDG_T_COUNTRIES (AGENCYGUID, province, ordernum) select t.guid, '1500', SEQTEST.nextval from fasp_t_pubagency t where ROWNUM < 20;
+  4. 追加市县功能点: 
+    + 明细有未录入的金额， 现在处理是只保存录入
+    + 明细未录入的值后台全部用总帐数据进行了覆盖， 以录入值为准
+    + 修改页面展示的余额需要根据保存数据规则 (都保存确定界面上余额的计算规则)
+    + 选中额度先同步到所有的明细
+    + 新增页面明细列表是配置表， 界面上可编辑字段必须是明细列表已经有的， 修改页面明细表是指标子表， 跟正常修改没区别， 可以根据配置修改所有字段
