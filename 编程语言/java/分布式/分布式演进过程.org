@@ -1,2 +1,0 @@
-* 从单jvm到多jvm
-* jvm通过rpc进行调用

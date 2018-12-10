@@ -1,6 +1,0 @@
-1. 支付域中，bank下需要bank-context和bank-contextserver.xml配置文件
-2. bank下 timetask中的bean都需要在server.xml配置文件中注册成远程服务
-3. timetask域中只留client.xml就行，必要时可以留context,删除掉client.xml已经带有的bean
-4. 删掉了pay 、salary、 card、 realpay、thips、jasper、inspect、dms的代码配置文件
-5. 在timetask下增加各个实现类的接口，创建imp包。
-6. 不知道为毛会需要commondaosupport.class

@@ -1,8 +1,0 @@
-* 年终额度统计导出
-* 功能点
-  + 导出
-    + 未导出 guid not in (select exportedguid from bdg_t_exportedguids)
-    + 已导出 guid in (select exportedguid from bdg_t_exportedguids)
-    + 全部
-    + 使用指标通用页签，条件直接配置
-  + 重写框架导出逻辑， 后台导出时记录导出guid
