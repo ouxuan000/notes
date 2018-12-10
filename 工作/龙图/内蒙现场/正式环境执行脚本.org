@@ -1,29 +1,23 @@
-select * from fasp_t_pabusinessmould t where t.appid = 'bdg';
-
-select * from fasp_t_pabusinessmodelmenu t where t.mouldid = '5C49F03AE83B1639E0530603A8C0B5C0';
-
-select global_multyear_cz.Secu_f_Global_Setparm('', '1500', '2018', '') from dual;
-
-
-/*
-追减、支出核销、新增修改页面列表不合计
-*/
+* 追减、支出核销、新增修改页面列表不合计
+#+BEGIN_SRC sql
 update busfw_t_uicolumn t2 set t2.totaltag = '0' where lower(t2.columncode) in ('curbal', 'amt', 'csamt', 'zbsyamt') and t2.key in(
 select t.UIKEY
   from fasp_t_papage t
 where t.MENUTYPE in ('56F0D14B19CA3C0AE055000000000001',
                       '56F0D14B19CB3C0AE055000000000001', '5C49F03AE83B1639E0530603Adjckdnd', '5C49F03AE83C1639E0530603A8C0B5C0')
   and t.type = 'maindatatable');
-
-/*除追减外所有金额列计算合计行*/
-update busfw_t_uicolumn t2 set t2.totaltag = '1' where t2.totaltag <> '1' and lower(t2.columncode) in ('curbal', 'amt', 'csamt', 'zbsyamt') and t2.key not in(
-select t.UIKEY
-  from fasp_t_papage t
-where t.MENUTYPE in ('56F0D14B19CA3C0AE055000000000001',
-                      '56F0D14B19CB3C0AE055000000000001',  '5C49F03AE83B1639E0530603Adjckdnd', '5C49F03AE83C1639E0530603A8C0B5C0'))
-                      and t2.key in (select t.UIKEY
-  from fasp_t_papage t
-where t.mouldid in (select t3.guid from fasp_t_pabusinessmould t3 where t3.appid = 'bdg'));
+#+END_SRC
+* 除追减外所有金额列计算合计行
+#+BEGIN_SRC sql
+  update busfw_t_uicolumn t2 set t2.totaltag = '1' where t2.totaltag <> '1' and lower(t2.columncode) in ('curbal', 'amt', 'csamt', 'zbsyamt') and t2.key not in(
+  select t.UIKEY
+    from fasp_t_papage t
+  where t.MENUTYPE in ('56F0D14B19CA3C0AE055000000000001',
+                        '56F0D14B19CB3C0AE055000000000001',  '5C49F03AE83B1639E0530603Adjckdnd', '5C49F03AE83C1639E0530603A8C0B5C0'))
+                        and t2.key in (select t.UIKEY
+    from fasp_t_papage t
+  where t.mouldid in (select t3.guid from fasp_t_pabusinessmould t3 where t3.appid = 'bdg'));
+#+END_SRC
 
 /*
 select * from busfw_T_uitable t2*/

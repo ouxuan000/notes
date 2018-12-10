@@ -1,3 +1,4 @@
+#+BEGIN_SRC sql
 select global_multyear_cz.Secu_f_Global_Setparm('', '1500', '2018', '')
   from dual;
 
@@ -618,3 +619,4 @@ UPDATE bdg_t_bdgsub t SET t.ZFYSJJFLBZ = '5F4E131093D18CA2C0993EECA19F9CF8' WHER
                   '74f72a30dd204f63bc01756f18563070',
                   'deeb11346d6e4ae2aac916bc405a78fd',
                   '0a8719c40bef48e2b1d3f2c6200b7fb3');
+#+END_SRC

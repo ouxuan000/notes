@@ -1,4 +1,4 @@
-
+#+BEGIN_SRC sql
 select global_multyear_cz.Secu_f_Global_Setparm('','1500','2017','') from dual;
                                 
 update pay_t_plan t
@@ -13,8 +13,6 @@ update pay_t_plan t
            and t2.guid = t.EXPECOGUID)
  where t.ZFYSJJFLBZ is null
   and t.EXPECOGUID is not null;
-
-
 
 
 update pay_t_request t
@@ -71,3 +69,4 @@ update pay_t_paymain t
            and t2.guid = t.EXPECOGUID)
  where t.ZFYSJJFLBZ is null
   and t.EXPECOGUID is not null;
+#+END_SRC

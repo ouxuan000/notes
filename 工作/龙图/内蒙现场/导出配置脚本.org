@@ -1,0 +1,24 @@
+* delete old config
+  #+BEGIN_SRC sql
+delete  from p#fasp_t_pavoucher t where t.appid = 'bdg';
+delete  from P#fasp_t_papage t where t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg');
+delete  from busfw_t_uifunction t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+delete  from busfw_t_uiqueryform t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+delete  from busfw_t_uitable t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+delete  from busfw_t_uicolumn t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+delete  from busfw_t_uieditform t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+delete  from busfw_t_uitabpage t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+delete  from fasp_t_pubmenu t where t.appid = 'bdg';
+  #+END_SRC
+* query src config
+  #+BEGIN_SRC sql
+    select * from p#fasp_t_pavoucher t where t.appid = 'bdg';
+    select * from P#fasp_t_papage t where t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg');
+    select * from busfw_t_uifunction t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+    select * from busfw_t_uiqueryform t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+    select * from busfw_t_uitable t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+    select * from busfw_t_uicolumn t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+    select * from busfw_t_uieditform t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+    select * from busfw_t_uitabpage t where t.key in (select t.uikey from P#fasp_t_papage t where t.vchtypeid is not null and t.mouldid in (select t2.guid from fasp_t_pabusinessmould t2 where t2.appid = 'bdg'));
+    select * from fasp_t_pubmenu t where t.appid = 'bdg';
+  #+END_SRC

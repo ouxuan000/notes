@@ -1,3 +1,4 @@
+#+BEGIN_SRC sql
 select global_multyear_cz.Secu_f_Global_Setparm('','1500','2017','') from dual;
 /*select TO_CHAR(wm_concat(T.COLUMN_NAME)) from user_tab_cols t where t.TABLE_NAME = 'BUSFW_T_UICOLUMN';
 */
@@ -284,3 +285,4 @@ update busfw_t_uiqueryform_self t
    where t.appid = 'pay'
      and regexp_instr(t.config, '"ZFYSJJFLBZ[^"]*"') = 0
      and regexp_instr(t.config, '"EXPECOGUID[^"]*"') > 0;
+#+END_SRC
