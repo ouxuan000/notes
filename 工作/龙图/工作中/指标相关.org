@@ -1,0 +1,555 @@
+* 导出 找不到queryMap的值,  修改js中返回的table
+  #+BEGIN_SRC javascript
+    protected Map getQueryConfigMap(Map pageobj) {
+        Map queryMap = new HashMap();
+        try {
+            queryMap = (Map) pageobj.get("queryMap");
+        } catch (Exception e) {
+            logger.error(" 请不要前台传递SQL语句！", e);
+        }
+        return queryMap;
+    }
+
+    Ext.lt.pay.getDataTableObj = function () {
+        return maindatatable;
+    }
+  #+END_SRC
+* 新门户待办配置
+  +  配置接口
+  +  在表BUSPROTAL_T_BINIDSET中加入指标系统待办调用bean接口
+* 根据实际key更新模板顺序
+  #+BEGIN_EXAMPLE
+    UPDATE
+      busfw_T_uicolumn t
+    SET
+      T.ORDERNUM =
+      (
+        SELECT
+          t3.ordernum
+        FROM
+          busfw_t_uicolumn t3
+        WHERE
+          t3.key                = 'CB6A99CABDB5C1A9F20DB88DB1BB5932'
+        AND lower(T.COLUMNCODE) = lower(T3.COLUMNCODE)
+      )
+    WHERE
+      t.key                  = '/bdg/bdgloading/edit/maindatatable'
+    AND lower(T.COLUMNCODE) IN
+      (
+        SELECT
+          lower(T2.COLUMNCODE)
+        FROM
+          BUSFW_T_UICOLUMN t2
+        WHERE
+          t2.key = 'CB6A99CABDB5C1A9F20DB88DB1BB5932'
+      );
+  #+END_EXAMPLE
+* 创建备份表， 与要添加字段的表做比较
+#+BEGIN_EXAMPLE
+insert into fasp_t_diccolumn select * from fasp_t_diccolumn_bak t where T.COLUMNCODE not in (select t2.columncode from fasp_t_diccolumn t2 where T2.TABLECODE = 'BDG_T_BDGSUB');
+
+select 'alter table P#BDG_T_BDGSUB add ' || T.COLUMN_NAME || ' '||t.data_type || '(' || T.DATA_LENGTH || ');' ,T.COLUMN_NAME, t.* from USER_TAB_COLS t where T.TABLE_NAME = 'P#BDG_T_BDGSUB_CHENGDU' and T.COLUMN_NAME not in (select T2.COLUMN_NAME from USER_TAB_COLS t2 where T2.TABLE_NAME = 'P#BDG_T_BDGSUB');
+#+END_EXAMPLE
+* 成都字段修改
+#+BEGIN_EXAMPLE
+alter table P#BDG_T_BDGMAIN rename column   INCOMEEXPMANAGE to  LOCEXPSTRGUID ;
+alter table P#BDG_T_BDGSUB rename column   INCOMEEXPMANAGE to  LOCEXPSTRGUID ;
+
+update fasp_t_diccolumn t set T.COLUMNCODE = ' LOCEXPSTRGUID', T.DBCOLUMNCODE = ' LOCEXPSTRGUID' where t.tablecode in ('BDG_T_BDGMAIN', 'BDG_T_BDGSUB') and T.COLUMNCODE = 'INCOMEEXPMANAGE';
+
+update BUSFW_T_UIEDITFORM t set T.COLUMNCODE = ' LOCEXPSTRGUID' where t.tablecode in ('BDG_T_BDGMAIN', 'BDG_T_BDGSUB') and columncode = 'INCOMEEXPMANAGE';
+
+update BUSFW_T_UIQUERYFORM T set T.COLUMNCODE = ' LOCEXPSTRGUID' where T.TABLECODE in ('BDG_T_BDGMAIN', 'BDG_T_BDGSUB') and COLUMNCODE = 'INCOMEEXPMANAGE';
+
+update busfw_t_uicolumn T set T.COLUMNCODE = ' LOCEXPSTRGUID' where t.key in (select T2.key from busfw_T_uitable t2 where  T2.TABLECODE in ('BDG_T_BDGMAIN', 'BDG_T_BDGSUB')) and COLUMNCODE = 'INCOMEEXPMANAGE';
+
+#+END_EXAMPLE
+* 项目新增
+1. 弹出项目需要 projectcode proname agency..,并且展示成列表级次关系， 需要参照1.0老系统 (用 +号分级次)
+2. 临时确定写入平台的项目表 pubproject中
+3. 其他类似与以前的项目
+* 核销
+1. 调帐 + 在途数据处理
+2. 在途数据处理（凭证清算之前都算在途） 需要总帐提供 修改总帐要素方法
+3. 核销业务处理逻辑:
+    a. 页面查询根据记账模版配置的来源数据， 上面展示临时指标， 选中临时指标后根据配置的匹配规则， 匹配正式指标
+    b. 选中一笔临时指标多笔（一笔主单， 多笔明细）或者一笔正式指标后， 根据正式指标额度信息组织成指标的业务数据， 模拟正常做数据扣减额度 （fromctrlid是选中正式指标额度的guid， toctrlid是原选中临时指标的guid, 类似调剂， 把正式指标钱拨到临时指标上）， 保存业务数据， 并跟新数据为正式指标
+    c. 终审记账时候调用总帐的过程， 处理原来临时指标和正式指标关系， 业务这边自己在过程中处理业务数据中要素， 以正式指标为准.
+* 添加字段
+#+BEGIN_EXAMPLE
+--以单位为准出脚本
+select sys_guid() as GUID,KEY,'ZFYSJJFLBZ' as COLUMNCODE,'政府预算支出经济分类唯一标识' as NAME,ORDERNUM,ISVISIABLE,ISEDIT,TOTALTAG,SHOWLEVEL,REQUIREMENT,COLTYPE,HEAD,FORMAT,DEFAULTVALUE,LEVELCONTROL,'200' as COLWIDTH,ISSOURCE,TYPE,CONFIG,BOTTOMCONTRL from BUSFW_T_UICOLUMN t2 where t2.COLUMNCODE = 'AGENCYGUID' and t2.KEY in (select t.UIKEY from fasp_t_papage t where t.MOULDID in (select t3.guid from FASP_T_PABUSINESSMOULD t3 where t3.appid = 'bdg') and t.VCHTYPEID is null and t.uiTYPE = 'busuidatatable');
+
+DELETE FROM BUSFW_T_UICOLUMN t WHERE t.KEY IN ('/bdg/bdgmodify/add/maindatatable','/bdg/bdgmodify/edit/maindatatable','/bdg/bdgassign/modcountry/maindatatable','/bdg/bdgassign/addcountry/datatable','/bdg/general/query/expand/datatable','/bdg/general/query/expand/maindatatable','/bdg/bdgassign/addcountry/maindatatable','/bdg/bdgloading/edit/datatable','/bdg/bdgloading/edit/maindatatable','/bdg/bdgloading/mod/datatable','/bdg/commonmanage/audit/datatable','/bdg/bdgsub/query/expand/datatable','/bdg/bdgadjust/mod/expand/maindatatable','/bdg/bdgadjust/mod/expand/datatable','/bdg/bdgadjust/add/expand/maindatatable','/bdg/bdgadjust/add/expand/datatable','/bdg/bdgadjust/edit/expand/maindatatable','/bdg/bdgadjust/edit/expand/datatable','/bdg/bdgreduce/add/maindatatable','/bdg/bdgreduce/edit/datatable','/bdg/bdgreduce/edit/maindatatable','/bdg/bdgreduce/mod/maindatatable','/bdg/bdgassign/mod/datatable','/bdg/bdgassign/mod/maindatatable','/bdg/bdgassign/edit/datatable','/bdg/bdgassign/edit/maindatatable','/bdg/bdgassign/add/datatable','/bdg/bdgassign/add/maindatatable','/bdg/bdgmodify/edit/datatable','/bdg/bdgassign/modcountry/datatable','/bdg/preindi/checkoff/add/expand/maindatatable','/bdg/preindi/checkoff/add/expand/datatable','/bdg/preindi/checkoff/edit/expand/datatable','/bdg/preindi/checkoff/edit/expand/maindatatable') AND t.columncode = 'ZFYSJJFLBZ';
+--删除的key
+SELECT WMSYS.WM_CONCAT(''''||t2.KEY||'''') FROM BUSFW_T_UICOLUMN t2 WHERE t2.COLUMNCODE = 'AGENCYGUID' AND t2.KEY IN (SELECT t.UIKEY FROM fasp_t_papage t WHERE t.MOULDID IN (SELECT t3.guid FROM FASP_T_PABUSINESSMOULD t3 WHERE t3.appid = 'bdg') AND t.VCHTYPEID IS NULL AND t.uiTYPE = 'busuidatatable');
+#+END_EXAMPLE
+* 明细查询看不到审核情况
+#+BEGIN_EXAMPLE
+update BUSFW_T_UITABLE T set T.TABLECODE = 'BDG_T_BDGSUB' WHERE T.KEY IN (
+select t.uikey from fasp_t_papage t where T.MOULDID = '54033228A90F27B7E0530603A8C0F167' and T.UITYPE = 'busuidatatable');
+#+END_EXAMPLE
+* 添加字段
+#+BEGIN_EXAMPLE
+SELECT 'alter table P#BDG_T_BDGMAIN add ('|| t.column_name||' '|| T.DATA_TYPE ||'('|| T.DATA_LENGTH||'));' as sqlstr, t.* FROM USER_TAB_COLS T WHERE T.TABLE_NAME = 'P#PAY_T_REQUEST' AND T.COLUMN_NAME IN ('GATHERBANKACCTCODE', 'GATHERBANKACCTNAME', 'GATHERBANKNAME');
+#+END_EXAMPLE
+* busimodelmenuGUID 
+#+BEGIN_EXAMPLE
+select t1.guid, t2.guid, 'update fasp_t_papage t set T.MENUTYPE = '''||t2.guid||''' where t.menutype = '''||t1.guid||''';', 'update FASP_T_PABUSINESSMODELMENU t set t.guid = '''||t2.guid||''' where t.guid ='''||t1.guid||''';' from FASP_T_PABUSINESSMODELMENU t1, FASP_T_PABUSINESSMODELMENUbak t2 where t1.mouldid in (select t.guid from fasp_t_pabusinessmould t where t.appid ='bdg') and t2.mouldid in (select t.guid from fasp_t_pabusinessmould t where t.appid ='bdg') and t1.menuurl = t2.menuurl;
+#+END_EXAMPLE
+* 列表区不翻译
+#+BEGIN_EXAMPLE
+update busfw_t_uicolumn t set T.FORMAT = '#code-#name', T.ISSOURCE = '1', T.TYPE = 'tree' where t.columncode = 'ISCONSTRUCT' and t.key in (select t2.key from busfw_t_uitable t2 where t2.tablecode = 'BDG_T_BDGSUB');
+select * from busfw_t_uicolumn t where ((t.type = 'tree' and (T.FORMAT is null or T.ISSOURCE <> '1')) or (T.FOrmat is not null and (t.type != 'tree' or T.ISSOURCE != '1')) or (T.ISSOURCE = '1' and (T.FORMAT is null or t.type != 'tree')) )and t.key in (select uikey from fasp_t_papage t where t.mouldid in (select guid from fasp_t_pabusinessmould where appid = 'bdg')) ;
+update bdg_t_bdgsub t set T.PREVUSERID = (select prevuserid from bdg_t_bdgmain t2 where t.mainguid = t2.guid) where T.PREVUSERID is null;
+#+END_EXAMPLE
+* 内蒙部门经济科目分支触发器
+```
+create or replace trigger bdgsub_update_workflag
+  before insert on p#bdg_t_bdgsub
+  for each row
+
+declare
+  srcexpfuncguid varchar(32);
+  srcproguid      varchar(32);
+  srcremark        varchar(32);
+  srczfysjjflbz    varchar(32);
+  srcagencyguid    varchar(32);
+  srcpaytypeguid  varchar(32);
+  srcbzjg          varchar(32);
+  srcdwzbly        varchar(32);
+  srcagencyexpguid varchar(32);
+  srcexpecoguid    varchar(32);
+  i                integer;
+  PRAGMA AUTONOMOUS_TRANSACTION; 
+begin
+  if :new.vchtypeid = '4C8A4F59CEC969A1FFBCA327D7B406' and :new.amt > 0 then
+
+      select expfuncguid,
+            proguid,
+            remark,
+            zfysjjflbz,
+            agencyguid,
+            paytypeguid,
+            bzjg,
+            dwzbly,
+            agencyexpguid,
+            expecoguid
+        into srcexpfuncguid,
+            srcproguid,
+            srcremark,
+            srczfysjjflbz,
+            srcagencyguid,
+            srcpaytypeguid,
+            srcbzjg,
+            srcdwzbly,
+            srcagencyexpguid,
+            srcexpecoguid
+        from bdg_t_bdgsub
+      where toctrlid = :new.fromctrlid;
+      
+    select count(1)
+      into i
+      from (
+            select * from fasp_t_pubexpeco t where t.guid = :new.expecoguid) t2
+    where t2.code not in
+          ('30212', '30215', '30216', '30217', '30231', '30913', '31013','30108', '30109', '30110', '30111');
+
+
+    if i > 0 and  srcexpecoguid <> :new.expecoguid and srcexpfuncguid = :new.expfuncguid and
+      :new.proguid = srcproguid and :new.remark = srcremark and
+      :new.zfysjjflbz = srczfysjjflbz and :new.agencyguid = srcagencyguid and
+      :new.paytypeguid = srcpaytypeguid and :new.bzjg = srcbzjg and
+      :new.dwzbly = srcdwzbly and :new.agencyexpguid = srcagencyexpguid then
+      update bdg_t_bdgmain set workflag = '1' where guid = :new.mainguid;
+    else
+      update bdg_t_bdgmain set workflag = '2' where guid = :new.mainguid;
+    end if;
+    commit;
+  end if;
+end;
+```
+
+##### 待办事项重复, 删除垃圾配置
+```
+delete  from fasp_t_papage t where t.mouldid in (select t2.guid from fasp_T_pabusinessmould t2 where t2.appid = 'bdg') and t.menutype not in (select guid from fasp_T_pabusinessmodelmenu t3 );
+```
+#####更新列表区翻译字段(有值集)
+```
+select global_multyear_cz.Secu_f_Global_Setparm('', '1500', '2017', '') from dual;
+update busfw_T_uicolumn t
+  set t.type = 'tree', t.issource = '1', t.format = '#code-#name'
+where lower(t.columncode) = '要修改的字段code小写'
+  and t.key in
+      (select t2.uikey
+          from fasp_t_papage t2
+        where t2.MOULDID in (select t3.guid
+                                from fasp_T_pabusinessmould t3
+                              where t3.appid = 'bdg'));
+```
+#####更新列表区字段不翻译(类似文号)
+```
+select global_multyear_cz.Secu_f_Global_Setparm('', '1500', '2017', '') from dual;
+update busfw_T_uicolumn t
+  set t.type = 's', t.issource = '0', t.format = ''
+where lower(t.columncode) = '要修改的字段code小写'
+  and t.key in
+      (select t2.uikey
+          from fasp_t_papage t2
+        where t2.MOULDID in (select t3.guid
+                                from fasp_T_pabusinessmould t3
+                              where t3.appid = 'bdg'));
+```
+#####编辑区修改类型（根据实际情况使用不同的类型）
+```
+select global_multyear_cz.Secu_f_Global_Setparm('', '1500', '2017', '') from dual;
+update busfw_T_uieditform t
+  set t.type = {'d', 's', 'tree'}--这个地方选择其中的一个
+where lower(t.columncode) = '要修改的字段code小写'
+  and t.key in
+      (select t2.uikey
+          from fasp_t_papage t2
+        where t2.MOULDID in (select t3.guid
+                                from fasp_T_pabusinessmould t3
+                              where t3.appid = 'bdg'));
+```
+##### 添加合计行(审核+编辑)
+```
+update busfw_T_uitable t
+  set t.totaltag = '1'
+where  t.key in
+      (select t2.uikey
+          from fasp_t_papage t2
+        where t2.MENUTYPE in
+              (select t3.guid
+                  from fasp_T_pabusinessmodelmenu t3
+                where t3.menucode in ('edit', 'audit')
+                  and t3.mouldid in (select t2.guid
+                                        from fasp_t_pabusinessmould t2
+                                      where t2.appid = 'bdg')));
+                          
+update busfw_T_uicolumn t
+  set t.totaltag = '1'
+where lower(t.columncode) = 'amt'
+  and t.key in
+      (select t2.uikey
+          from fasp_t_papage t2
+        where t2.MENUTYPE in
+              (select t3.guid
+                  from fasp_T_pabusinessmodelmenu t3
+                where t3.menucode in ('edit', 'audit')
+                  and t3.mouldid in (select t2.guid
+                                        from fasp_t_pabusinessmould t2
+                                      where t2.appid = 'bdg')));
+```
+##### 17年系统提前下达数据迁入
+1.  原指标数据迁入到新指标业务表中(根据新指标表中字段进行转换迁移)
+2. 业务数据更新（更新vchtypeid， 数据统一置为提前下达， 处室和单位指标要能区分）
+3. 总帐， 工作流迁移， 更新vchtypeid
+
+#####预算转指标1000条时间统计
+预算转指标保存数据总耗时: 396255
+预算转指标删除临时表数据总耗时: 178
+else if 预算转指标createBill耗时: 99153 (执行动作create用时：52290ms， 新增记账用时：45556)
+if 预算转指标新增并终审耗时: 267426
+生成多级指标获取单号用时: 12835
+
+##### 指标按照明细处理(全局配置)：
+    1. 工作流分支条件业务表单 
+    2. 主子单是否都保存数据 (还是单表操作?)
+    3. 是否默认明细展示， 或者只能明细展示 
+    4. 原走主单的数据怎么处理 *
+    5. 选中按明细展示（还给不给这个勾选框） (只能看不能操作， 还是关联主单级联操作) 跟全局配置明细操作区分
+    
+    7.  * 目前按明细操作统一数据处理为主子单一对一， 仍然是主单走工作流， 不能看到按明细展示的勾选框
+
+##### 删除重复字段
+```
+select distinct 'delete
+  from busfw_t_uieditform t where  lower(t.columncode) = ''remark'' and t.key = '''||t.key||''' and  t.type = ''Ext.lt.ui_inputValue''
+  and rowid not in (select min(rowid)
+  from busfw_t_uieditform t
+where lower(t.columncode) = ''remark'' and t.key = '''||t.key||''' and  t.type = ''Ext.lt.ui_inputValue'');' from busfw_t_uieditform t where lower(t.columncode) = 'remark' and t.key like '/bdg/%' and  t.type = 'Ext.lt.ui_inputValue';
+```
+
+##### 查询下级科目指标
+
+#####重定来源
+```
+SELECT GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_SETPARM('','1500','2017','') FROM DUAL;
+select t.fromctrlid, t.expfuncguid, t.mainguid, t.timestamps, t.amt, t.adjustcols, t.businesssrc from bdg_T_bdgsub t where t.vchtypeid = '7789B5D279A916C3B0C6502E37916CE8';
+
+--查看总帐金额变化
+select (t.damt-t.camt) * dc - T.OCCUPYAMT - T.FROZENAMT, t2.businesssrc, t2.wfstatus from fasp_t_glctrl288000 t, bdg_t_bdgsub t2  where t.guid = t2.fromctrlid and t2.mainguid = '9A81BEBC049511A74E6EF310ABC093B4';
+
+--终审后查看要素是否修改
+select 'afterreset' as fx, t.guid, t.fromctrlid, t.expfuncguid, t.toctrlid, t.amt from bdg_T_bdgsub t where t.guid = '4F505810050D15475F1F3640AEBD5732' 
+union all
+select 'before' as fx, t.guid, t.fromctrlid, t.expfuncguid, t.toctrlid, t.amt from bdg_T_bdgsub t where T.BUSINESSSRC = 'beforereset' and T.ADJUSTCOLS like '%4F505810050D15475F1F3640AEBD5732%'  and t.vchtypeid = '7789B5D279A916C3B0C6502E37916CE8'  and rownum = 1;
+
+--查找做了下级的指标
+select t.guid, t.fromctrlid, t.expfuncguid, t.toctrlid, t.amt, t.bgtdocno, t.billcode  from bdg_t_bdgsub t where t.toctrlid in (select t2.fromctrlid from pay_t_plan t2);
+
+--补全数据的单据id
+update fasp_t_glrecord288000 t set t.vchtypeid = (select t.vchtypeid from bdg_t_bdgsub t where t.guid = 'FBD12859CC7EE50F60F0B7B3FC809A6E') where t.billguid in (select t.guid from bdg_t_bdgsub t where t.guid = 'FBD12859CC7EE50F60F0B7B3FC809A6E');
+
+```
+
+##### 清库
+```
+select global_multyear_cz.Secu_f_GLOBAL_SetPARM('', '1500', '2018', '') from dual;
+
+delete from bdg_t_bdgmain;
+
+delete from bdg_t_bdgsub;
+
+delete from bdg_t_bdgmainlog;
+
+delete from bdg_t_bdgsublog;
+
+delete from bdg_t_pubproject;
+
+commit;
+```
+
+##### 删除注册信息重复字段
+```
+DELETE FROM fasp_t_diccolumn a WHERE
+    ( a.tablecode,a.columncode ) IN (
+        SELECT
+            t.tablecode,
+            t.columncode
+        FROM
+            fasp_t_diccolumn t
+        WHERE
+            t.tablecode LIKE 'INDI_T_YEAROFEND%'
+        GROUP BY
+            t.tablecode,
+            t.columncode
+        HAVING
+            COUNT(t.columncode) > 1
+    )
+AND
+    ROWID NOT IN (
+        SELECT
+            MIN(ROWID)
+        FROM
+            fasp_t_diccolumn t
+        WHERE
+            t.tablecode LIKE 'INDI_T_YEAROFEND%'
+        GROUP BY
+            t.tablecode,
+            t.columncode
+        HAVING
+            COUNT(t.columncode) > 1
+    )
+```
+##### 表头添加标题
+```
+SELECT GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_SETPARM('', '150200', '2018', '')FROM DUAL;
+--获取单据GUID
+SELECT T.GUID,* FROM FASP_T_PAVOUCHER T WHERE T.APPID ='bdg';
+--传GUID获取UIKEY
+SELECT T.UIKEY,T.* FROM FASP_T_PAPAGE T WHERE T.VCHTYPEID='E7ACF24C1C00F7E3E3A79040FE6FD1B8';
+--传UIKEY，修改HEAD，格式['十二月']
+SELECT T.COLUMNCODE,T.NAME,T.HEAD,T.*,T.ROWID FROM BUSFW_T_UICOLUMN T WHERE T.KEY='AFE7B02D7CBF78CA44168FE4A9FB4D31';
+```
+##### 查询不生效
+```
+update busfw_t_uicolumn t set T.FORMAT = '', T.ISSOURCE = '0', T.TYPE = 's' where upper(t.columncode) = 'REMARK' and t.key in (select t2.uikey from fasp_t_papage t2 where t2.uitype = 'busuidatatable' and t2.mouldid in(select t.guid from fasp_t_pabusinessmould t where t.appid = 'bdg'));
+```
+##### 新建表注册信息
+```
+insert into fasp_t_dictable  
+SELECT
+    '2017' as year,
+    '87' as province,
+    'BDG_T_RECEIVEBDGDATA' as tablecode,
+    '中央指标' as name,
+    remark,
+    '1' as tabletype,
+    version,
+    'P#BDG_T_RECEIVEBDGDATA' as dbtabname,
+    'bdg' AS appid,
+    exp,
+    '0' as tablepart,
+    isshow,
+    dbimpflag,
+    issys,
+    isuses,
+    'BDG_T_RECEIVEBDGDATA' as viewtablename,
+    dbversion,
+    datasync,
+    hastrigger,
+    syncclassname,
+    '1' as status
+FROM
+    fasp_t_dictable t
+WHERE
+    t.tablecode = 'BDG_T_BDGMAIN';
+
+comment on column p#BDG_T_CENTRALLOCALREL.centralid is '中央指标id';
+
+insert into fasp_t_diccolumn
+select    
+    '' as deid,
+    '' as csid,
+    '' as exp,
+    '0' as issys,
+    t.column_name as dbcolumncode,
+    '' as isuses,
+    '2018' as year,
+    '1500' as province,
+    sys_guid() as columnid,
+    t.column_name as columncode,
+    replace(t.table_name, 'P#') astablecode,
+    t2.comments as name,
+    case when t.data_type = 'VARCHAR2' or t.data_type = 'CHAR' then 'S'
+    else 'N' 
+    end
+    datatype,
+    t.data_length as datalength,
+    t.data_scale as  scale,
+    '1' as version,
+    case when t.nullable = 'Y' then '1' else
+    '0' end  nullable,
+    '' as defaultvalue,
+    null as dbversion  from user_tab_cols t, user_col_comments t2 where T.COLUMN_NAME = t2.column_name and t.table_name = 'P#BDG_T_RECEIVEBDGDATA' and T2.TABLE_NAME = 'P#BDG_T_RECEIVEBDGDATA';
+
+```
+
+···
+select substr(regexp_substr(t.config, 'key:''[^'']*'),6) as uikey, t.* from Fw_t_Pageconsolecomconfig t ;
+···
+
+* 指标模版和页面key对应关系
+  #+BEGIN_EXAMPLE
+    SELECT
+        t.name AS "模板名",
+        t.code AS "模版编码",
+        t2.menuurl AS "url地址",
+        regexp_substr(t3.config,'key:''[^'']*') AS "模版key",
+        regexp_substr(t3.config,'name:''[^'']*') AS "区域名"
+    FROM
+        fasp_t_pabusinessmould t,
+        fasp_t_pabusinessmodelmenu t2,
+        bus_t_pageconsolecomconfig t3
+    WHERE
+            t.guid = t2.mouldid
+        AND
+            t2.menuurl = t3.url
+        AND
+            t3.id NOT LIKE '%Service'
+        AND
+            t3.componentid NOT IN (
+                'busfw.dataexport','buslefttree','header'
+            )
+        AND
+            t.appid = 'bdg';
+  #+END_EXAMPLE
+* 批量调剂，追减等新增页面amt默认不能查
+  + 设置字段 coltype==2 默认查询时候不查该字段
+    #+BEGIN_EXAMPLE
+      public String getSelectColumns(DatatableDTO datatableDto) throws AppException {
+            StringBuilder allColString = new StringBuilder();
+            List<String> keys = new ArrayList<String>();
+            // 包含展示字段和系统字段
+            // 1.获取展示列信息
+            List<DataColumnsDTO> uiColList = datatableDto.getCols();
+            for (DataColumnsDTO coldto : uiColList) {
+                String columncode = coldto.getColcode().toLowerCase();
+
+                if (keys.contains(columncode) || 2 == coldto.getColtype() ||"attach".equalsIgnoreCase(columncode) ||"files".equalsIgnoreCase(coldto.getType())) {
+                    continue;
+                }
+                if (allColString.length() == 0) {
+                    allColString.append(columncode);
+                } else {
+                    allColString.append(",").append(columncode);
+                }
+                keys.add(columncode);
+            }
+            try {
+                Map config = datatableDto.getConfigMap();
+                if (config == null || config.get("showsyscol") == null || (Boolean) config.get("showsyscol")) {
+                    // 2.根据tablecode查询diccol里的系统字段 标志 issys = 1
+                    String tablecode = datatableDto.getTablecode();
+                    IDicTableQueryService dtqs = (IDicTableQueryService) ServiceFactory.getBean("bus.dic.table.queryService");
+                    List<DicColumnDTO> sysColList = dtqs.getDicColumnByTablecode(tablecode);
+                    for (DicColumnDTO m : sysColList) {
+                        if ("1".equals(m.get("issys"))) {
+                            String columncode = m.get("columncode").toString().toLowerCase();
+                            if (!keys.contains(columncode)) {
+                                allColString.append(",").append(columncode);
+                                keys.add(columncode);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+            return allColString.toString();
+        }
+    #+END_EXAMPLE
+
+  + 快速查询不查该字段
+    #+BEGIN_EXAMPLE
+      if(isvisiable != 1 ||coltype !=1){
+                  continue;
+                }  
+    #+END_EXAMPLE
+* 新加字段直接添加单据定义, 或者本身为系统字段
+  + 配置 issync为1, 或者2
+    #+BEGIN_EXAMPLE
+      for (DicColumnDTO columndto : columnList) {
+              // 增加系统字段过滤.
+              if (!columndto.isSys()) {
+                  codeList.add(columndto.get("columncode") + "");
+              }
+          }
+      for (int i = 0; i < moulist.size(); i++) {
+                  String colcode = moulist.get(i).get("colcode").toString();
+                  UIconfigDTO moldDTO = (UIconfigDTO) moulist.get(i).clone();// 克隆，换掉对象，用以添加新对象csid
+                  Map config = moldDTO.getConfigMap();
+                  if (colcode.equalsIgnoreCase("curbal") || colcode.equalsIgnoreCase("adjustamt")) {
+                      list.add(moldDTO);
+                  } else if (config != null && config.get("issync") != null && config.get("issync").equals(2)) {
+                      moldDTO.put("csid", csidMap.get(colcode.toUpperCase()));// 增加csid属性
+                      list.add(moldDTO);
+                  } else if (codeList.contains(colcode.toUpperCase())) {
+                      moldDTO.put("csid", csidMap.get(colcode.toUpperCase()));// 增加csid属性
+                      list.add(moldDTO);
+                  } else if (config != null && config.get("issync") != null && config.get("issync").equals(1)) {// issync:1
+                                                                                                                // UI表的字段不经过dic表的检查，直接显示。
+                      list.add(moulist.get(i));
+                  }
+              }
+    #+END_EXAMPLE
+* buspageconsolecomconfig获取key
+#+BEGIN_EXAMPLE
+select Regexp_Substr(t.config, '([^'']+)', '11') as key from bus_t_pageconsolecomconfig t where t.url like '%resetsrc/add%';
+找到第二个匹配串并截取一位
+或者
+select regexp_replace('1001-ad3Df38Fd,1002-6fG3Hdg,1003-Ku45SdGf78','([0-9]*)-([0-9a-zA-Z]*),?','\1(\2)'||chr(10))from dual;
+通过组的替换实现
+#+END_EXAMPLE
+* 新增页面用编辑区的末级控制更新列表去对应字段
+  #+BEGIN_EXAMPLE
+    select GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_SETPARM('', '1500', '2017', '') from DUAL; 
+    select 'update busfw_t_uicolumn t set t.bottomcontrl = (select nvl(t2.bottomcontrl,0) from busfw_T_uieditform t2 where t2.key =
+    (select t3.uikey from fasp_T_papage t3 where t3.menutype = '''|| t2.guid ||''' and t3.vchtypeid = '''||t.guid||''' and t3.type = ''editform'') and lower(t.columncode) = lower(t2.columncode)) where t.key = 
+    (select t.uikey from fasp_T_papage t where t.menutype = '''|| t2.guid ||''' and t.vchtypeid = '''||t.guid||''' and t.type = ''datatable'');' from fasp_t_pavoucher t, fasp_t_pabusinessmodelmenu t2 where t2.menucode = 'add' and t.mouldid = t2.mouldid and  t.mouldid in ('50BA23DJCKDNCK63BJDKCJ39A6A05186');
+  #+END_EXAMPLE
+* 执行情况表查询字段报错
+  #+BEGIN_SRC sql
+    --FASP_T_GLCTRL
+    update pay_150001.p#busfw_T_uitable t set t.tablecode = 'FASP_T_GLCTRL' where t.key in(
+    select t.uikey from pay_150001.p#fasp_t_papage t where t.mouldid = '54BA8884B0AE248FE0530603A8C030CC' and t.type = 'maindatatable'
+    );
+
+    --BDG_T_BDGSUB
+    update pay_150001.p#busfw_T_uitable t set t.tablecode = 'BDG_T_BDGSUB' where t.key in(
+    select t.uikey from pay_150001.p#fasp_t_papage t where t.mouldid = '54BA8884B0AE248FE0530603A8C030CC' and t.type = 'datatable'
+    ); 
+  #+END_SRC

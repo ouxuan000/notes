@@ -1,0 +1,40 @@
+* 来源额度
+    1. 来源额度统一查询总账接口返回数据, 目前框架统一在代码中加入动态金额字段， 需要在单据定义进行配置展现
+    2. 支持金额:
+    #+BEGIN_EXAMPLE
+      CSAMT  初始金额
+      AMT08 当前预算
+      ZBSYAMT  已分配金额
+      WSYYE  指标余额
+      ADJAMT 调整金额
+      YPFAMT  已批计划数
+      QSAMT  已支付数
+    #+END_EXAMPLE
+* 指标明细信息
+    1. 明细列表目前支持展现部分动态金额
+       + 业务数据必须是已经终审的数据， 根据toctrlid关联总账动态金额
+       + 追减数据不查询动态金额
+    2. 支持金额:
+    #+BEGIN_EXAMPLE
+     已批计划数: DECODE(t2.ZBAMT+t2.ZBTJAMT,0,0,ROUND((t2.YPFAMT/(t2.ZBAMT+t2.ZBTJAMT))*100, 2)) end as ALPLANPERT
+     CSAMT  初始金额
+     AMT08 当前预算   (t2.ZBAMT + t2.ZBTJAMT) end as AMT08
+     ZBSYAMT  已分配金额
+     WSYYE  指标余额   (t2.DAMT-t2.CAMT) end as WSYYE
+     ADJAMT 调整金额   (t2.ZBAMT + t2.ZBTJAMT - t2.CSAMT) end as ADJAMT
+     SYPERT  已分配%    DECODE(t2.ZBAMT+t2.ZBTJAMT,0,0,ROUND((t2.ZBSYAMT/(t2.ZBAMT+t2.ZBTJAMT))*100, 2)) end as SYPERT
+    #+END_EXAMPLE
+    3. 除上述有计算方式字段，其他均为总账直接提供
+* 加入动态金额配置表
+  + 目前加入amt01 -- 05现场使用时根据具体情况修改计算方式(calculation)
+  + 计算的金额必须是总账已经提供的金额字段
+    | alias | calculation | remark |
+    | amt01 | damt        |        |
+    | amt02 | damt - camt |        |
+    | amt03 |             |        |
+    | ...   | ...         | ...    |
+  + 查询方式
+    #+BEGIN_EXAMPLE
+    select WMSYS.WM_CONCAT(t.CALCULATION || ' as ' || t.ALIAS) from BDG_T_DYAMTCONFIG t where t.calculation is not null;
+    #+END_EXAMPLE
+

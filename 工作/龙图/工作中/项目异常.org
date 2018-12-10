@@ -1,0 +1,240 @@
+1、一个诡异的问题：
+    主域、从域搭建时，同样的代码，主域一切正常、从域却出现各种错误。
+    从域报错：找不到ltinspect-context-server.xml配置文件，在fasp2-busfw-client.xml 修改<import resource="classpath:ltinspect-context-server.xml" />
+    实际中存在的文件叫做ltinspect-context-service.xml,修改后又出现更多的错误，尝试注释掉这部分代码
+ 
+ 
+2、<Included resource or file "/template/template_defautl.jsp" not found from requested resource "/bcom/core/manualbill/add.page".>
+    修改page.java页面中的 private static final String DEFAULT_PAGE = "/template/template_defautl.jsp";
+    private static final String DEFAULT_PAGE = "/busfw/template/busfw_default.jsp";
+ 
+ 
+3、组件注册异常
+组件服务运行异常
+com.alibaba.dubbo.rpc.RpcException: Failed to invoke the method get in the service gov.mof.fasp2.busfw.ui.datatable.IUIDatatableCacheInit. No provider available for the service bgt/gov.mof.fasp2.busfw.ui.datatable.IUIDatatableCacheInit from registry 192.168.5.233:22181 on the consumer 192.168.5.233 using the dubbo version 2.4.9. Please check if the providers have been started and registered.
+    at com.alibaba.dubbo.rpc.cluster.support.AbstractClusterInvoker.checkInvokers(AbstractClusterInvoker.java:245)
+ 
+修改ManualBillBO.java改成如下：把getDatatableConfig写死
+DatatableDTO tabDto = (DatatableDTO)((List)UIconfigFactory.getDatatableConfig("indi").get(tableUiKey)).get(0);
+ 
+4、手工制单页面报错
+ERROR　Failed to invoke the method getNavigationInfo in the service gov.mof.fasp2.bcom.core.manualbill.IManualBillDAO. No provider available for the service bgt/gov.mof.fasp2.bcom.core.manualbill.IManualBillDAO from registry 192.168.5.218:22181 on the consumer 192.168.5.218 using the dubbo version 2.4.9. Please check if the providers have been started and registered.-null
+同时myeclipse后台报错2015-10-28 13:57:22,858 ERROR [[ACTIVE] ExecuteThread: '0' for queue: 'weblogic.kernel.Default (self-tuning)'] (PageBuilder.java:349) - 'ID:'bcomManualBillService',Class:'bcom.core.manualbill.ManualBillService',jsObjectName:'Ext.lt.bcom.manualservice',beanName:'bcom.core.manualbill.ManualBillService',serviceClass:'class gov.mof.fasp2.bcom.core.manualbill.ManualBillService'}加载失败
+com.alibaba.dubbo.rpc.RpcException: Failed to invoke the method getNavigationInfo in the service gov.mof.fasp2.bcom.core.manualbill.IManualBillDAO. No provider available for the service bgt/gov.mof.fasp2.bcom.core.manualbill.IManualBillDAO from registry 192.168.5.218:22181 on the consumer 192.168.5.218 using the dubbo version 2.4.9. Please check if the providers have been started and registered.
+解决方案：在ManualBillBO中使用
+@Override
+    public IManualBillDAO getBusinessDAO() {
+        if(null == businessDAO){
+//            businessDAO = (IManualBillDAO) ServiceFactory.getBean("bcom.core.manualbill.ManualBillDAO",SecureUtil.getApp());
+    //使用下面的这部分       
+    businessDAO = (IManualBillDAO) ServiceFactory.getBean("bcom.core.manualbill.ManualBillDAO","indi");
+        }
+        return businessDAO;
+    }
+ 
+   //DatatableDTO tabDto = (DatatableDTO)((List)UIconfigFactory.getDatatableConfig(SecureUtil.getApp()).get(tableUiKey)).get(0);
+        DatatableDTO tabDto = (DatatableDTO)((List)UIconfigFactory.getDatatableConfig("indi").get(tableUiKey)).get(0);
+ 
+ 
+5、-/busfw/common/pop.page产品信息不存在或者没有权限!
+ 
+6、按钮对象不存在
+ 
+7、org.springframework.jdbc.UncategorizedSQLException: StatementCallback; uncategorized SQLException for SQL [SELECT * FROM (SELECT dt.*,ROWNUM RN FROM( select t.code,t.name,t.agencyname,t.guid from CODE_T_PROJECTANDSPF t where 1=1 and 1=1 and  1=1  and 1=1 ) dt WHERE ROWNUM <= 10 and  1=1  and 1=1 ) WHERE RN >=  1]; SQL state [72000]; error code [4063]; ORA-04063: package body "EFMIS_62GANSU.GLOBAL_MULTYEAR_CZ" 有错误
+; nested exception is java.sql.SQLException: ORA-04063: package body "EFMIS_62GANSU.GLOBAL_MULTYEAR_CZ" 有错误
+EFMIS_62GANSU这个对象调用的不对，应该是使用当前数据源对象才对，诡异，从数据库语句入手
+select t.code,t.name,t.agencyname,t.guid from CODE_T_PROJECTANDSPF t where 1=1 and 1=1 and  1=1  and 1=1在数据库中执行报错，分析 视图有问题，查看视图上面写死了。
+ 
+CODE_T_PROJECTANDSPF视图查看发现创建时候使用的是CREATE OR REPLACE VIEW EFMIS_62GANSU.CODE_T_PROJECTANDSPF AS，用户名是写死的，好诡异,修改视图的用户名，结果还是无效，每次都变回去
+ 
+在plsqldeveloper中找到synonms目录，有个视图，里面指定了用户名，在这里修改即可(张姐+钟哥的帮助下终于搞定，md)
+ 
+8、在04中修改按钮弹出界面中，项目名称显示undefined，自定义类型需要特殊处理，有来源的数据都是object类型，但是ext.lt.proguid确不是--》考虑自己拼装成对象，效率很低，而且主从域好麻烦。原来tree的类型是在哪打包成对象的-->common.js中，判断类型为tree和类型为ext.lt.proguid类型是做相同的处理，就可以解决这个问题
+ 
+9、
+GeneralException [Code:StatementCallback; bad SQL grammar [select * from FASP_T_BCTYPESUB where bctypeid in ( ) order by DC desc]; nested exception is java.sql.SQLSyntaxErrorException: ORA-00936: 缺失表达式
+, Message:null, SystemMessage:null]
+ 
+单据定义页面--规则设置--记账凭证--修改--新增--选择记账模板--保存
+ 
+10、界面空白无内容，--》js报错
+ 
+11、java.lang.IndexOutOfBoundsException: Index: 0, Size: 0
+2015-12-08 11:15:23,587 ERROR [[ACTIVE] ExecuteThread: '1' for queue: 'weblogic.kernel.Default (self-tuning)'] (PageBuilder.java:349) - 'ID:'busuidatatable',Class:'buscommon.ui.datatable',jsObjectName:'Ext.lt.bus.ui.datatable',beanName:'buscommon.ui.datatable',serviceClass:'class gov.mof.fasp2.buscommon.ui.datatable.BusDataTableComponet'}加载失败
+    at java.util.ArrayList.RangeCheck(ArrayList.java:547)
+ 
+怎么报错的，页面空白，js里提示找不到buseditform，修改代码中if条件，出现这个问题   解决：pageconsole config配置错误
+ 
+12、javax包的错误，把j2ee5改成6
+ 
+13、启动服务报ltinspect-context-server.xml错误，
+    解决方案：动态监控要关掉
+<!-- 动态监控-->
+     <!-- <import resource="classpath:ltinspect-context-server.xml" />  -->
+ 
+14、启动主从域错误，修改developer.properties文件
+    common={domainip\:"127.0.0.1",domainport\:"7001",domainmark\:"zhao_domain",islocal\:"1",appname\:"common"}
+portal={domainip\:"127.0.0.1",domainport\:"7001",domainmark\:"zhao_domain",islocal\:"1",appname\:"portal"}
+fasp={domainip\:"127.0.0.1",domainport\:"7001",domainmark\:"zhao_domain",islocal\:"1",appname\:"fasp"}
+fasp1={domainip\:"127.0.0.1",domainport\:"7001",domainmark\:"zhao_domain",islocal\:"1",appname\:"fasp1"}
+indi={domainip\:"127.0.0.1",domainport\:"7007",domainmark\:"from_domain",islocal\:"1",appname\:"\u6307\u6807\u7CFB\u7EDF"}
+#indi={domainip\:"127.0.0.1",domainport\:"7001",domainmark\:"zhao_domain",islocal\:"1",appname\:"\u6307\u6807\u7CFB\u7EDF"}
+pa={domainip\:"127.0.0.1",domainport\:"7001",domainmark\:"zhao_domain",islocal\:"1"}
+buspa={domainip\:"127.0.0.1",domainport\:"7001",domainmark\:"zhao_domain",islocal\:"1"}
+bpmnpage={domainip\:"127.0.0.1",domainport\:"7001",domainmark\:"zhao_domain",islocal\:"1"}
+gl={domainip\:"127.0.0.1",domainport\:"7001",domainmark\:"zhao_domain",islocal\:"1"}
+bcom={domainip\:"127.0.0.1",domainport\:"7001",domainmark\:"zhao_domain",islocal\:"1"}
+hqreport={domainip\:"127.0.0.1",domainport\:"7008",domainmark\:"hqreport_domain",islocal\:"1"}
+hqoa={domainip\:"192.168.3.183",domainport\:"9005",domainmark\:"hqoa_domain",islocal\:"0"}
+xch={domainip\:"192.168.5.30",domainport\:"8002",domainmark\:"xchserver_domain8002",islocal\:"0"}
+fuds={domainip\:"192.168.5.30",domainport\:"8003",domainmark\:"fileserver_domain8003",islocal\:"0"}
+ 
+ 
+15、spring初始化bean报fasp2logDataSource错误
+    datasource.xml需要修改
+    <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+ 
+    <bean id="fasp2datasource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="fasp2datasource"/>
+    </bean>
+    <bean id="fasp2logDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="fasp2datasource"/>
+    </bean>
+</beans>
+ 
+16、com.alibaba.dubbo.rpc.RpcException: Failed to invoke the method queryForList in the service gov.mof.fasp2.fw.daosupport.IFasp2QueryDaoSupport. No provider available for the service bgt/gov.mof.fasp2.fw.daosupport.IFasp2QueryDaoSupport from registry 127.0.0.1:22181 on the consumer 192.168.5.205 using the dubbo version 2.4.9. Please check if the providers have been started and registered.
+解决方案
+//        return (IFasp2QueryDaoSupport) ServiceFactory.getBean("fasp2.client.querydao", SecureUtil.getApp());
+        return (IFasp2QueryDaoSupport) ServiceFactory.getBean("fasp2.client.querydao", "indi");
+ 
+ 
+18、在特殊编辑页面，specialindi_edit.js中，在点击打标签按钮弹出一个div，使用Ext.lt.indi.common.window.draw画一个div，这个window是全局的，如果页面不刷新，以后这个div就一直存在，这个window也一直存在，只要显示和隐藏即可，不能每次调用重新画，否则会出现bottomdiv中树不显示
+ 
+19、FASP_T_DICDSRANGEVERSION
+ 
+20、2016-01-13 16:47:38,949 ERROR [DubboServerHandler-192.168.5.197:17033-thread-2] (ExceptionFilter.java:87) -  [DUBBO] Got unchecked and undeclared exception which called by 192.168.5.197. service: com.longtu.framework.cache.service.ISynchronizedCacheHandler, method: handleNotification, exception: java.lang.IllegalStateException: BeanFactory not initialized or already closed - call 'refresh' before accessing beans via the ApplicationContext, dubbo version: 2.4.9, current host: 192.168.5.197
+ 
+21、进入指标大页面报错：StatementCallback; bad SQL grammar [select global_multyear_cz.Secu_f_GLOBAL_SetPARM('','8700','2016','') from dual ]; nested exception is java.sql.SQLSyntaxErrorException: ORA-00904: "GLOBAL_MULTYEAR_CZ"."SECU_F_GLOBAL_SETPARM": 标识符无效
+ 
+ 
+22、05 /indi/core/sourceswh/audit 来源切换类页面，修改数据库pageconsole，不去继承父页面，js一直在报错，发现没有加载common.js  注：pgeconsole中jslib的js加载顺序是按照配置的先后顺序来的。
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+-----支付-------
+Caused by: GeneralException [Code:11003200, Message:业务要素对象主键guid含有特殊字符, SystemMessage:null]
+    at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+    at gov.mof.fasp2.dic.dataset.service.DataSetService.getDataSetByGuid(DataSetService.java:265)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+    at gov.mof.fasp2.pay.common.impl.CommonBO.getAgencys(CommonBO.java:2014)
+    at java.lang.reflect.Method.invoke(Method.java:597)
+    at gov.mof.fasp2.pay.common.impl.CommonPage.setLeftTreeAgencyDatas(CommonPage.java:214)
+    at com.longtu.framework.server.PageBuilder.buildTemplateContentInfo(PageBuilder.java:237)
+    at gov.mof.fasp2.pay.monthpayment.MonthPaymentPage.editPage(MonthPaymentPage.java:37)
+    at com.longtu.framework.server.PageBuilder.createBody(PageBuilder.java:123)
+    ... 36 more
+    at com.longtu.framework.server.PageBuilder.buildPageContent(PageBuilder.java:93)
+    at com.longtu.framework.server.PageServlet.pageserver(PageServlet.java:173)
+    at com.longtu.framework.server.PageServlet.service(PageServlet.java:118)
+    ... 27 more
+38:16(GTXIntercepter.java:138) - 事务id=[ACTIVE] ExecuteThread: '1' for queue: 'weblogic.kernel.Default (self-tuning)'1462419496708,发生异常,事务回滚结束
+38:16(SendException.java:49) - ERROR NO:11003200
+GeneralException [Code:11003200, Message:业务要素对象主键guid含有特殊字符, SystemMessage:null]
+    at gov.mof.fasp2.dic.dataset.service.DataSetService.getDataSetByGuid(DataSetService.java:265)
+    at gov.mof.fasp2.pay.common.impl.CommonBO.getAgencys(CommonBO.java:2014)
+ 
+解决：左侧树，agency数据库配置中缺少csid
+ 
+ 
+2、06:33(SendException.java:49) - ERROR NO:单据组件中无法获取到有用的数据，请检查组件配置!
+GeneralException [Code:单据组件中无法获取到有用的数据，请检查组件配置!, Message:null, SystemMessage:null]
+    at gov.mof.fasp2.buspa.uiconfig.UIConfigBO.getLeftButton(UIConfigBO.java:261)
+    at gov.mof.fasp2.buspa.uiconfig.PAUIConfigService.queryUIPageConfigData(PAUIConfigService.java:143)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+    at java.lang.reflect.Method.invoke(Method.java:597)
+    at com.longtu.framework.component.AbstractComponentService.runFunction(AbstractComponentService.java:130)
+    at com.longtu.framework.server.PageServlet.rcpInvoke(PageServlet.java:320)
+    at com.longtu.framework.server.PageServlet.rcpserver(PageServlet.java:247)
+    at com.longtu.framework.server.PageServlet.service(PageServlet.java:121)
+    at javax.servlet.http.HttpServlet.service(HttpServlet.java:820)
+    at weblogic.servlet.internal.StubSecurityHelper$ServletServiceAction.run(StubSecurityHelper.java:227)
+    at weblogic.servlet.internal.StubSecurityHelper.invokeServlet(StubSecurityHelper.java:125)
+ 
+解决：单据定义页面 界面配置加载不成功，数据库末班配置有问题 从uipageconsole开始检查
+ 
+界面配置 service报错 对象不支持此操作
+ 
+3、: Error creating bean with name 'dev2015' defined in class path resource [fasp1-datasource.xml]: Invocation of init method failed; nested exception is javax.naming.NameNotFoundException: Unable to resolve 'dataSource'. Resolved ''; remaining name 'dataSource'
+    at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1512)
+ 
+    解决方法：剪贴最新代码，需要注视到develop.properties文件中的 fasp1。不需要加载fasp1的模块
+ 
+ 
+4、org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'pa.businessvoucher.businessVoucherBO': Injection of resource dependencies failed; nested exception is org.springframework.beans.factory.NoSuchBeanDefinitionException: No bean named 'fasp2.wf.wfService' is defined
+    at org.springframework.context.annotation.CommonAnnotationBeanPostProcessor.postProcessPropertyValues(CommonAnnotationBeanPostProcessor.java:306)
+ 
+    develop.properties文件配置问题，hqoa的配置不能放开。应该注释掉
+ 
+ 
+ 
+5、打开页面报  请先登录
+ 
+ 
+6、平台升级功能后，单据定义页面系统下拉没有值，需要在fw_t_sysapp和busfw_t_appaccsyslink中都有值才行
+7、点击页面菜单，后台报错单据不存在，找不到的单据可能是俩种情况，一种是当前菜单中的vchtypeid不存在，另外一种是当前单据的显示单据为空，或者不存在
+
+8. 今天接收运维提供一台机器，启动weblogic的时候出现下面的错误： 
+<Aug 18, 2010 9:48:10 PM CST> <Critical> <WebLogicServer> <BEA-000386> <Server subsystem failed. Reason: java.lang.AssertionError: Could not obtain the localhost address. The most likely cause is an error in the network configuration of this machine. 
+java.lang.AssertionError: Could not obtain the localhost address. The most likely cause is an error in the network configuration of this machine. 
+        at weblogic.server.channels.AddressUtils$AddressMaker.getLocalHost(AddressUtils.java:40) 
+        at weblogic.server.channels.AddressUtils$AddressMaker.<clinit>(AddressUtils.java:35) 
+        at weblogic.server.channels.AddressUtils.getIPAny(AddressUtils.java:105) 
+        at weblogic.protocol.configuration.ChannelHelper.checkConsistency(ChannelHelper.java:60) 
+        at weblogic.server.channels.ChannelService.start(ChannelService.java:197) 
+        Truncated. see log file for complete stacktrace 
+java.net.UnknownHostException: qswm: qswm 
+        at java.net.InetAddress.getLocalHost(InetAddress.java:1354) 
+        at weblogic.server.channels.AddressUtils$AddressMaker.getLocalHost(AddressUtils.java:38) 
+        at weblogic.server.channels.AddressUtils$AddressMaker.<clinit>(AddressUtils.java:35) 
+        at weblogic.server.channels.AddressUtils.getIPAny(AddressUtils.java:105) 
+        at weblogic.protocol.configuration.ChannelHelper.checkConsistency(ChannelHelper.java:60) 
+        Truncated. see log file for complete stacktrace 
+> 
+经过Google，看了几篇文章，问题基本定位在hosts文件上面。打开/etc/hosts文件，果然发现没有配置机器名对应的ip地址，于是在文件里面加入： 
+127.0.0.1 qswm     注：qswm是机器名称。 
+保存后，再次启动weblogic正常启动。
+
+9. windows下用idea启动weblogic的debug服务报错：  Unable to open debugger port (127.0.0.1:63777): java.net.BindException ＂Address
+解决方式: 准备删掉pay_domain的域，重新建，但是发现删不掉，有服务绑定， 用unclock解除绑定，再次尝试启动服务，发现好了。
+
+10.通知单修改带审核页签ordernum为0，解决代办事项跳转到第二个页签的问题
+
+11. 点击弹出页面报错 11001044 没有province， 
+   > 解决方式：页面url需要传财政年度， 而且必须是紧紧跟到tokenid后面
+
+12. 1:57(Component.java:78) - 加载component 没有找到对象 ：pay.plancomm.CommPlanEditService
+   51:57(Component.java:121) - 'ID:'commplanEditService',Class:'pay.plancomm.CommPlanEditService',jsObjectName:'Ext.lt.pay.commPlanManageService',beanName:'null',serviceClass:'null'}
+   51:57(Component.java:78) - 加载component 没有找到对象 ：pay.plancomm.CommPlanEditService
+   51:57(PageBuilder.java:361) - 'ID:'commplanEditService',Class:'pay.plancomm.CommPlanEditService',jsObjectName:'Ext.lt.pay.commPlanManageService',beanName:'null',serviceClass:'null'}加载失败
+ ******** bean 的大小写 大小写 大小写
+
+13. 单据定义界面配置时候， 选中一个模板保存后变成俩条数据，这里还是模板配置有重复， 字段大小写不同也是重复
+  处理逻辑: 
+select ''''||columncode||''',' from (select LOWER(T.COLUMNCODE) as COLUMNCODE from BUSFW_T_UICOLUMN T where T.key = '/bdg/bdgreduce/mod/maindatatable') group by COLUMNCODE having COUNT(1) > 1;
+根据上述查询结果， 删掉一部分重复数据
+
+14. 执行RCP.call请求回调方法出现异常!
+错误原因：Cannot set property 'check' of undefined
+错误现场:function (queryMap, callbackfun) {
+

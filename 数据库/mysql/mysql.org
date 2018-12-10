@@ -1,0 +1,10 @@
+* mysql导入excel文件
+  + 使用libreoffice造好数据
+  + save as 为cvs格式数据
+  + 使用workbench直接导入即可
+  + 也可以使用命令
+  #+BEGIN_EXAMPLE
+  load data infile 'd.txt' into table tt
+  lines terminated by'\r\n'
+  (name);
+  #+END_EXAMPLE

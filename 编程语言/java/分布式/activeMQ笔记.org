@@ -1,0 +1,204 @@
+* 消息中间件的初步认识
+** 什么是消息中间件？
+   消息中间件是值利用高效可靠的消息传递机制进行平台无关的数据交流，并基于数据通信来进行分布式系统的集成。通过提供消息传递和消息排队模型，可以在分布式架构下扩展进程之间的通信。
+** 消息中间件能做什么？
+   消息中间件主要解决的就是分布式系统之间消息传递的问题，它能够屏蔽各种平台以及
+   协议之间的特性，实现应用程序之间的协同。
+   + 举个非常简单的例子，就拿一个电商平台的注册功能来简单分析下，
+    用户注册这一个服务，不单单只是insert一条数据到数据库
+    里面就完事了，还需要发送激活邮件、发送新人红包或者积分、发送营销短信等一系列
+    操作。假如说这里面的每一个操作，都需要消耗1s，那么整个注册过程就需要耗时4s才
+    能响应给用户。但是我们从注册这个服务可以看到，每一个子操作都是相对独立的，同
+    时，基于领域划分以后，发送激活邮件、发送营销短信、赠送积分及红包都属于不同的
+    子域。所以我们可以对这些子操作进行来实现异步化执行，类似于多线程并行处理的概
+    念。如何实现异步化呢？用多线程能实现吗？多线程当然可以实现，只是，消息的持久
+    化、消息的重发这些条件，多线程并不能满足。所以需要借助一些开源中间件来解决。
+    而分布式消息队列就是一个非常好的解决办法，引入分布式消息队列以后，架构图就变
+    成这样了（下图是异步消息队列的场景）。通过引入分布式队列，就能够大大提升程序
+    的处理效率，并且还解决了各个模块之间的耦合问题• 
+    + 同步操作
+    [[file:activeMQ/同步操作.png]]
+    + 异步操作
+    [[file:activeMQ/异步操作.png]]
+   + 我们再来展开一种场景，通过分布式消息队列来实现流量整形，比如在电商平台的秒杀场景下，流量会非常大。通过消息队列的方式可以很好的缓解高流量的问题
+    + 用户提交过来的请求，先写入到消息队列。消息队列是有长度的，如果消息队列长度超过指定长度，直接抛弃
+    + 秒杀的具体核心处理业务，接收消息队列中消息进行处理，这里的消息处理能力取决于消费端本身的吞吐量
+   + 当然，消息中间件还有更多应用场景，比如在弱一致性事务模型中，可以采用分布式消息队列的实现最大能力通知方式来实现数据的最终一致性等等
+* ActiveMQ 简介
+ActiveMQ是完全基于JMS规范实现的一个消息中间件产品。是Apache开源基金会研发的消息中间件。ActiveMQ主要应用在分布式系统架构中，帮助构建高可用、高性能、可伸缩的企业级面向消息服务的系统
+** ActiveMQ 特性
+  + 多语言和协议编写客户端
+      + 语言： java/C/C++/C#/Ruby/Perl/Python/PHP
+      + 应用协议: openwire/stomp/REST/ws/notification/XMPP/AMQP
+  + 完全支持 jms1.1和J2ee1.4 规范
+  + 对spring 的支持，ActiveMQ可以很容易内嵌到spring模块中
+** ActiveMQ 安装
+  + 登录到	http://activemq.apache.org/activemq-5150-release.html 找到 ActiveMQ 的下载地址
+  + 直接copy到服务器上通过tar -zxvf	apache-activeMQ.tar.gz
+  + archlinux直接 yaourt -S activemq (这种安装方式再/opt下面，并且webapps目录全部被移动，导致进不去管理页面)
+  + 启动运行
+    + 普通启动：到bin 目录下， sh activemq start
+    + 启 动 并 指 定 日 志 文 件 sh activemqstart>/tmp/activemqlog
+  + 检查是否已启动
+    ActiveMQ 默认采用61616 端口提供JMS 服务，使用8161端口提供管理控制台服务，执行以下命令可以检查是否成功启动 ActiveMQ 服务 netstat -an|grep 61616
+  + 通过http://:8161访问activeMQ管理页面	，默认帐号密码admin/admin
+ 关闭ActiveMQ;	sh activemqstop
+* 从 JMS 规范来了解 ActiveMQ
+** JMS 定义
+  Java消息服务（JavaMessageService）是java平台中关于面向消息中间件的API，用于在两个应用程序之间，或者分布式系统中发送消息，进行异步通信。
+  JMS是一个与具体平台无关的API， 绝大多数MOM（MessageOrientedMiddleware）（面向消息中间件）提供商都对JMS提供了支持。
+** 什么是 MOM
+    MOM 是面向消息的中间件，使用消息传送提供者来协调消息传送操作。MOM 需要提供
+API 和管理工具。客户端使用 api 调用，把消息发送到由提供者管理的目的地。在发送消
+息之后，客户端会继续执行其他工作，并且在接收方收到这个消息确认之前，提供者一直保
+留该消息。
+** MOM 的特点
+    + 消息异步接收，发送者不需要等待消息接受者响应
+    + 消息可靠接收，确保消息在中间件可靠保存。只有接收方收到后才删除消息Java 消息传送服务规范最初的开发目的是为了使 Java 应用程序能够访问现有 MOM 系统。引入该规范之后，它已被许多现有的 MOM 供应商采用并且已经凭借自身的功能实现为异步消息传送系统。
+** 其他开源的 JMS 提供商
+  JbossMQ(jboss4) 、 jboss messaging(jboss5) 、 joram 、ubermq、mantamq、openjms…大部分基于的JMS provider开源的消息中间件都已经停止维护了，剩下的几个都抱到了大腿，比如Jboss mq和jboss、joram	与	jonas(objectweb	组  织  )、ActiveMQ	与Geronimo(apache 基金组织)。
+** JMS 规范
+  我们已经知道了JMS规范的目的是为了使得Java应用程序能够访问现有MOM(消息中间件)系统，形成一套统一的标准规范，解决不同消息中间件之间的协作问题。在创建JMS规范时，设计者希望能够结合现有的消息传送的精髓，比如说
+    + 不同的消息传送模式或域，例如点对点消息传送和发布/订阅消息传送
+    + 提供于接收同步和异步消息的工具
+    + 对可靠消息传送的支持
+    + 常见消息格式，例如流、文本和字节
+** JMS 的体系结构
+  + 通过 JMS 规范结合 ActiveMQ 实现消息发送案例
+  + 查看gitlab 上的代码
+  + 案例总结
+    + 这个案例的架构图如下
+** 细化 JMS 的基本功能
+  通过前面的内容讲解以及案例演示，我们已经知道了JMS 规范以及他的基本功能是用于和面向消息中间件相互通信的应用程序的接口，那么JMS提供的具体标准有哪些呢？ 我们来仔细去研究下
+  消息传递域。JMS 规范中定义了两种消息传递域：点对点（point-to- point ） 消 息 传 递 域 和 发 布 / 订 阅 消 息 传 递 域(publish/subscribe)
+  简单理解就是：有点类似于我们通过qq聊天的时候，在群里面发消息和给其中一个同学私聊消息。在群里发消息， 所有群成员都能收到消息。私聊消息只能被私聊的学员能收到消息，
+  + 点对点消息传递域(queue)
+    + 每个消息只能有一个消费者
+    + 消息的生产者和消费者之间没有时间上的相关性。无论消费者在生产者发送消息的时候是否处于运行状态，都可以提取消息, 类似于qq, 无论谁先上后上都能收到对方的信息
+    + 代码实现
+      #+BEGIN_SRC java
+        public static void main(String[] args) {
+          ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.31.248:61616");
+          Connection connection = null;
+          try {
+              //创建连接
+              connection = connectionFactory.createConnection();
+              //一定要启动连接
+              connection.start();
+
+              Session session = connection.createSession(Boolean.TRUE, Session.AUTO_ACKNOWLEDGE);
+
+              //创建queue, 这个类似于一个编号
+              Destination myqueue = session.createQueue("myQueue");
+
+              //创建消费者
+              MessageConsumer consumer = session.createConsumer(myqueue);
+
+              //接收消息, receive 阻塞
+              TextMessage textMessage = (TextMessage)consumer.receive();
+              System.out.println(textMessage.getText());
+
+              session.commit();
+              session.close();
+          } catch (JMSException e) {
+              e.printStackTrace();
+          }finally {
+              if(connection != null){
+                  try {
+                      connection.close();
+                  } catch (JMSException e) {
+                      e.printStackTrace();
+                  }
+              }
+          }
+      }
+      #+END_SRC
+  + 发布订阅消息传递域(topic)
+    +每个消息可以有多个消费者  
+    +生产者和消费者之间有时间上的相关性。订阅一个主题的消费者只能消费自它订阅之后发布的消息。JMS规范允许客户创建持久订阅，这在一定程度上降低了时间上的相关性要求。持久订阅允许消费者消费它在未处于激活状态时发送的消息, 例如微信的公众号信息订阅, 正常情况下，只有先订阅了以后才可以新发送的推送， 但是有的公众号有个历史消息功能(持久订阅)， 就可以获取以前发布的推送
+** 消息结构组成
+  JMS 消息由及部分组成：消息头、属性、消息体
+  + 消息头
+    消息头(Header) - 消息头包含消息的识别信息和路由信息， 消息头包含一些标准的属性如：
+    JMSDestination	消息发送的目的地，queue或者topic)
+    JMSDeliveryMode	传送模式。持久模式和非持久模式
+    JMSPriority	消息优先级（优先级分为10个级别，从0(最低)到9(最高). 如果不设定优先级，默认级别是4。需要注意的是，JMSprovider并不一定保证按照优先级的顺序提交消息）
+    JMSMessageID	唯一识别每个消息的标识属性按类型可以分为应用设置的属性，标准属性和消息中间件定义的属性
+      + 应用程序设置和添加的属性，比如Message.setStringProperty(“key”,”value”);通过下面的代码可以获得自定义属性的，在接收端的代码中编写
+      + 在发送端，定义消息属性message.setStringProperty("Mic","Hello World");在接收端接收数据
+      + JMS 定义的属性
+        使用“JMSX”作为属性名的前缀，通过下面这段代码可以返回所有连接支持的 JMSX 属性的名字
+      + JMSprovider特定的属性
+  + 消息体
+    就是我们需要传递的消息内容，JMSAPI定义了5中消息体格式，可以使用不同形式发送接收数据，并可以兼容现有的消息格式，其中包括绝大部分的时候，我们只需要基于消息体进行构造
+** 持久订阅
+  持久订阅的概念，也很容易理解，比如还是以 QQ 为例， 我们把 QQ 退出了，但是下次登录的时候，仍然能收到离线的消息。
+  + 持久订阅就是这样一个道理，持久订阅有两个特点：
+    + 持久订阅者和非持久订阅者针对的Domain是Pub/Sub，而不是P2P
+    + 当Broker发送消息给订阅者时，如果订阅者处于 未激活状态状态：持久订阅者可以收到消息，而非持久订阅者则收不到消息。当然这种方式也有一定的影响：当持久订阅者处于 未激活状态时，Broker需要为持久订阅者保存消息；如果持久订阅者订阅的消息太多则会溢出。
+  + 代码实现
+  #+BEGIN_SRC java
+    connection=connectionFactory.createConnectio n();
+    connection.setClientID("Mic-001");	
+    connection.start();
+    Session	session=connection.createSession(Boolean.TRUE,Session.AUTO_ACKNOWLEDGE);	
+    Topic	destination=session.createTopic("myTopic");MessageConsumer consumer=session.createDurableSubscriber(destination,"Mic-001");	TextMessage	message=(TextMessage)consumer.receive(); System.out.println(message.getText());
+  #+END_SRC
+持久订阅时，客户端向JMS服务器注册一个自己身份的ID， 当这个客户端处于离线时，JMSProvider会为这个ID保存所有发送到主题的消息，当客户再次连接到	JMSProvider时，会根据自己的ID得到所有当自己处于离线时发送到主题的消息。
+这个身份ID，在代码中的体现就是connection的ClientID，这个其实很好理解，你要想收到朋友发送的qq消息，前提就是你得先注册个QQ号，而且还要有台能上网的设备，电脑或手机。设备就相当于是clientId是唯一的；qq号相当于是订阅者的名称，在同一台设备上，不能用同一个qq号挂2个客户端。连接的clientId必须是唯一的，订阅者的名称在同一个连接内必须唯一。这样才能唯一的确定连接和订阅者。
+activeMQ 控制台的截图
+设置持久订阅以后，在控制台能看到下图的变化
+* JMS 消息的可靠性机制
+理论上来说，我们需要保证消息中间件上的消息，只有被消费者确认过以后才会被签收，相当于我们寄一个快递出去，收件人没有收到快递，就认为这个包裹还是属于待签收状态，这样才能保证包裹能够安全达到收件人手里。消息中间件也是一样。消息的消费通常包含 3 个阶段：客户接收消息、客户处理消息、消息被确认
+** 首先，来简单了解 JMS 的事务性会话和非事务性会话的概念
+  JMS Session接口提供了commit和rollback方法。事务提交意味着生产的所有消息被发送，消费的所有消息被确认； 事务回滚意味着生产的所有消息被销毁，消费的所有消息被恢复并重新提交，除非它们已经过期。 事务性的会话总是牵涉到事务处理中，commit或rollback方法一旦被调用，一个事务就结束了，而另一个事务被开始。关闭事务性会话将回滚其中的事务
+  在事务型会话中在事务状态下进行发送操作，消息并未真正投递到中间件，而只有进行session.commit操作之后，消息才会发送到中间件，再转发到适当的消费者进行处理。如果是调用
+  rollback操作，则表明，当前事务期间内所发送的消息都取消掉。通过在创建session的时候使用true or false来决定当前的会话是事务性还是非事务性connection.createSession(Boolean.TRUE,Session.AUTO_ACKNOWLEDGE);
+  在事务性会话中，消息的确认是自动进行，也就是通过session.commit()以后，消息会自动确认。
+  注意： 必须保证发送端和接收端都是事务性会话
++ 在非事务型会话中消息何时被确认取决于创建会话时的应答模式(acknowledgement mode). 有三个可选项
+  + Session.AUTO_ACKNOWLEDGE
+    当客户成功的从	receive	方法返回的时候，或者从
+    MessageListenner.onMessage方法成功返回的时候，会话自动确认客户收到消息。
+  + Session.CLIENT_ACKNOWLEDGE
+    客户通过调用消息的 acknowledge 方法确认消息。
+  + CLIENT_ACKNOWLEDGE特性
+    在这种模式中，确认是在会话层上进行，确认一个被消费的消息将自动确认所有已被会话消费的消息。列如，如果一个消息消费者消费了10个消息，然后确认了第5个消息，那么0~5的消息都会被确认 ->
+    演示如下：发送端发送10个消息，接收端接收10个消息，但是在i==5的时候，调用message.acknowledge()进行确认，会发现0~4的消息都会被确认
+  + Session.DUPS_ACKNOWLEDGE
+    消息延迟确认。指定消息提供者在消息接收者没有确认发送时重新发送消息，这种模式不在乎接受者收到重复的消息。
+    消息的持久化存储消息的持久化存储也是保证可靠性最重要的机制之一，也就是消息发送到Broker 上以后，如果broker出现故障宕机了，那么存储在broker上的消息不应该丢失。可以通过下面的代码来设置消息发送端的持久化和非持久化特性
+    +对于非持久的消息，JMSprovider不会将它存到文件/数据库等稳定的存储介质中。也就是说非持久消息驻留在内存中，如果jmsprovider宕机，那么内存中的非持久消息会丢失
+    +对于持久消息，消息提供者会使用存储-转发机制，先将消息存储到稳定介质中，等消息发送成功后再删除。如果jmsprovider挂掉了，那么这些未送达的消息不会丢失；jmsprovider恢复正常后，会重新读取这些消息， 并传送给对应的消费者。
+* 分布式消息通信activemq原理分析
+  + 默认kahadb， 关闭服务后，下次进去仍然可以消费
+** 持久化消息和非持久化消息的发送策略
+*** 消息同步发送和异步发送
+    + ActiveMQ支持同步、异步两种发送模式将消息发送到broker上。
+    + 同步发送过程中，发送者发送一条消息会阻塞直到broker反馈一个确认消息，表示消息已经被broker处理。这个机制提供了消息的安全性保障，但是由于是阻塞的操作，会影响到客户端消息发送的性能
+    + 异步发送的过程中，发送者不需要等待broker提供反馈，所以性能相对较高。但是可能会出现消息丢失的情况。所以使用异步发送的前提是在某些情况下允许出现数据丢失的情况。
+    + 默认情况下，非持久化消息是异步发送的，持久化消息并且是在非事务模式下是同步发送的。但是在开启事务的情况下，消息都是异步发送。由于异步发送的效率会比同步发送性能更高。所以在发送持久化消息的时候，尽量去开启事务会话。
+    + 除了持久化消息和非持久化消息的同步和异步特性以外，我们还可以通过以下几种方式来设置异步发送
+    #+BEGIN_EXAMPLE
+        1.ConnectionFactory connectionFactory=new ActiveMQConnectionFactory("tcp://192.168.11.153:61616?
+        jms.useAsyncSend=true");
+        2.((ActiveMQConnectionFactory) connectionFactory).setUseAsyncSend(true);
+        3.((ActiveMQConnection)connection).setUseAsyncSend(true);
+    #+END_EXAMPLE
+*** 消息的发送原理分析图解 
+*** ProducerWindowSize的含义
+producer每发送一个消息，统计一下发送的字节数，当字节数达到ProducerWindowSize值时，需要等待broker的
+确认，才能继续发送。
+代码在：ActiveMQSession的1957行
+主要用来约束在异步发送时producer端允许积压的(尚未ACK)的消息的大小，且只对异步发送有意义。每次发送消
+息之后，都将会导致memoryUsage大小增加(+message.size)，当broker返回producerAck时，memoryUsage尺
+寸减少(producerAck.size，此size表示先前发送消息的大小)。
+可以通过如下2种方式设置:
+Ø 在brokerUrl中设置: "tcp://localhost:61616?jms.producerWindowSize=1048576",这种设置将会对所有的
+producer生效。
+Ø 在destinationUri中设置: "test-queue?producer.windowSize=1048576",此参数只会对使用此Destination实例
+的producer失效，将会覆盖brokerUrl中的producerWindowSize值。
+注意：此值越大，意味着消耗Client端的内存就越大。
+** 消息的持久化方案及实践
+** 消费端消费消息的原理
+** 关于PrefetchSize的优化

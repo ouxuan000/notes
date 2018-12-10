@@ -1,0 +1,30 @@
+1. 安装数据库
+2. windows命令行输入
+  + sqlplus /nolog
+3.  用dba用户登陆: 
+  + conn / as sysdba
+4. 创建15g的efmis表空间
+  +  create tablespace EFMIS datafile 'D:\EFMIS.ora' size 15000m;
+5. 创建用户
+  +  create user pay identified by 1 default tablespace EFMIS;
+6. 给用户授予dba权限
+  +  grant dba to pay;
+7. 创建directory
+  +  create or replace directory dp_dir as 'D:\dp_dir';
+8. 修改system用户密码为1（这个看个人需求） 
+  + alter user system identified by 1;
+9.  把要导入的数据库dmp文件放到指定的directory下，执行下面的命令
+  + impdp system/1 directory=dp_dir dumpfile=FASP_20160826.DMP logfile=impfasp.log remap_schema=FASP_20160826:fasp transform=oid:n,segment_attributes:n
+9.  导出数据库
+  + expdp pay_0825/1 schemas=pay_0825 dumpfile=expdp_pay_0825.dmp DIRECTORY=DIR_DP logfile=expdb_pay_20160825.log
+10.  删除表空间
+  +  drop tablespace EFMIS including contents and datafiles; 
+11.  查看默认表空间
+  + select * from database_properties where property_name = 'DEFAULT_PERMANENT_TABLESPACE';  
+12.  设置默认表空间
+  + alter database default tablespace users;
+13. 添加表空间文件
+  +  alter tablespace SDE add datafile 'D:\ORACLE\ORADATA\LYGL\SDE01.DBF' size 20480m;
+14.  conn / as sysdb
+
+

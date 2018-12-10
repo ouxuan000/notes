@@ -1,0 +1,52 @@
+* 需求
+  + 该功能主要为了外部系统与内部要素进行对照
+  + 左侧为外部值集， 右侧为内部值集
+  + 注: 一定不能出现一个外部值集对多个内部值集
+* v3040版本该功能升级
+  + 左侧外部值集不再使用平台值集， 需要实施人员扩展, 配置表为 bdg_T_left开头 + 要素code + 操作类型(例: bdg_t_leftfundtype2)
+  + 右侧值集为: bdg_t_+ 要素code + 操作类型 (例: bdg_t_fundtype2)
+  + 要素编码查看 select ELEMENTNAME name,FASPELEMENTCODE code from BDG_T_ELEMENTS where status='1' order by code desc, 其中faspelementcode即为要素编码
+  + 操作类型: 一般为2， 门头沟项目专项资金时为3
+  + 3040之前配置需要进行交换 (只可以执行一次)
+    #+BEGIN_EXAMPLE
+    declare
+    begin
+      execute immediate 'alter table BDG_T_ELECOMPARE add elementguidbak varchar2(32)';
+      execute immediate 'update BDG_T_ELECOMPARE t set t.elementguidbak = t.elementguid';
+      execute immediate 'update BDG_T_ELECOMPARE t set t.elementguid = T.COMPAREGUID';
+      execute immediate'update BDG_T_ELECOMPARE t set t.COMPAREGUID = t.elementguidbak';
+      execute immediate 'alter table BDG_T_ELECOMPARE drop column elementguidbak';
+    end;
+    #+END_EXAMPLE
+* 非末级要素对照
+  + 现场需要调整视图，将isleaf=1, superguid=0, 所有要素全部置为同一个级次， 例如
+  #+BEGIN_EXAMPLE
+      create or replace view bdg_t_leftfundtype2 as
+    SELECT
+        admdiv,
+        guid,
+        '1' as isleaf,
+        name,
+        desguid,
+        '1' as levelno,
+        srcscale,
+        remark,
+        starttime,
+        createtime,
+        pinyin,
+        alias,
+        version,
+        '0' as superguid,
+        endtime,
+        srcguid,
+        code,
+        status,
+        year,
+        province,
+        dbversion,
+        canceltime,
+        enable
+    FROM
+        fasp_t_pubfundtype;
+    --select WMSYS.wm_concat(t.column_name) from user_tab_cols t where t.table_name = 'FASP_T_PUBFUNDTYPE';
+  #+END_EXAMPLE

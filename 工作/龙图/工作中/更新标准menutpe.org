@@ -1,0 +1,18 @@
+* 指标第一版本时脚本mentype为自动生成，各个现场不一致
+  + 下面sql需要一个需要更新的环境，以及一个标准环境，根据mouldmenu表中url唯一性进行对照转换
+#+BEGIN_SRC sql
+--更新menutype
+select 'update p#fasp_t_papage t set t.menutype = '''||s.cdmenutype||''' where t.province = ''510105'' and t.year = ''2018'' and t.menutype = '''||s.zqmenutype||''';' from(
+select t.menuurl, t.guid as zqmenutype,
+       (select t2.guid
+          from Fasp_t_Pabusinessmodelmenu t2
+         where t2.mouldid in (select t3.guid
+                                from Fasp_t_Pabusinessmould t3
+                               where t3.appid = 'bdg')
+           and t2.menuurl = t.menuurl and t2.guid <> t.guid) as cdmenutype
+  from Fasp_t_Pabusinessmodelmenu@pay_4412 t
+ where t.mouldid in (select guid
+                       from Fasp_t_Pabusinessmould@pay_4412 t4
+                      where t4.appid = 'bdg')) s where s.cdmenutype is not null;
+
+#+END_SRC

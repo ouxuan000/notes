@@ -1,0 +1,154 @@
+* archlinux安裝
+** 注意事项
+  + 强烈建议新手移步 Arch Wiki > 新手指南
+  + 经验者请参阅 Arch Wiki > 安装指南
+  + 若在安装 / 使用过程中遇到问题，请查阅 Arch Wiki，咨询 Google、百度，或在官方论坛（英文）、本论坛发帖提问。
+  + 本指南介绍如何通过 ArchISO（Arch Linux 安装镜像，下同）以官方推荐的安装方式将 Arch Linux 安装到到一台普通 PC 上。
+  + 安装过程中请保持网络畅通
+** 简要介绍
+  + pacman 是 Arch Linux 的软件包管理器，下文中提及的软件均可通过其完成安装：pacman -S <软件包> ...
+  + 本文推荐使用 vi 编辑文件：vi <文件>
+** 安装准备
+  + 获取并校验 ArchISO
+      ArchISO 攘括了 32 位和 64位版本，同时支持 x86 和 x86_64，可从官方下载页面下载。
+      在该页面亦能找到 ArchISO 的 SHA1、MD5 值和 PGP 签名，用于进行校验。
+  + 准备安装介质
+    ArchISO 支持多种方式引导。用户可将其刻录至光盘中，写入 USB 闪存盘、移动硬盘，或载入内存中。请根据自身需求及实际情况进行选择，這裏我使用了poweriso，軟碟通和dd我這裏不能用
+** 启动至 ArchISO
+    ArchISO 包含了完整的 Arch Linux 基础系统。但 ArchISO 无法保存用户所做的改动（关机即失），因此只适合用于系统安装与维护，请勿用于日常。接下来的安装操作都会在 ArchISO 进行。
+    根据机器的不同，用户可能需要调整机器的引导顺序，或者调出机器的引导菜单。具体做法请查阅随机手册。
+<<<<<<< HEAD
+    机器成功从准备好的安装介质中启动后，屏幕将呈现出一个菜单。用户可以根据需要使用 [↑]/[↓]（方向键）进行选择，[↩]（回车键）确认。市面上大部分 PC 机同时支持 UEFI 和 BIOS 接口。根据设置的不同，Arch Linux 可能在 UEFI环境下启动，或在环境 BIOS 下启动。根据启动环境的不同，用户可能看到不同菜单界面。
+=======
+    机器成功从准备好的安装介质中启动后，屏幕将呈现出一个菜单。用户可以根据需要使用 [↑]/[↓]（方向键）进行选择，[↩]
+（回车键）确认。市面上大部分 PC 机同时支持 UEFI 和 BIOS 接口。根据设置的不同，Arch Linux 可能在 UEFI
+环境下启动，或在环境 BIOS 下启动。根据启动环境的不同，用户可能看到不同菜单界面。
+>>>>>>> f7bf132ae9465874966a412b6c335d0b09174fee
+    需要指出的是，虽然32 位版的 Arch Linux 能够在 UEFI 环境下运行，但默认情况下无法通过 ArchISO 安装 32 位的 Arch Linux。若有这样的需求，请参考上文的注意事项。
+    参考链接：
+        - Arch Wiki > USB 闪存盘安装介质
+    + 检查环境
+        efivar -l
+        若 efivar 正确地列出了 UEFI 变量，则本机为 UEFI 系统，否则为 BIOS。
+    + 配置 ArchISO
+      + 预设：
+        键盘布局：US （美式键盘）
+        locale：en_US.UTF-8（美式英语）
+        网络连接：dhcpcd（有线连接）
+      + 配置：
+      + 键盘布局：localectl list-keymaps 查看可用键盘布局 loadkeys <键盘布局>
+      + 终端字体：ls /usr/share/kbd/consolefonts/ 查看可用终端字体 setfornt <终端字体>
+      + 显示语言（不建议中文用户修改）：nano /etc/locale.gen    # 反注释需要的 locale
+locale-gen
+export LANG=<语言>
+网络连接：在设置网络之前，请先查明自己的网卡名称，网络设备名可以通过 ip link 或 iw dev(无线网络)查到设备名称。通常以 en (ethernet), wl (WLAN) 或 ww (WWAN)开头。
+为了防止冲突，首先停用 dhcpcd 服务，将 enp0s25 替换为正确的有线接口：
+   systemctl stop dhcpcd@enp0s25.service
+无线网络连接
+使用 netctl 的 wifi-menu 连接到无线网络:
+   wifi-menu -o wlp2s0
+其他连接方式
+同步时间timedatectl set-ntp true
+pacman 软件仓库镜像服务器：
+选择地理位置最为接近的镜像服务器以获得更高的下载速度。
+pacman 优先使用位置靠前的镜像地址。将选定的镜像地址置于最前以便 pacman 使用。
+注意：该配置不仅会应用到安装环境，也会应用至新系统中。 nano /etc/pacman.d/mirrorlist更新本地数据库： pacman -Syy查看中国大陆的镜像服务器： grep -A 1 'China' /etc/pacman.d/mirrorlist选择所有的中国大陆的镜像服务器： sed -i '/Score/{/China/!{n;s/^/#/}}' /etc/pacman.d/mirrorlist
+- **分区**
+在本节，用户须在 MBR 和 GPT 之间做出选择。通常建议在 UEFI 系统中使用 GPT，在 BIOS 系统中使用 MBR。注意部分 UEFI 系统不支持 MBR 引导，部分 BIOS 系统不支持 GPT 引导。
+    - 分区方案
+        基本要求：
+至少一个分区（类型代码：8300）
+        特殊要求：
+BIOS + GPT + Grub：BIOS 引导分区（类型代码：ef02；大小 ≥ 1 MiB）
+UEFI：UEFI 系统分区（类型代码：ef00；大小 ≥ 256 MiB）
+系统休眠：交换分区（类型代码：8200；大小 ≥ 2×内存大小）
+    - 一般建议：
+若安装目标内存 ≤ 2GB，添加一个交换分区
+为 /home 分配一个分区
+    - 一个例子：
+    lsblk /dev/sda -o NAME,FSTYPE,SIZE,MOUNTPOINT     名称，文件系统，大小，挂载点
+
+    NAME	FSTYPE	SIZE	MOUNTPOINT
+
+    sda		120G
+
+    ├─sda1	vfat	512M	/boot/EFI
+
+    ├─sda2	ext4	36G	/
+
+    ├─sda3	ext4	79.5G	home
+
+    └─sda4	swap	4G	[SWAP]
+    - 分区
+    确定目标磁盘及目标分区：
+    lsblk
+    分区用软件：
+通用：parted、cfdisk、sfdisk
+仅 GPT：cgdisk、sgdisk
+    - uefi 分區
+    首先需要一个 EFI 系统分区.如果是和 Windows 双系统启动，此分区已经存在，不要重新创建。
+
+    用下面命令创建分区 (建议大小是 512MiB)。
+
+    (parted) mkpart ESP fat32 1M 513M
+
+    (parted) set 1 boot on
+
+    剩下的空间可以按需要创建，root 占用全部 100% 剩余空间：(我這裏是把所有分區都分配給了root)
+    (parted) mkpart primary ext4 513M 100%
+    
+  - 格式化系統分區
+    先查看所有分区：
+
+    lsblk /dev/sdx
+
+    如果新创建了 UEFI 系统分区，需要格式化成 **fat32** 或 **vfat32** 文件系统，否则无法启动。Windows 双启动系统不要再格式化。
+     mkfs.vfat -F32 /dev/sdxY
+     
+
+    建议用 **ext4** 文件系统格式化其它分区：
+
+    mkfs.ext4 /dev/sdxY
+     
+
+  - 掛載分區
+       先挂载 / (root) 分区，其它目录都要在 / 分区中创建然后再挂载。在安装环境中用 /mnt 目录挂载 root：
+
+         mount /dev/sdxR /mnt
+
+       然后挂载其余单独分区(除了 Swap)，比如 /boot，/var。先创建目录，然后挂载分区：
+
+        mkdir /mnt/home
+
+        mount /dev/sda2 /mnt/home
+
+       建议将 EFI 系统分区挂载到 /mnt/boot，其它方式参阅EFISTUB。
+
+        mkdir -p /mnt/boot
+
+        mount /dev/sdXY /mnt/boot
+
+
+  - 安装引导器
+    GRUB
+        BIOS：
+            pacman -S grub os-prober
+
+            grub-install --recheck /dev/<目标磁盘>
+
+            grub-mkconfig -o /boot/grub/grub.cfg
+        UEFI：
+            pacman -S dosfstools grub efibootmgr
+
+            grub-install --target=x86_64-efi --efi-directory=<EFI 分区挂载点> --bootloader-id=arch_grub --recheck
+
+            grub-mkconfig -o /boot/grub/grub.cfg其他引导器
+
+    - 卸载分区并重启
+      exit     退回安装环境
+   umount -R < / 挂载点>    卸载新分区
+
+   reboot    重启
+
+   记得移除安装介质
+   

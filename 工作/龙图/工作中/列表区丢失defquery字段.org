@@ -1,0 +1,28 @@
+##### --列表区丢失defquery字段
+```
+update busfw_t_uitable ui
+   set ui.defquery =
+       (select r.wheresql
+          from p#fasp_t_papage t
+          left join p#fasp_t_busrurule r
+            on (t.ruguid = r.guid)
+         where t.ruguid is not null
+           and t.uikey in (select t1.key
+                             from busfw_t_uitable t1
+                            where t1.defquery is null)
+           and t.mouldid in
+               (select guid from fasp_t_pabusinessmould where appid = 'pay')
+           and t.Year = '2017'
+           and r.year = '2017'
+           and t.uikey = ui.key)
+ where ui.key in
+       (select t.uikey
+          from p#fasp_t_papage t
+         where t.ruguid is not null
+           and t.uikey in (select t1.key
+                             from busfw_t_uitable t1
+                            where t1.defquery is null)
+           and t.mouldid in
+               (select guid from fasp_t_pabusinessmould where appid = 'pay')
+           and t.year = '2017');
+```

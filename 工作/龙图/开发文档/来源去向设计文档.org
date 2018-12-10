@@ -1,0 +1,56 @@
+* 来源去向实现
+  + 只有总帐的link表保留了所有业务系统业务数据的fromctrl toctrlid级次关系， 展示树状结构需要通过该表
+  + 查询时因为业务系统会存在 a - b -a的数据结构， 所以需过过滤掉部分模版id， 追减退款业务的数据不作为一次查询直接展示， 递归查询sql中只允许包含正向逻辑
+  + 数据补全通过总帐明细账表关联，进行补齐， link.guid = record.billguid
+* 3_0_2_2调整
+  + 3.0.2.2版本调整， 来源去向展示来源展示追减数据，并且可以展示去向， 但是如果追减的去向科目是无来源科目， 不展示， 不展示的交易令id为60C3D0CB5DC72B03E055000000000001
+      #+BEGIN_EXAMPLE
+        create or replace PACKAGE PKG_BDG_GLSRCTO is
+
+          procedure querySrcTo(linktable varchar2, recored varchar2, billguid varchar2);
+
+        end PKG_BDG_GLSRCTO;
+
+        create or replace package body PKG_BDG_GLSRCTO is
+        procedure querySrcTo(linktable varchar2, recored varchar2, billguid varchar2) is
+          v_sql varchar2(4000);
+          cols varchar2(1000);
+          bctypeids varchar2(1000);
+          bctypeidsnotin varchar2(200);
+          begin
+        select WM_CONCAT(T.COLUMN_NAME) into cols from user_tab_cols t where t.table_name = 'BDG_TMP_GLSRCTO';
+        bctypeids := 'select t2.BCTYPEID from fasp_t_pavoucherbctype t2 where t2.VCHTYPEID in(
+        select t.guid from fasp_T_pavoucher t where t.mouldid in (''5419A068DB2C6A9EE0530603A8C03D1E'',''437A05D24863A1E540612AA5CAC8B39F'',''B7632D99EBB346F1A8E5AE2580B042FF'',''B7632D99EBB346F1A8E5AE2580B072FF'',''4AD1F41DEDFC5B419E21B6B6D288FD28'',''50BA2350F9AD4563BJDKCJ39A6A05186'', ''54061BD6377D4123E0530603A8C0FE61'', ''50BA23DJCKDNCK63BJDKCJ39A6A05186'', ''5C49F03AE83B1639E0530603A8C0B5C0''))';
+        bctypeidsnotin := '''60C3D0CB5DC72B03E055000000000001''';
+            v_sql := 'insert into BDG_TMP_GLSRCTO ('||cols||') (
+                select '|| cols ||' from (
+                    select t2.leaf, t2.srcto, t2.fromctrlid, t2.toctrlid, t3.*, t4.zbamt from (
+                SELECT case WHEN guid in ('||billguid||') THEN ''ben''
+                    ELSE ''src''
+                END
+                    srcto,rownum AS leaf,t1.* FROM (
+                    select * from '||linktable||' t1 where t1.bctypeid in  ('||bctypeids||') and t1.bctypeid not in ('||bctypeidsnotin||')) t1
+                        START WITH t1.guid in ('||billguid||')
+                    CONNECT BY nocycle
+                    t1.toctrlid = PRIOR t1.fromctrlid) t2 left join '||recored||' t3 on (T2.GUID = t3.billguid) left join FASP_T_GLSTATISTICSAMT t4 on (t3.ctrlid=t4.guid) where t3.dc = 1))';
+        --    insert into test(sql) values(v_sql);
+            execute immediate v_sql;
+            v_sql:= 'update bdg_tmp_glsrcto t set t.toctrlid = '''' where t.srcto=''src'' or  (t.srcto = ''ben'' and (select count(1) from '||linktable||' t2 where t2.bctypeid in ('||bctypeids||') and t2.fromctrlid = t.toctrlid) < 1)';
+        --        insert into test(sql) values(v_sql);
+            execute immediate v_sql;
+          end;
+        end PKG_BDG_GLSRCTO;
+
+      #+END_EXAMPL
+* 3_0_3_0 
+  + 来源去向加入动态金额
+    + 加入的字段有
+    #+BEGIN_EXAMPLE
+    'QSAMT','YPFAMT','ADJAMT','WSYYE','ZBSYAMT','ZBAMT','CSAMT','ALPAYPERT','SYPERT','ALPLANPERT','AMT08','OCCUPYAMT','TZAMT','TJAMT'
+    #+END_EXAMPLE
+  + 执行情况表支持来源去向
+    + 执行情况表数据来源为总账, guid会对应bdgsub的toctrlid, 通过关联业务查询来源去向
+
+* 常见问题
+  + 界面配置了要素没值
+    + 分别检查BGG_tmp_srcto表，及fasp_t_diccolumn中是否都添加了该字段

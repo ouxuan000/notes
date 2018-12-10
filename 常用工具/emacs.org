@@ -1,0 +1,15 @@
+* 坑爹的windows使用emacs
+    1. 下载一个emacs的zip包， 解压到你想要的目录下, 配置环境变量
+    2. git clone spacemacs的配置文件
+    3. 重新启动emacs肯定会报一坨的错， 最好使用命令行 emacs -insecure(虽然不知道为啥)
+    4. spc f e 编辑.spacemacs配置文件， 打开org-mode
+    5. 重启同样一堆错， cant install xxx , 同样使用命令行 -insecure大法, 搞定
+    6. spac /搜索文件, 跳转时只能基于项目跟目录跳转， 如果再其他目录跳转路径不对
+       
+* arch linux, 好用的一b
+    1. 打开org文件时候， 会报错 org-projectfilexx, 直接在 elph目录下找到这个org-projecxx目录， 进去后执行git-fetch，ok
+    2. m+q 折行快捷键， spac+t+L
+    3. spacemacs 打开自动折行M-x spacemacs/toggle-visual-line-navigation-on
+    4. emacs -nw 命令行启动
+    5. 导出其他格式 c-c c-e o
+    6. todo

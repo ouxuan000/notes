@@ -1,0 +1,524 @@
+* spring-mvc 在方法参数列表为什么可以使用变量
+  + 第二期课程中的 javabean描述有关， 类似于ide可以调试debug变量类似
+* 内容调停
+  + 第一期视频 spring rest
+  + 浏览器或者类似postman的工具访问服务端时， 会在请求头中传入参数， 告诉服务端我可以接受什么样规范的数据，并且可以设置权重，根据权重传入顺序，服务端找到支持的并且最合适的返回
+* srpingboot rest
+** 幂等
+  + PUT 
+    + 初始状态：0
+    + 修改状态：1 * N
+    + 最终状态：1
+  + DELETE
+    + 初始状态：1
+    + 修改状态：0 * N
+    + 最终状态：0
+  + 非幂等
+  + POST
+    + 初始状态：1
+    + 修改状态：1 + 1 =2 
+    + N次修改： 1+ N = N+1
+    + 最终状态：N+1
+  幂等/非幂等 依赖于服务端实现，这种方式是一种契约
+** 浏览器请求协议顺序
+  + Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8
+    + 第一优先顺序：text/html -> application/xhtml+xml -> application/xml
+    + 第二优先顺序：image/webp -> image/apng
+  + 浏览器通过accept告诉服务器我可以支持哪些类型的返回, 服务器本身也有支持的类型(WebMvcConfigurationSupport#getDefaultMediaTypes)，通过比对然后返回第一个匹配类型ContentNegotiationManager#resolveMediaTypes(访问时匹配类型)
+** 学习源码入口(自描述消息)：
+   + EnableWebMvc
+     ​+ DelegatingWebMvcConfiguration
+     ​	+ WebMvcConfigurationSupport#addDefaultHttpMessageConverters
+           + 启动服务时会根据class是否存在来确定是否支持当前格式解析
+             #+BEGIN_EXAMPLE
+                 private static final boolean jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", WebMvcConfigurationSupport.class.getClassLoader());
+             #+END_EXAMPLE
+           + WebMvcConfigurationSupport#getMessageConverters#extendMessageConverters该方法中可以进行扩展, list有序，所以可以自定义优先级
+             #+BEGIN_SRC java
+                protected final List<HttpMessageConverter<?>> getMessageConverters() {
+                    if (this.messageConverters == null) {
+                        this.messageConverters = new ArrayList();
+                        this.configureMessageConverters(this.messageConverters);
+                        if (this.messageConverters.isEmpty()) {
+                            this.addDefaultHttpMessageConverters(this.messageConverters);
+                        }
+
+                        this.extendMessageConverters(this.messageConverters);
+                    }
+
+                    return this.messageConverters;
+                }
+             #+END_SRC
+   + AbstractMessageConverterMethodProcessor#writeWithMessageConverters 这个是访问页面时写出逻辑
+   所有的 HTTP 自描述消息处理器均在 messageConverters（类型：`HttpMessageConverter`)，这个集合会传递到 RequestMappingHandlerAdapter，最终控制写出。
+   messageConverters，其中包含很多自描述消息类型的处理，比如 JSON、XML、TEXT等等
+   以 application/json 为例，Spring Boot 中默认使用 Jackson2 序列化方式，其中媒体类型：application/json，它的处理类 MappingJackson2HttpMessageConverter，提供两类方法：
+    1. 读read* ：通过 HTTP 请求内容转化成对应的 Bean
+    2. 写write*： 通过 Bean 序列化成对应文本内容作为响应内容
+** 思考
+  问题：为什么第一次是JSON，后来怎加了 XML 依赖，又变成了 XML 内用输出
+  回答：Spring Boot 应用默认没有增加XML 处理器（HttpMessageConverter）实现，所以最后采用轮训的方式去逐一尝试是否可以 canWrite(POJO) ,如果返回 true，说明可以序列化该 POJO 对象，那么 Jackson 2 恰好能处理，那么Jackson 输出了。
+
+  问题：当 Accept 请求头未被制定时，为什么还是 JSON 来处理
+  回答：这个依赖于 messageConverters 的插入顺序。(AbstractMessageConverterMethodProcessor#writeWithMessageConverters)
+
+  问题：优先级是默认的是吧 可以修改吗
+  回答：是可以调整的，通过extendMessageConverters 方法调整
+
+** 扩展自描述消息
+   + json2properties
+     #+BEGIN_EXAMPLE
+      controller中, 写出时会根据produces中指定，匹配到自定义扩展
+      @PostMapping(value = "/person/json/to/properties",
+              consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+              produces = "application/properties+person" // 响应类型
+      )
+      public Person personJsonToProperties(@RequestBody Person person) {
+          // @RequestBody 的内容是 JSON
+          // 响应的内容是 Properties
+          return person;
+      }
+      //输入, postman请求中指定content-type: json
+      {
+        "id":1,
+        "name":"ttang"
+      }
+     #+END_EXAMPLE
+   + properties2json
+     #+BEGIN_EXAMPLE
+      @PostMapping(value = "/person/properties/to/json",
+        consumes = "application/properties+person", // 请求类型 // Content-Type
+        produces =  MediaType.APPLICATION_JSON_UTF8_VALUE// 响应类型 // Accept
+      )
+      public Person personPropertiesToJson(@RequestBody Person person) {
+          // @RequestBody 的内容是 Properties
+          // 响应的内容是 JSON
+          return person;
+      }
+
+     //输入文本, 指定content-type:application/properties+person, 会走自定义扩展的read方法
+      person.id = 1
+      person.name = 小马哥
+     #+END_EXAMPLE
+    ```properties
+    person.id = 1
+    person.name = 小马哥
+    ```
+  + 实现 AbstractHttpMessageConverter 抽象类
+    1. supports 方法：是否支持当前POJO类型
+    2. readInternal 方法：读取 HTTP 请求中的内容，并且转化成相应的POJO对象（通过 Properties 内容转化成 JSON）
+    3. writeInternal 方法：将 POJO 的内容序列化成文本内容（Properties格式），最终输出到 HTTP 响应中（通过 JSON 内容转化成 Properties ）
+*** 注意
+    + @RequestMappng 中的 consumes 对应 请求头 “Content-Type”
+    + @RequestMappng 中的 produces   对应 请求头 “Accept”
+  + HttpMessageConverter 执行逻辑：
+    + 读操作：尝试是否能读取，canRead 方法去尝试，如果返回 true 下一步执行 read
+    + 写操作：尝试是否能写入，canWrite 方法去尝试，如果返回 true 下一步执行 write
+** 源码路径
+   + https://github.com/offline7LY/demo/tree/master/rest-on-springmvc
+* spring webmvc
+** MVC
+  + M : Model
+  + V : View
+  + C : Controller -> DispatcherServlet
+    Front Controller = DispatcherServlet
+    Application Controller = @Controller or Controller
+    ServletContextListener -> ContextLoaderListener -> Root WebApplicationContext
+                  DispatcherServlet -> Servlet WebApplicationContext
+                  Services => @Service
+                  Repositories => @Repository
+** 请求映射
+  + Servlet中 / 和 /*的区别
+    /表示根路径， /*表示根路径下所有的目录
+  ServletContext path = /servlet-demo
+  URI : /servlet-demo/IndexServlet
+  DispatcherServlet < FrameworkServlet < HttpServletBean < HttpServlet
+** 自动装配
+   + *入口类* org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration
+  ServletContext path = "" or "/"
+  Request URI = ServletContex path + @RequestMapping("")/ @GetMapping()
+
+  当前例子：
+  Request URI = "" + "" = "" -> RestDemoController#index()
+  Request URI : "" 或者 "/"
+  HandlerMapping ，寻找Request URI，匹配的 Handler ：
+	Handler：处理的方法，当然这是一种实例
+	整体流程：Request -> Handler -> 执行结果 -> 返回（REST） -> 普通的文本
+	请求处理映射：RequestMappingHandlerMapping -> @RequestMapping Handler Mapping
+
+	拦截器：HandlerInterceptor 可以理解 Handler 到底是什么
+			处理顺序：preHandle(true) -> Handler: HandlerMethod 执行(Method#invoke) -> postHandle -> afterCompletion
+					  preHandle(false)
+
+Spring Web MVC 的配置 Bean ：WebMvcProperties
+Spring Boot 允许通过 application.properties 去定义一下配置，配置外部化
+WebMvcProperties 配置前缀：spring.mvc
+spring.mvc.servlet 
+** 异常处理
+*** 传统的Servlet web.xml 错误页面
+    + 优点：统一处理，业界标准
+    + 不足：灵活度不够，只能定义 web.xml文件里面
+      <error-page> 处理逻辑：
+      + 处理状态码 <error-code>
+      + 处理异常类型 <exception-type>
+      + 处理服务：<location>
+    + 代码路径: https://github.com/microzhao/demo/tree/master/servlet
+*** Spring Web MVC 异常处理
+    + @ExceptionHandler
+      + 优点：易于理解，尤其是全局异常处理
+      + 不足：很难完全掌握所有的异常类型
+      + https://docs.spring.io/spring/docs/5.0.0.RELEASE/spring-framework-reference/web.html
+    注:
+      + @RestControllerAdvice = @ControllerAdvice + @ResponseBody
+      + @ControllerAdvice 专门拦截（AOP） @Controller
+      + 代码路径:https://github.com/microzhao/demo/tree/master/springmvc/exception-on-springmvc
+*** Spring Boot 错误处理页面
+    + 实现 ErrorPageRegistrar
+      + 状态码：比较通用，不需要理解Spring WebMVC 异常体系
+      + 不足：页面处理的路径必须固定
+    + 注册 ErrorPage 对象
+    + 实现 ErrorPage 对象中的Path 路径Web服务
+    + 代码路径:https://github.com/microzhao/demo/tree/master/springmvc/exception-on-springmvc
+** 视图技术
+*** View
+*** render 方法
+    处理页面渲染的逻辑，例如：Velocity、JSP、Thymeleaf(前面这些技术都是对页面处理逻辑的实现, springboot官方推荐thymeleaf)
+*** ViewResolver
+    View Resolver = 页面 + 解析器 -> resolveViewName 寻找合适/对应 View 对象
+    RequestURI-> RequestMappingHandlerMapping ->
+    HandleMethod -> return "viewName" ->
+    完整的页面名称 = prefix + "viewName" + suffix 
+    -> ViewResolver -> View -> render -> HTML
+*** Spring Boot 解析完整的页面路径：
+    spring.view.prefix + HandlerMethod return + spring.view.suffix
+    + ContentNegotiationViewResolver
+      用于处理多个ViewResolver：JSP、Velocity、Thymeleaf
+      当所有的ViewResover 配置完成时，他们的order 默认值一样，所以先来先服务（List）
+      当他们定义自己的order，通过order 来倒序排列
+*** Thymeleaf
+  + 自动装配类：ThymeleafAutoConfiguration
+  + 配置项前缀：spring.thymeleaf
+  + 模板寻找前缀：spring.thymeleaf.prefix
+  + 模板寻找后缀：spring.thymeleaf.suffix
+  + 代码示例：/thymeleaf/index.htm
+    prefix: /thymeleaf/
+    return value : index
+    suffix: .htm
+** 国际化（i18n）
+  Locale
+  ```java
+  LocaleContextHolder
+  ```
+  #### 
+* Spring MVC 设计原理及手写实现
+** 组件介绍
+    + DispatcherServlet 是 SpringMVC 中的前端控制器(Front Controller),负责接收 Request并将 Request 转发给对应的处理组件.
+    + HanlerMapping 是 SpringMVC 中完成 url 到 Controller 映射的组件.DispatcherServlet接收 Request,然后从 HandlerMapping 查找处理 Request 的 Controller.
+    + Cntroller 处理 Request,并返回 ModelAndView 对象,Controller 是 SpringMVC 中负责处理 Request 的组件(类似于 Struts2 中的 Action),ModelAndView 是封装结果视图的组件.
+    + 视图解析器解析 ModelAndView 对象并返回对应的视图给客户端
+** Spring MVC 的工作机制
+    在容器初始化时会建立所有 url 和 Controller 的对应关系,保存到 Map<url,Controller>中.Tomcat 启动时会通知 Spring 初始化容器(加载 Bean 的定义信息和初始化所有单例 Bean),然后SpringMVC 会遍历容器中的 Bean,获取每一个 Controller 中的所有方法访问的 url,然后将 url 和Controller 保存到一个 Map 中;
+    这样就可以根据 Request 快速定位到 Controller,因为最终处理 Request 的是 Controller 中的方法,Map 中只保留了 url 和 Controller 中的对应关系,所以要根据 Request 的 url 进一步确认Controller 中 的 Method, 这 一 步 工 作 的 原 理 就 是 拼 接 Controller 的 url(Controller 上@RequestMapping 的值)和方法的 url(Method 上@RequestMapping 的值),与 request 的 url 进行匹配,找到匹配的那个方法;
+    确定处理请求的 Method后,接下来的任务就是参数绑定,把 Request中参数绑定到方法的形式参数上,这一步是整个请求处理过程中最复杂的一个步骤。 SpringMVC 提供了两种 Request 参数与方法形参的绑定方法:
+    +  通过注解进行绑定,@RequestParam
+    +  通过参数名称进行绑定.
+    使用注解进行绑定,我们只要在方法参数前面声明@RequestParam("a"),就可以将 Request 中参数 a 的值绑定到方法的该参数上.使用参数名称进行绑定的前提是必须要获取方法中参数的名称,Java反射只提供了获取方法的参数的类型,并没有提供获取参数名称的方法.SpringMVC 解决这个问题的方法是用 asm 框架读取字节码文件,来获取方法的参数名称.asm 框架是一个字节码操作框架,关于 asm 更多介绍可以参考它的官网。个人建议,使用注解来完成参数绑定,这样就可以省去 asm 框架的读取字节码的操作。
+** Spring MVC 源码分析
+   根据工作机制中三部分来分析 SpringMVC 的源代码.。
+    其一,ApplicationContext 初始化时建立所有 url 和 Controller 类的对应关系(用 Map 保存);
+    其二,根据请求 url 找到对应的 Controller,并从 Controller 中找到处理请求的方法;
+    其三,request 参数绑定到方法的形参,执行方法处理请求,并返回结果视图
+    + 建立 Map<urls,Controller>的关系
+      +ApplicationObjectSupport# setApplicationContext --> org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMapping#initApplicationContext
+      #+BEGIN_SRC java
+        public void initApplicationContext() throws ApplicationContextException {
+          super.initApplicationContext();
+          detectHandlers();
+        } 
+      #+END_SRC
+      + detectHandlers
+        #+BEGIN_SRC java
+
+        //建立当前 ApplicationContext 中的所有 Controller 和 url 的对应关系
+       	protected void detectHandlers() throws BeansException {
+          ApplicationContext applicationContext = obtainApplicationContext();
+
+          // 获取 ApplicationContext 容器中所有 bean 的 Name
+          String[] beanNames = (this.detectHandlersInAncestorContexts ?
+              BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, Object.class) :
+              applicationContext.getBeanNamesForType(Object.class));
+
+          // Take any bean name that we can determine URLs for.
+          // 遍历 beanNames,并找到这些 bean 对应的 url
+          for (String beanName : beanNames) {
+          // 找 bean 上的所有 url(Controller 上的 url+方法上的 url),该方法由对应的子类实现
+            String[] urls = determineUrlsForHandler(beanName);
+            if (!ObjectUtils.isEmpty(urls)) {
+              // URL paths found: Let's consider it a handler.
+              // 保存 urls 和 beanName 的对应关系,put it to Map<urls,beanName>,该方法在父类 AbstractUrlHandlerMapping 中实现
+              registerHandler(urls, beanName);
+            }
+          }
+
+          if ((logger.isDebugEnabled() && !getHandlerMap().isEmpty()) || logger.isTraceEnabled()) {
+            logger.debug("Detected " + getHandlerMap().size() + " mappings in " + formatMappingName());
+          }
+        } 
+        #+END_SRC
+        + determineUrlsForHandler
+          #+BEGIN_SRC java
+            protected abstract String[] determineUrlsForHandler(String beanName);
+          #+END_SRC
+          determineUrlsForHandler(String beanName)方法的作用是获取每个 Controller 中的 url,不同子类有不同的实现,这是一个典型的模板设计模式.因为开发中我们用的最多的就是用注解来配置ontroller 中 的 url,BeanNameUrlHandlerMapping 是 AbstractDetectingUrlHandlerMapping子类,处理注解形式的 url 映射.所以我们这里以 BeanNameUrlHandlerMapping 来进行分析.我们看BeanNameUrlHandlerMapping 是如何查 beanName 上所有映射的 url
+          #+BEGIN_SRC java
+            protected String[] determineUrlsForHandler(String beanName) {
+              List<String> urls = new ArrayList<>();
+              if (beanName.startsWith("/")) {
+                urls.add(beanName);
+              }
+              String[] aliases = obtainApplicationContext().getAliases(beanName);
+              for (String alias : aliases) {
+                if (alias.startsWith("/")) {
+                  urls.add(alias);
+                }
+              }
+              return StringUtils.toStringArray(urls);
+            } 
+          #+END_SRC
+          到这里 HandlerMapping 组件就已经建立所有 url 和 Controller 的对应关系。
+    + 根据请求 url 找到对应的 Controller,并从 Controller 中找到处理请求的方法;
+      第二个步骤是由请求触发的,所以入口为 DispatcherServlet 的核心方为 doService(),doService()中的核心逻辑由 doDispatch()实现,我们查看 doDispatch()的源代码
+      + dodispatch
+        #+BEGIN_SRC java
+        //中央控制器,控制请求的转发
+          protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+            HttpServletRequest processedRequest = request;
+            HandlerExecutionChain mappedHandler = null;
+            boolean multipartRequestParsed = false;
+
+            WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+
+            try {
+              ModelAndView mv = null;
+              Exception dispatchException = null;
+
+              try {
+              //检查是否是文件上传的请求
+                processedRequest = checkMultipart(request);
+                multipartRequestParsed = (processedRequest != request);
+
+                // Determine handler for the current request.
+                // 2.取得处理当前请求的 Controller,这里也称为 hanlder,处理器,
+                // 第一个步骤的意义就在这里体现了.这里并不是直接返回 Controller,
+                // 而是返回的 HandlerExecutionChain 请求处理器链对象,
+                // 该对象封装了 handler 和 interceptors.
+                mappedHandler = getHandler(processedRequest);
+                if (mappedHandler == null) {
+                  noHandlerFound(processedRequest, response);
+                  return;
+                }
+
+                // Determine handler adapter for the current request.
+                //3. 获取处理 request 的处理器适配器 handler adapter
+                HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+
+                // Process last-modified header, if supported by the handler.
+                // 处理 last-modified 请求头
+                String method = request.getMethod();
+                boolean isGet = "GET".equals(method);
+                if (isGet || "HEAD".equals(method)) {
+                  long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
+                  if (new ServletWebRequest(request, response).checkNotModified(lastModified) && isGet) {
+                    return;
+                  }
+                }
+
+                if (!mappedHandler.applyPreHandle(processedRequest, response)) {
+                  return;
+                }
+
+                // Actually invoke the handler.
+                // 4.实际的处理器处理请求,返回结果视图对象
+                mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+
+                if (asyncManager.isConcurrentHandlingStarted()) {
+                  return;
+                }
+
+                // 结果视图对象的处理
+                applyDefaultViewName(processedRequest, mv);
+                mappedHandler.applyPostHandle(processedRequest, response, mv);
+              }
+              catch (Exception ex) {
+                dispatchException = ex;
+              }
+              catch (Throwable err) {
+                // As of 4.3, we're processing Errors thrown from handler methods as well,
+                // making them available for @ExceptionHandler methods and other scenarios.
+                dispatchException = new NestedServletException("Handler dispatch failed", err);
+              }
+              processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
+            }
+            catch (Exception ex) {
+              triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
+            }
+            catch (Throwable err) {
+              triggerAfterCompletion(processedRequest, response, mappedHandler,
+                  new NestedServletException("Handler processing failed", err));
+            }
+            finally {
+              if (asyncManager.isConcurrentHandlingStarted()) {
+                // Instead of postHandle and afterCompletion
+                // 请求成功响应之后的方法
+                if (mappedHandler != null) {
+                  mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
+                }
+              }
+              else {
+                // Clean up any resources used by a multipart request.
+                if (multipartRequestParsed) {
+                  cleanupMultipart(processedRequest);
+                }
+              }
+            }
+          } 
+        #+END_SRC
+        + ha.handle --> org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter#handle --> org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#handleInternal
+
+          反射调用处理请求的方法， 返回结果视图
+          #+BEGIN_SRC java
+            protected ModelAndView handleInternal(HttpServletRequest request,
+                HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+
+              ModelAndView mav;
+              checkRequest(request);
+
+              // Execute invokeHandlerMethod in synchronized block if required.
+              if (this.synchronizeOnSession) {
+                HttpSession session = request.getSession(false);
+                if (session != null) {
+                  Object mutex = WebUtils.getSessionMutex(session);
+                  synchronized (mutex) {
+                    mav = invokeHandlerMethod(request, response, handlerMethod);
+                  }
+                }
+                else {
+                  // No HttpSession available -> no mutex necessary
+                  mav = invokeHandlerMethod(request, response, handlerMethod);
+                }
+              }
+              else {
+                // No synchronization on session demanded at all...
+                mav = invokeHandlerMethod(request, response, handlerMethod);
+              }
+
+              if (!response.containsHeader(HEADER_CACHE_CONTROL)) {
+                if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
+                  applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);
+                }
+                else {
+                  prepareResponse(response);
+                }
+              }
+
+              return mav;
+            }
+
+          #+END_SRC
+        + org.springframework.web.servlet.handler.AbstractHandlerMapping#getHandler
+          #+BEGIN_SRC java
+            protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+            // 如果请求 url 为,http://localhost:8080/web/hello.json, 则 lookupPath=web/hello.json
+              String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+              this.mappingRegistry.acquireReadLock();
+              try {
+              // 遍历 Controller 上的所有方法,获取 url 匹配的方法
+                HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
+                return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
+              }
+              finally {
+                this.mappingRegistry.releaseReadLock();
+              }
+            } 
+          #+END_SRC
+        + invokeHandlerMethod
+          #+BEGIN_SRC java
+          //获取处理请求的方法,执行并返回结果视图 
+            protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
+                HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+
+              ServletWebRequest webRequest = new ServletWebRequest(request, response);
+              try {
+                WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
+                ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
+
+                ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+                if (this.argumentResolvers != null) {
+                  invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+                }
+                if (this.returnValueHandlers != null) {
+                  invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+                }
+                invocableMethod.setDataBinderFactory(binderFactory);
+                invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+
+                ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+                mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
+                modelFactory.initModel(webRequest, mavContainer, invocableMethod);
+                mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
+
+                AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
+                asyncWebRequest.setTimeout(this.asyncRequestTimeout);
+
+                WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+                asyncManager.setTaskExecutor(this.taskExecutor);
+                asyncManager.setAsyncWebRequest(asyncWebRequest);
+                asyncManager.registerCallableInterceptors(this.callableInterceptors);
+                asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
+
+                if (asyncManager.hasConcurrentResult()) {
+                  Object result = asyncManager.getConcurrentResult();
+                  mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
+                  asyncManager.clearConcurrentResult();
+                  LogFormatUtils.traceDebug(logger, traceOn -> {
+                    String formatted = LogFormatUtils.formatValue(result, !traceOn);
+                    return "Resume with async result [" + formatted + "]";
+                  });
+                  invocableMethod = invocableMethod.wrapConcurrentResult(result);
+                }
+
+                invocableMethod.invokeAndHandle(webRequest, mavContainer);
+                if (asyncManager.isConcurrentHandlingStarted()) {
+                  return null;
+                }
+
+                return getModelAndView(mavContainer, modelFactory, webRequest);
+              }
+              finally {
+                webRequest.requestCompleted();
+              }
+            }
+          #+END_SRC
+** springmvc 最佳实践
+  1.Controller 如果能保持单例,尽量使用单例,这样可以减少创建对象和回收对象的开销.也就是,如果 Controller的类变量和实例变量可以以方法形参声明的尽量以方法的形参声明,不要以类变量实例变量声明,这样可以避免线程安全问题.
+  2.处理 Request 的方法中的形参务必加上@RequestParam 注解,这样可以避免 SpringMVC 使用asm 框架读取 class 文件获取方法参数名的过程.即便 SpringMVC 对读取出的方法参数名进行了缓存,如果不要读取 class 文件当然是更加好.
+* springmvc 与 servlet
+** 无论是哪个框架都最终遵循规范, jsp, servlet等规范
+** org.springframework.web.servlet.DispatcherServlet#doDispatch
+   + dispatcherservlet作为前端总的控制器, 所有页面跳转通过它进行转发, 不再需要在web.xml对不同的页面跳转制定不同的servlet
+     #+BEGIN_EXAMPLE
+      <servlet>
+          <servlet-name>app1</servlet-name>
+          <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+          <init-param>
+              <param-name>contextConfigLocation</param-name>
+              <param-value>/WEB-INF/app1-context.xml</param-value>
+          </init-param>
+          <load-on-startup>1</load-on-startup>
+      </servlet>
+     #+END_EXAMPLE
+   + dodispatch中会产生model + view然后view通过rander进行渲染， model作为数据填充
+** javax.servlet.http.HttpServlet#service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   + service方法调度不同的页面请求, 通过传入url, redirect或者forward到不同的页面， 与springmvc中mapping(url)类似, 只不过servlet中jsp的数据需要自己来实现rander的过程
+** servlet-springmvc-springboot页面跳转不同实现方式
+   + https://github.com/microzhao/demo/tree/master/springmvc/servlet-springmvc-springboot

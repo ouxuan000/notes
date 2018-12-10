@@ -1,0 +1,33 @@
+#####原字符串
+#+BEGIN_EXAMPLE
+ {11:{planvch:CB30D23E6C7EA2B4E11A738EF165F01D, reqvch:DA0D82B074E41EB2AAF44CC34B1459AB, paymentvch:F19C24EBFB29EE204C5CE4B79957796D, planwf:666, reqwf:667, paymentwf:668},12:{planvch:CB30D23E6C7EA2B4E11A738EF165F01D,reqvch:DA0D82B074E41EB2AAF44CC34B1459AB, paymentvch:F19C24EBFB29EE204C5CE4B79957796D, planwf:666, reqwf:667, paymentwf:668}}
+#+BEGIN_EXAMPLE
+
+##### 字符串处理
+> %s/ //g 去除空格
+> %s/"//g 去除双引号
+> %s/[^,{}:]+/"&"/g 将处理后的字符串各个单词俩边加入 “
+
+##### 处理后
+#+BEGIN_EXAMPLE
+{
+    "11": {
+        "planvch": "CB30D23E6C7EA2B4E11A738EF165F01D",
+        "reqvch": "DA0D82B074E41EB2AAF44CC34B1459AB",
+        "paymentvch": "F19C24EBFB29EE204C5CE4B79957796D",
+        "planwf": "666",
+        "reqwf": "667",
+        "paymentwf": "668"
+    },
+    "12": {
+        "planvch": "CB30D23E6C7EA2B4E11A738EF165F01D",
+        "reqvch": "DA0D82B074E41EB2AAF44CC34B1459AB",
+        "paymentvch": "F19C24EBFB29EE204C5CE4B79957796D",
+        "planwf": "666",
+        "reqwf": "667",
+        "paymentwf": "668"
+    }
+}
+
+#+BEGIN_EXAMPLE
+处理后的字符串才可以用一些json工具解析，例如java中的jsonutil

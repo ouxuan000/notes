@@ -1,0 +1,138 @@
+#####启动管理器 slim
+> 修改了的就是默认登陆用户名，以免登陆时既要输入用户名，又要输入密码，修改的是/etc/slim.conf文件，将default_user设置为我自己的默认登陆名，这样子登陆时就只需输入密码了, 目前我设置自动登录, 密码都不用输入，直接进入桌面
+> systemctl enable slim.service
+> ~/.xinitrc文件 exec openbox-session
+#+BEGIN_EXAMPLE
+export LC_ALL=zh_CN.UTF-8
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=“@im=fcitx”
+
+xrandr -s 1600x900 &
+exec openbox-session
+#+BEGIN_EXAMPLE
+##### 桌面 openbox
+> 配置文件的位置是在当前用户的.config/openbox/rc.xml这儿，里面主要修改的是快捷键绑定
+#+BEGIN_EXAMPLE
+<!-- keybindings for open file browser -->
+    <keybind key="w-e">
+      <action name="execute">
+        <startupnotify>
+          <enabled>true</enabled>
+          <name>pcmanfm</name>
+        </startupnotify>
+        <command>pcmanfm -n /home/roysong</command>
+      </action>
+    </keybind>
+   <!-- keybindings for capture screen -->
+    <keybind key="c-a-a">         
+      <action name="execute">
+        <startupnotify>                             
+          <enabled>true</enabled>                             
+          <name>shutter</name>
+        </startupnotify>                                              
+        <command>shutter -s -e</command>
+      </action>                                                               
+    </keybind>
+ <!-- keybindings for start terminal-->
+    <keybind key="w-r">
+      <action name="execute">
+        <startupnotify>
+          <enabled>true</enabled>
+          <name>terminal</name>
+        </startupnotify>
+        <command>urxvt</command>
+      </action>
+    </keybind>
+    <!-- keybindings for lock screen-->
+    <keybind key="w-l">
+      <action name="execute">
+        <startupnotify>
+          <enabled>true</enabled>
+          <name>terminal</name>
+        </startupnotify>
+        <command>xlock</command>
+      </action>
+    </keybind>
+
+openbox –reconfigure done
+#+BEGIN_EXAMPLE
+##### 文件管理器 
+> pcmanfm --desktop &
+> 它就会自动将~/desktop下面的快捷方式展现在桌面上
+> 文件管理采用的是pcmanfm，-n参数是指每次采用win+e键开启一个新的文件管理窗口，指向用户主路径
+#####网络图形化管理使用的是wicd，没进行啥特别的配置，安装上即可(这里我使用的是 NetworkManager  + networkmanager-applet, 需要启动networkmanager服务， 具体 archlinuxwiki)。 加入到autostart  ;nohup nm-applet > /dev/null &
+
+#####音量图形化管理是pnmixer，也没进行啥特别配置，安装上即可。
+#####监视器图形化管理是采用的lxrandr，装上即可。
+##### autostart
+>在.config/openbox/autostart.sh中我还添加了这两句：
+>synclient tapbutton1=1
+>synclient tapbutton2=3
+>作用是打开触摸板轻触作为左键点击，以及双指触作为右键的功能
+#####urxvt
+>urxvt的默认界面极其丑陋，它的配置文件是~/.xdeaults
+##### 屏保
+>xscreensaver
+#####护眼模式 xflux
+yaourt -S xflux xflux
+执行 systemctl --user enable xfluxd
+#+BEGIN_EXAMPLE
+Created symlink /home/lx7ly/.config/systemd/user/default.target.wants/xfluxd.service → /usr/lib/systemd/user/xfluxd.service.
+#+END_EXAMPLE
+配置文件在/etc/xfluxd.conf
+##### 音量调节
+volumeicon
+pacman -S alsa-utils包含 xmixer
++ 默认安装后时没有声音得，可以打开网易云音乐， 然后alsamixer进行调整， 插入耳机时候要打开headphone
+#####锁屏
+yaourt -S xlockmore
+#####默认分辨率
+再.xinitrc中加入 xrandr -s 1600x900 & 我放在了exec openbox-session之前
+##### 软件不能输入汉字处理, 在对应软件的启动文件中加入下面内容， 或者可以尝试在设置环境变量的地方加入
+#+BEGIN_EXAMPLE
+export XMODIFIERS="@im=fcitx"
+export GTK_IM_MODULE="fcitx"
+export QT_IM_MODULE="fcitx"
+#+BEGIN_EXAMPLE
+* 定时任务
+  + 安装cronie，这个时候会提醒与vixie-cron要卸载后者：以root身份运行pacman -S cronie
+  + 启用并打开cronie.service：以root身份运行systemctl enable cronie.service && systemctl start cronie.service
+  + 确保普通用户能使用cron，否则运行echo arche >> /etc/cron.allow 【arche是你的用户名】
+  + 编写~/MyCrontab任务计划，参考https://www.lulinux.com/archives/2252的“crontab写法举例”
+  + 载入MyCrontab计划到cronie服务模块中：crontab ~/MyCrontab
+  + 检查crontab计划是否就绪：crontab -l
+* 网络共享
+  + 安装:
+    pacman -S create_ap
+  + create_ap
+    sudo create_ap wlp3s0 enp0s31f6 arch-zhao 1234567890
+
+* 命令行工具
+ + 强烈推荐zsh + ohmyzsh
+   + 安装zsh， 安装ohmyzsh
+     sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+   + 安装zsh-autosuggestions(补全工具)
+     git clone git://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+   + 编辑.zshrc plugins中打开, 三个神器
+     plugins=(z git zsh-autosuggestions)
+   + 重启或者 source .zshrc
+   + 注意:1、你如果分开设置oh-my-zsh和autosuggestions，那么你的terminal的autosuggestions不会起作用的，所以你要把autosuggestions作为zsh的插件放到~/.zsh/plugins/下面，然后再在～/.zshrc文件中加入这个插件plugins=(git zsh-autosuggestions)
+
+
+* 亮度调整
+  + yaourt -Ss xbacklight
+  + rc.xml加入快捷键
+    #+BEGIN_EXAMPLE
+      <keybind key="XF86MonBrightnessUp">  
+        <action name="Execute">
+          <command>xbacklight +10</command>
+        </action>
+      </keybind>
+
+      <keybind key="XF86MonBrightnessDown">  
+        <action name="Execute">
+          <command>xbacklight -10</command>
+        </action>
+      </keybind> 
+    #+END_EXAMPLE

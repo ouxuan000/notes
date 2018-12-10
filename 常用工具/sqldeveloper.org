@@ -1,0 +1,22 @@
+* 安装
+  1. 从官网下载no jre的压缩包
+  2. 最新版的sqldeveloper需要jdk8的支持
+  3. yaourt -s 安装过程总， 将压缩包替换到临时文件中, 继续安装
+  4. 在~/.sqldeveloper/18.1.0/product.conf, 修改设置jdk home全路径
+* 数据结果集中编辑数据
+  点击表，右面显示表的信息，点击下面的数据，不是汉化版的话 点击data，想要过滤的话 在过滤器后面的框里输入条件  比如  id like '000%'，这些数据可以直接在表格中编辑，记得编辑完提交数据，提交按键在过滤器左面的一排按键中。
+* sql自动补全
+  属性--> sql编辑器代码模版-->
+ 修改调用sql模板的快捷键，输入id 例如 ssf ctrl+M 会提示
+* 代码提示
+ 工具--》 首选项 --》 代码编辑器 --》 完成设置  增大弹出速度 以及 
+* plsql输出结果
+  在 sql worksheet 中，执行一个 block 之前，执行 set serveroutput on;
+  #+BEGIN_EXAMPLE
+  set serveroutput on;
+  declare g_salary number:=100;
+  begin
+    select salary into g_salary from employees where employee_id=178;
+    dbms_output.put_line('the salary is:'|| g_salary);
+  end;
+  #+END_EXAMPLE

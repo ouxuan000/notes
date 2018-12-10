@@ -1,0 +1,137 @@
+* 环境准本
+  + 华为云 centos系统
+  + 本地已经正常使用, 需要部署到服务器并且需要用docker启动
+  + web容器使用weblogic10.3.6
+  + 本人的原始环境为archlinux
+* 操作步骤
+** 本地环境打包
+    + 注意： 采用本地环境为了省事, 本地环境包含整个的weblogic环境， 及jdk, 如果自己心情好完全可以再搭建一套
+    #+BEGIN_EXAMPLE
+      tar -zcvf weblogic.tar.gz ~/Oracle #这个目录是weblogic的默认安装及建域目录, 相应的war包也在该目录下
+      tar -zcvf jdk.tar.gz ~/applications/jdk1.7 #jdk
+    #+END_EXAMPLE
+** 上传到云服务器
+   + 上传打包好的文件
+     + weblogic
+      #+BEGIN_EXAMPLE
+       scp weblogic.tar.gz root@11x.xxx.xxx.xxx:/root  
+       根据提示输入密码稍等上传完成
+      #+END_EXAMPLE
+     + jdk
+      #+BEGIN_EXAMPLE
+       scp jdk.tar.gz root@11x.xxx.xxx.xxx:/root  
+       根据提示输入密码稍等上传完成
+      #+END_EXAMPLE
+   + 解压, 找一个自己喜欢的目录，建议跟本地保持一致
+     + 在服务建立与本地一致的目录
+       #+BEGIN_EXAMPLE
+       mkdir /home/lx7ly/applications
+       #+END_EXAMPLE
+     + 解压文件
+       #+BEGIN_EXAMPLE
+       tar -zxvf /root/weblogic.tar.gz -C /home/lx7ly
+       tar -zxvf /root/jdk.tar.gz -C /home/lx7ly/applications
+       #+END_EXAMPLE
+   + 在云服务器上配置启动web服务, 并通过弹性公网访问或者服务器本地确认服务启动正常
+     + 进入domain目录启动服务验证
+       #+BEGIN_EXAMPLE
+       nohup ./startWeblogic.sh & tail -f nohup.out
+       #+END_EXAMPLE
+** 使用docker容器启动
+*** 制作docker镜像
+    + Dockerfile文件
+      + touch /home/lx7ly/Dockerfile
+        #+BEGIN_EXAMPLE
+          #Dockerfile  
+          # 基于centos构建本容器
+          FROM centos
+          # 跟本地映射的端口， 这里相当与访问本地7003会自动转发到容器中7003
+          EXPOSE 7003
+          #设置环境变量，所有操作都是非交互式的
+          ENV LANG en_US.UTF-8  
+          ENV LC_ALL en_US.UTF-8
+          ENV DEBIAN_FRONTEND noninteractive
+          #可以安装软件
+          #RUN yum install xx
+          # 需要打到docker中的文件全部copy到docker对应的目录中， 本地目录是相对当前目录，不能写绝对路径, 后面这个路径最好加/
+          COPY . /home/lx7ly/
+          COPY cmd.sh /cmd.sh
+          # 容器启动后直接执行给定脚本
+          CMD sh /cmd.sh
+          #End
+        #+END_EXAMPLE
+      + 制作镜像
+        + 进入目录 /home/lx7ly
+          在目录 /home/lx7ly中目前存在
+          #+BEGIN_EXAMPLE
+            drwxr-xr-x 3 root root 4096 Sep 30 10:49 applications
+            -rwxr-xr-x 1 root root  128 Sep 30 11:17 cmd.sh
+            -rw-r--r-- 1 root root  305 Sep 30 17:07 Dockerfile
+            drwxr-xr-x 3 root root 4096 Jul 14 18:39 Oracle
+          #+END_EXAMPLE
+        + 执行命令 docker build -t payimage .
+          + 最后的点表示dockerfile在当前目录
+        + 查看存在镜像 docker images
+          #+BEGIN_EXAMPLE
+            REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+            payimage            latest              d7b3db0e1d59        15 hours ago        2.22 GB
+            centos              latest              c5507be714a7        7 weeks ago         199.7 MB
+          #+END_EXAMPLE
+    + docker commit命令通过运行中容器制作镜像
+      #+BEGIN_EXAMPLE
+      docker commit pay7003 payimages:v1.0
+      #+END_EXAMPLE
+*** 启动容器
+    + cmd.sh
+      #+BEGIN_EXAMPLE
+        #!/bin/bash
+        domainname=$1 # 这里如果没有其他情况可以写死
+        nohup sh /home/lx7ly/Oracle/Middleware/user_projects/domains/$domainname/startWebLogic.sh > /7003.log & tail -f /7003.log 
+      #+END_EXAMPLE
+    + 通过上一步镜像启动
+      #+BEGIN_EXAMPLE
+        docker  run -itd --net=host --name pay7003 payimage sh /cmd.sh
+        命令解释:
+        -i: 
+        -t: 
+        -d: 保持，退出后不关闭docker
+        --name: docker容器的名称
+        payimage: 镜像名称
+        --net=host: 这个必须有，否则启动报错
+        sh /cmd.sh: 这个是容器启动会执行的命令， 以后docker start 也会执行该文件
+      #+END_EXAMPLE
+    + 可以省略第一步操作直接制作容器启动
+      #+BEGIN_EXAMPLE
+        docker run itd -v weblogic:weblogic idk:jdk --net=host -p7003:7003 --name=pay7003 centos
+        上面的weblogic前后分别表示本地的目录和远程的目录
+        -v 可以达到dockfile中copy的效果
+        -p 表示端口映射
+      #+END_EXAMPLE
+    + 容器管理
+      #+BEGIN_EXAMPLE
+      docker start pay7003
+      docker stop pay7003
+      docker rm pay7003 #删除容器, 先stop再rm
+      #+END_EXAMPLE
+*** 连接容器，检查服务
+    + 查看现有容器
+      + docker ps -a
+        #+BEGIN_EXAMPLE
+          CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
+          dc2eeca7873e payimage "sh /cmd.sh" 15 hours ago Exited (137) 15 hours ago pay7003 
+        #+END_EXAMPLE
+    + 登录容器
+      #+BEGIN_EXAMPLE
+        docker exec -it pay7003 bash #这里pay7003是容器name， 也可以使用容器id
+        通过该命令可以连接到容器pay7003的bash中， 跟正常操作cenos系统一样, 完成后exit即可
+      #+END_EXAMPLE
+* 容器管理
+** 大杀器片甲不留, 自己玩可以用
+  #+BEGIN_EXAMPLE
+    docker kill $(docker ps -q) ; docker rm $(docker ps -a -q) ; docker rmi $(docker images -q -a) 
+  #+END_EXAMPLE
+
+** 删除镜像
+   #+BEGIN_EXAMPLE
+    docker rmi payimage
+   #+END_EXAMPLE

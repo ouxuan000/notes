@@ -1,0 +1,104 @@
+* 添加表注释
+  #+BEGIN_EXAMPLE
+  select 'comment on column ' || t.table_name || '.' || t.column_name || ' is ''' || t.comments || ''';', t.* from USER_COL_COMMENTS t where t.table_name = 'T_RECEIVEBDGDATA';
+  #+END_EXAMPLE
+* 根据表注释 及字段信息生成diccolumn注册信息
+  #+BEGIN_EXAMPLE
+  --获取注册表字段
+  select ''''' as '|| t.COLUMN_NAME ||',' from user_tab_cols t where t.table_name = 'FASP_T_DICCOLUMN';
+  -- 转换成diccolumn数据
+  delete from fasp_t_diccolumn t where t.tablecode = 'BDG_T_BDGSENDDATA';
+  insert into fasp_t_diccolumn ( columncode,
+      columnid,
+      csid,
+      datalength,
+      datatype,
+      dbcolumncode,
+      dbversion,
+      defaultvalue,
+      deid,
+      exp,
+      issys,
+  isuses,
+      name,
+      nullable,
+  province,
+      scale,
+      tablecode,
+      version,
+      year)
+  SELECT
+      t.column_name AS columncode,
+      sys_guid() AS columnid,
+      '' AS csid,
+      t.data_length AS datalength,
+          CASE t.data_type
+              WHEN 'NUMBER' THEN 'N'
+              ELSE 'S'
+          END
+      AS datatype,
+      t.column_name AS dbcolumncode,
+      NULL AS dbversion,
+      '' AS defaultvalue,
+      '' AS deid,
+      '' AS exp,
+      '0' AS issys,
+      '' AS isuses,
+      t2.comments AS name,
+      '' AS nullable,
+      '1500' AS province,
+      '' AS scale,
+      t.table_name AS tablecode,
+      '' AS version,
+      '2018' AS year
+  FROM
+      user_tab_cols t,
+      user_col_comments t2
+  WHERE
+          t.table_name = 'BDG_T_BDGSENDDATA'
+      AND
+          t.table_name = t2.table_name (+)
+      AND
+          t.column_name = t2.column_name (+);
+
+  #+END_EXAMPLE
+
+*  造关联视图
+  #+BEGIN_EXAMPLE
+
+  SELECT
+  -- t.columncode,
+      distinct t2.tablecode || ' ' || lower(substr(t2.tablecode,instr(t2.tablecode, '_', 1, 2)+1)) ||',',
+      ' = ' || lower(substr(t2.tablecode,instr(t2.tablecode, '_', 1, 2)+1)) ||'.guid(+) and '
+
+    -- t3.datasource
+  FROM
+      fasp_t_diccolumn t,
+      fasp_t_dicds t2,
+      fasp_t_dicdssource t3
+  WHERE
+          t.csid = t2.guid (+)
+      AND
+          t.csid = t3.guid (+)
+      AND
+          t.tablecode = 'BDG_T_BDGSUB'
+      AND
+          t.csid IS NOT NULL
+          and t2.tablecode is not null;
+  #+END_EXAMPLE
+* 指标导出业务表信息
+  #+BEGIN_EXAMPLE
+  --先给物理表加上字段注释信息
+  select 'comment on column p#' || t.tablecode || '.' || t.columncode ||
+        ' is ''' || t.name || ''';',
+        t.*
+    from fasp_t_diccolumn t
+  where t.tablecode = 'BDG_T_BDGSUB';
+
+  --导出注释及字段信息
+  select t.column_name, t2.comments, t.data_type || '(' || t.data_length || ')', t.data_length
+    from user_tab_cols t, user_col_comments t2
+  where t.table_name = t2.table_name(+)
+    and t.column_name = t2.column_name(+)
+    and t.table_name = 'P#BDG_T_BDGSUB';
+  #+END_EXAMPLE

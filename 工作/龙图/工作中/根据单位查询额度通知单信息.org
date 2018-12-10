@@ -1,0 +1,18 @@
+```
+select distinct t4.CODE || '_' || t4.NAME as "单位",
+                t5.name as "通知单类型",
+                t1.WFSTATUS || '_' || t1.SENDSTATUS "审核情况",
+                t1.AMT,
+                t1.BILLCODE as "通知单单号",
+                t1.TIMESTAMPS
+  from pay_t_order               t1,
+       pay_t_middleorder         t2,
+       pay_T_plan                t3,
+       fasp_v_age_level1province t4,
+       fasp_t_pavoucher          t5
+ where t4.CODE = '502007'
+   and t1.guid = t2.ORDERID(+)
+   and t2.SUBID = t3.guid(+)
+   and t3.AGENCYGUID = t4.guid(+)
+   and t1.vchtypeid = t5.guid(+);
+```

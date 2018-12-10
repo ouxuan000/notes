@@ -1,0 +1,901 @@
+* MongoDB 中的应用场景及设计原理
+  MongoDB是一个基于分布式文件存储的数据库。由C++语言编写。旨在为WEB应用提供可扩展的高性能数据存储解决方案。MongoDB是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。在这里我们有必要先简单介绍一下非关系型数据库（NoSQL）
+** 、什么是NoSQL
+   NoSQL，指的是非关系型的数据库。NoSQL有时也称作NotOnlySQL的缩写，是对不同于传统的关系型数据库的数据库管理系统的统称。NoSQL用于超大规模数据的存储。（例如谷歌或Facebook每天为他们的用户收集万亿比特的数据）。这些类型的数据存储不需要固定的模式，无需多余操作就可以横向扩展。
+** 关系型数据库 VS 非关系型数据库
+| 关系型数据库                 | NoSQL数据库                               |
+|------------------------------+-------------------------------------------|
+| 高度组织化结构化数据         | 代表着不仅仅是SQL                         |
+| 结构化查询语言（SQL）        | 没有声明性查询语言                        |
+| 数据和关系都存储在单独的表中 | 没有预定义的模式                          |
+| 数据操作语言，数据定义语言   | 键-值对存储，列存储，文档存储，图形数据库 |
+| 严格的一致性                 | 最终一致性，而非ACID属性                  |
+| 基础事务                     | 非结构化和不可预知的数据                  |
+|                              | CAP定理                                   |
+|                              | 高性能，高可用性和可伸缩性                |
+|                              |                                           |
+** NoSQL数据库分类
+| *类型*        | *典型代表*                                       | *特点*                                                                                                                                 |
+|---------------+--------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------|
+| 列存储        | Hbase,Cassandra,Hypertable                       | 顾名思义，是按照列存储数据的。最大的特点是方便存储结构化和半结构化的数据，方便做数据压缩，对针对某一列或者某几列的查询有非常大的IO优势 |
+| 文档存储      | MongoDBCounchDB                                  | 文档存储一般用类似json的格式存储，存储的内容是文档型的。这样也就有机会对某些字段建立索引，实现关系数据库的某些功能。                   |
+| Key-value存储 | TokyoCabinet/Tyrant, Berkelery, DBMemcache,Redis | 可以通过key快速查询到其value。一般来说， 存储不管value的格式，照单全收。(Redis包含了其他功能)                                          |
+| 图存储        | Neo4J,FlockDB                                    | 图形关系的最佳存储。使用传统关系数据库来解决的话性能低下，而且设计使用不方便。                                                         |
+| 对象存储      | Db4o,Versant                                     | 通过类似面向对象语言的语法操作数据库，通过对象的方式存储数据。                                                                         |
+| XML数据库     | Berkeley,DBXMLBaseX                              | 高效的存储XML数据，并存储XML的内部查询语法,比如XQuery,Xpath。                                                                          |
+** MongoDB的数据结构与关系型数据库数据结构对比
+| 关系型数据库术语/概念 | MongoDB术语/概念 | 解释/说明                       |
+|-----------------------+------------------+---------------------------------|
+| Database              | Database         | 数据库                          |
+| Table                 | Collection       | 数据库表/集合                   |
+| Row                   | Document         | 数据记录行/文档                 |
+| Column                | Field            | 数据列/数据字段                 |
+| Index                 | Index            | 索引                            |
+| Tablejoins            |                  | 表关联/MongoDB不支持            |
+| PrimaryKey            | ObjectID         | 主键/MongoDB自动将_id设置为主键 |
+** MongoDB中的数据类型
+| 数据类型    | 说明       | 解释                                                                             | 举例                      |
+|-------------+------------+----------------------------------------------------------------------------------+---------------------------|
+| Null        | 空值       | 表示空值或者未定义的对象                                                         | {“x”:null}              |
+| Boolean     | 布尔值     | 真或者假：true或者false                                                          | {“x”:true}              |
+| Integer     | 整数       | 整型数值。用于存储数值。根据你所采用的服务器，可分为32位或64 位。                |                           |
+| Double      | 浮点数     | 双精度浮点值。                                                                   | {“x”：3.14，”y”：3}   |
+| String      | 字符串     | UTF-8字符串                                                                      |                           |
+| Symbol      | 符号       | 该数据类型基本上等同于字符串类型，但不同的是，它一般用于采用特殊符号类型的语言。 |                           |
+| ObjectID    | 对象ID     | 用于创建文档的ID。                                                               | {“id”:ObjectId()}       |
+| Date        | 日期       | 用UNIX时间格式来存储当前日期或时间。                                             | {“date”:newDate()}      |
+| Timestamp   | 时间戳     | 从标准纪元开始的毫秒数                                                           |                           |
+| Regular     | 正则表达式 | 文档中可以包含正则表达式，遵循JavaScript的语法                                   | {“foo”:/testdb/i}       |
+| Code        | 代码       | 可以包含JavaScript代码                                                           | {“x”：function(){}}     |
+| Undefined   | 未定义     | 已废弃                                                                           |                           |
+| Array       | 数组       | 值的集合或者列表                                                                 | {“arr”:[“a”,”b”]}   |
+| BinaryData  | 二进制     | 用于存储二进制数据。                                                             |                           |
+| Object      | 内嵌文档   | 文档可以作为文档中某个key的value                                                 | {“x”:{“foo”:”bar”}} |
+| Min/Maxkeys | 最小/大值  | 将一个值与BSON（二进制的JSON）元素的最低值和最高值相对比。                       |                           |
+** 图解MongoDB底层原理
+   MongoDB的集群部署方案中有三类角色：实际数据存储结点、配置文件存储结点和路由接入结点。连接的客户端直接与路由结点相连，从配置结点上查询数据，根据查询结果到实际的存储结点上查询和存储数据。MongoDB的部署方案有单机部署、复本集（主备）部署、分片部署、复本集与分片混合部署。
+   混合的部署方式如图：
+   [[file:mongodbimg/1.jpg]]
+   混合部署方式下向MongoDB写数据的流程如图：
+   [[file:mongodbimg/2.jpg]]
+   混合部署方式下读MongoDB里的数据流程如图：
+   [[file:mongodbimg/3.jpg]]
+   对于复本集，又有主和从两种角色，写数据和读数据也是不同，写数据的过程是只写到主结点中，由主结点以异步的方式同步到从结点中：
+   [[file:mongodbimg/4.jpg]]
+   而读数据则只要从任一结点中读取，具体到哪个结点读取是可以指定的：
+   [[file:mongodbimg/5.jpg]]
+   对于MongoDB的分片，假设我们以某一索引键（ID）为片键，ID的区间[0,50]，划分成5个chunk，分别存储到3个片服务器中，如图所示：
+   [[file:mongodbimg/6.jpg]]
+   假如数据量很大，需要增加片服务器时可以只要移动chunk来均分数据即可。
+  + 配置结点：
+    存储配置文件的服务器其实存储的是片键与chunk以及chunk与server的映射关系，用上面的数据表示的配置结点存储的数据模型如下表：
+    + Map1
+      | Keyrange | chunk  |
+      | [0,10)   | chunk1 |
+      | [10,20)  | chunk2 |
+      | [20,30)  | chunk3 |
+    + Map2
+      | chunk  | shard  |
+      | chunk1 | shard1 |
+      | chunk2 | shard1 |
+      | chunk3 | shard2 |
+  + 路由结点：
+    路由角色的结点在分片的情况下起到负载均衡的作用。
+** MongoDB的应用场景和不适用场景
+*** 适用场景
+    对于MongoDB实际应用来讲，是否使用MongoDB需要根据项目的特定特点进行一一甄别，这就要求我们对MongoDB适用和不适用的场景有一定的了解。
+    根据MongoDB官网的说明，MongoDB的适用场景如下:
+      + 网站实时数据:MongoDB非常适合实时的插入，更新与查询，并具备网站实时数据存储所需的复制及高度伸缩性。
+      + 数据缓存:由于性能很高，MongoDB也适合作为信息基础设施的缓存层。在系统重启之后，由MongoDB搭建的持久化缓存层可以避免下层的数据源过载。
+      + 大尺寸、低价值数据存储:使用传统的关系型数据库存储一些数据时可能会比较昂贵，在此之前，很多时候程序员往往会选择传统的文件进行存储。
+      + 高伸缩性场景:MongoDB非常适合由数十或数百台服务器组成的数据库。MongoDB的路线图中已经包含对MapReduce引擎的内置支持。
+      + 对象或JSON数据存储:MongoDB的BSON数据格式非常适合文档化格式的存储及查询。
+*** 不适用场景
+    了解了MongoDB适用场景之后，还需要了解哪些场景下不适合使用MongoDB，具体如下:
+    + 高度事务性系统:例如银行或会计系统。传统的关系型数据库目前还是更适用于需要大量原子性复杂事务的应用程序。
+    + 传统的商业智能应用:针对特定问题的BI数据库会对产生高度优化的查询方式。对于此类应用，数据仓库可能是更合适的选择。
+    + 需要复杂SQL查询的问题。
+  MongoDB不仅仅是数据库，更多的使用是将MongoDB作为一个数据库中间件在实际应用中合理划分使用细节，这一点对于MongoDB应用来讲至关重要！
+* MongoDB 基本配置及常用命令
+** 安装MongoDB数据库（Windows和Linux环境）
+  打开官网：https://www.mongodb.com/download-center?jmp=nav#community
+** 安装与启动
+   + windows
+     傻瓜式安装即可，一直下一步
+   + linux
+   + 安装完成后配置环境变量
+     #+BEGIN_EXAMPLE
+      C:\Program Files\MongoDB\Server\4.0\bin
+     #+END_EXAMPLE
+  + 启动数据库
+    + 自己新建一个目录用来存放数据文件
+    + 执行下面命令， 路径为上一步创建的路径
+      #+BEGIN_EXAMPLE
+      mongod --dbpath="D:\Program Files\MongoDB"
+      2018-09-02T14:19:28.810+0800 I NETWORK  [initandlisten] waiting for connections on port 27017
+      到上面步骤就说明等待连接中, 可以新打开一个命令行窗口， 输入mongodb, 即可连接
+      #+END_EXAMPLE
+      建立完数据库之后，会在我们的 MongoDbData 文件夹下，生成一些文件夹和文件：在 journal 文件夹中会存储相应的数据文件，NoSQL 的 MongoDB，它以文件的形式，也就是说被二进制码转换过的 json 形式来存储所有的数据模型。
+    + linux 启动服务
+      sudo service mongodb start
+** 安装RoboMongo客户端
+** MongoDB常用命令
+  + 启动mongodb
+    mongo
+  + 查看现有db
+    db || show dbs
+  + 选择db，没有会新建
+    use mydb
+  + 删除db
+    db.dropDatabase()
+  +  help
+  + 创建数据库
+  + 创建集合
+  db.createCollection("collectionName", option)
+  + 查看集合
+    #+BEGIN_EXAMPLE
+    show collections
+    #+END_EXAMPLE
+  + 插入数据
+    db.t_member.insert({name:"zhaomin",age:23})
+    + 没有集合会自动创建
+  + 查询
+    #+BEGIN_EXAMPLE
+      db.t_member.find()
+      结果:
+        { "_id" : ObjectId("5b8b89f79bfffa4f4254149e"), "name" : "zhangsan" }
+        { "_id" : ObjectId("5b8b8a819bfffa4f4254149f"), "name" : "lisi", "age" : 999 }
+      db.t_member.findOne()
+    #+END_EXAMPLE
+  + 修改
+    #+BEGIN_EXAMPLE
+      db.t_member.update({name:"zhaomin"},{$set:{age:18}}, true)
+    #+END_EXAMPLE
+    第三个参数可选， 为true表示insertOrUpdate
+    + 批量修改
+      db.t_member.update({name:"zhaomin"},{$set:{name:"zhanmin11"}},false,true);
+      第四个参数表示批量更新
+    + 常用更新操作更新器使用
+      + $set:指定一个键值对，若存在就进行修改，不存在则添加
+      + $inc：只使用于数字类型，可以为指定键值对的数字类型进行加减操作：执行结果是名字叫“zhangsan”的年龄加了2
+        #+BEGIN_EXAMPLE
+          db.t_member.update({name:"zhangsan"},{$inc:{age:2}})
+        #+END_EXAMPLE
+        注: 原来如果没有age这个元素也会直接创建并设置age == 2
+      + $unset:删除指定的键
+        #+BEGIN_EXAMPLE
+          db.t_member.update({name:"zhangsan"},{$unset:{age:1}})
+        #+END_EXAMPLE
+      + $push:数组键操作：
+        + 如果存在指定的数组，则为其添加值；
+        + 如果不存在指定的数组，则创建数组键，并添加值；
+        + 如果指定的键不为数组类型，则报错；
+      + $addToSet:当指定的数组中有这个值时，不插入，反之插入
+        #+BEGIN_EXAMPLE
+          db.t_member.update({name:"zhangsan"},{$addToSet:{classes:"English"}})
+          如果没有创建，有就会在class集合中加入内容
+        #+END_EXAMPLE
+      + $pop：删除指定数组的值，当value=1删除最后一个值，当value=-1删除第一个值
+        #+BEGIN_EXAMPLE
+          db.t_member.update({name:"zhangsan"},{$pop:{classes:1}})
+        #+END_EXAMPLE
+      + $pull:删除指定数组指定的值
+        #+BEGIN_EXAMPLE
+        db.persons.update({name:"zhangsan"},{$pull:{classes:"Chinese"}})
+        #+END_EXAMPLE
+      + $:修改指定数组时，若数组有多个对象，但只想修改其中一些，则需要定位器：
+        #+BEGIN_EXAMPLE
+        db.t_member.update({"classes.type":"AA"},{$set:{"classes.$.sex":"male"}})
+        #+END_EXAMPLE
+      + $addToSet与$each结合完成批量数组更新操作
+        #+BEGIN_EXAMPLE
+          db.t_member.update({name:"zhangsan"},{$set:{classes:{$each:["chinese","art"]}}})
+        #+END_EXAMPLE
+      + runCommand函数和findAndModify函数
+        #+BEGIN_EXAMPLE
+          runCommand({
+            findAndModify:"persons",
+            query:{查询器},
+            sort:{排序},
+            update:{修改器},
+            new:true 是否返回修改后的数据
+            });
+        #+END_EXAMPLE
+      + runCommand函数可执行mongdb中的特殊函数
+      + findAndModify就是特殊函数之一，用于返回执行返回update或remove后的文档例如：
+        #+BEGIN_EXAMPLE
+        db.runCommand({
+          findAndModify:"persons",
+          query:{name:"zhangsan"},
+          update:{$set:{name:"lisi"}},
+          new:true
+          })
+        #+END_EXAMPLE
+  + 删除
+    + 删除满足条件的第一条 只删除数据 不删除索引
+      db.t_member.remove({age:1})
+    + 删除集合
+      db.t_member.drop();
+    +删除数据库
+      db.dropDatabase();
+  + 高级查询详解
+      #+BEGIN_EXAMPLE
+        db.t_member.find({},{_id:0,name:1})
+        第一个空括号表示查询全部数据，第二个括号中值为0表示不返回，值为1表示返回，默认情况下若不指定主键，主键总是会被返回.
+
+        db.persons.find({条件},{指定键});
+        比较操作符：$lt:<$lte:<=$gt:>$gte:>=$ne:!=
+      #+END_EXAMPLE
+    + 查询条件
+      #+BEGIN_EXAMPLE
+        ＃查询年龄大于等于 25 小于等于 27 的人
+        db.t_member.find({age:{$gte:25,$lte:27}},{_id:0,name:1,age:1})
+        ＃查询出所有国籍不是韩国的人的数学成绩
+        db.t_member.find({country:{$ne:"韩国"}},{_id:0,name:1,country:1})
+      #+END_EXAMPLE
+    + 包含与不包含（仅针对于数组）$in或$nin
+      #+BEGIN_EXAMPLE
+        ＃查询国籍是中国或美国的学生信息
+        db.t_member.find({country:{$in:["China","USA"]}},{_id:0,name:1:country:1})
+      #+END_EXAMPLE
+    + $or查询
+      #+BEGIN_EXAMPLE
+        ＃查询语文成绩大于 85 或者英语大于 90 的学生信息
+        db.t_member.find({$or:[{c:{$gt:85}},{e:{$gt:90}}]},{_id:0,name:1,c:1,e:1})
+        ＃把中国国籍的学生上增加新的键 sex
+        db.t_member.update({country:"China"},{$set:{sex:"m"}},false,true)
+        ＃查询出 sex 为 null 的人
+        db.t_member.find({sex:{$in:[null]}},{_id:0,name:1,sex:1})
+      #+END_EXAMPLE
+    + 正则表达式
+      #+BEGIN_EXAMPLE
+        ＃查询出名字中存在”li”的学生的信息
+        db.t_member.find({name:/li/i})
+      #+END_EXAMPLE
+    + $not的使用
+      $not和$nin的区别是$not可以用在任何地方儿$nin是用到集合上的
+      #+BEGIN_EXAMPLE
+        ＃查询出名字中不存在”li”的学生的信息
+        db.t_member.find({name:{$not:/li/i}})
+      #+END_EXAMPLE
+    + $all与index的使用
+      #+BEGIN_EXAMPLE
+        ＃查询喜欢看 MONGOD 和 JS 的学生
+        db.t_member.find({books:{$all:["JS","MONGODB"]}},{_id:0,name:1})
+        ＃查询第二本书是 JAVA 的学习信息
+        db.t_member.find({"books.1":"JAVA"},{_id:0,name:1,books:1})
+      #+END_EXAMPLE
+    + $size的使用，不能与比较查询符同时使用
+      #+BEGIN_EXAMPLE
+        ＃查询出喜欢的书籍数量是 4 本的学生
+        db.t_member.find({books:{$size:4}},{_id:0,name:1})
+      #+END_EXAMPLE
+    + 查询出喜欢的书籍数量大于4本的学生本的学生
+      + 增加size键
+        #+BEGIN_EXAMPLE
+          db.t_member.update({},{$set:{size:4}},false,true)
+        #+END_EXAMPLE
+      + 添加书籍,同时更新size
+      #+BEGIN_EXAMPLE
+        db.t_member.update({name:"jim"},{$push:{books:"ORACL"},$inc:{size:1}})
+      #+END_EXAMPLE
+      + 查询大于3本的
+      #+BEGIN_EXAMPLE
+        db.t_member.find({size:{$gt:4}},{_id:0,name:1,size:1})
+      #+END_EXAMPLE
+    + $slice操作符返回文档中指定数组的内部值
+      #+BEGIN_EXAMPLE
+      ＃查询出 Jim 书架中第 2~4 本书
+      db.t_member.find({name:"zhangsan"},{_id:0,name:1,books:{$slice:[1,3]}})
+      ＃查询出最后一本书
+      db.t_member.find({name:"zhangsan"},{_id:0,name:1,books:{$slice:-1}})
+      #+END_EXAMPLE
+    + 文档查询
+      查询出在K上过学且成绩为A的学生
+      1）绝对查询，顺序和键个数要完全符合
+      #+BEGIN_EXAMPLE
+      db.t_member.find({school:{school:"K","score":"A"}},{_id:0,name:1})
+      #+END_EXAMPLE
+      2）对象方式,但是会出错，多个条件可能会去多个对象查询
+      #+BEGIN_EXAMPLE
+      db.t_member.find({"school.school":"K","school.score":"A"},{_id:0,name:1})
+      #+END_EXAMPLE
+      正确做法单条条件组查询$elemMatch
+      #+BEGIN_EXAMPLE
+      db.t_member.find({school:{$elemMatch:{school:"K",score:"A"}},{_id:0,name:1})
+    db.t_member.find({age:{$gt:22},books:"C++",school:"K"},{_id:0,name:1,age:1,books:1,school:1})
+      #+END_EXAMPLE
+    + 分页与排序
+      + limit返回指定条数  查询出persons文档中前5条数据：
+      #+BEGIN_EXAMPLE
+        db.t_member.find({},{_id:0,name:1}).limit(5)
+      #+END_EXAMPLE
+      + 指定数据跨度 查询出persons文档中第3条数据后的5条数据
+      #+BEGIN_EXAMPLE
+      db.t_member.find({},{_id:0,name:1}).limit(5).skip(3)
+      #+END_EXAMPLE
+      + sort排序1为正序，-1为倒序
+      #+BEGIN_EXAMPLE
+      db.t_member.find({},{_id:0,name:1,age:1}).limit(5).skip(3).sort({age:1})
+      注意:mongodb的key可以存不同类型的数据排序就也有优先级
+      最小值->null->数字->字符串->对象/文档->数组->二进制->对象ID->布尔->日期->时间戳->正则
+      ->最大值
+      #+END_EXAMPLE
+    + 游标
+      + 利用游标遍历查询数据
+        #+BEGIN_EXAMPLE
+        var persons = db.persons.find();
+        while(persons.hasNext()){
+        obj = persons.next();
+        print(obj.name)
+        }
+        #+END_EXAMPLE
+      + 游标几个销毁条件
+        + 客户端发来信息叫他销毁
+        + 游标迭代完毕
+        + 默认游标超过10分钟没用也会别清除
+    + 查询快照
+      #+BEGIN_EXAMPLE
+      ＃用快照则需要用高级查询
+      db.persons.find({$query:{name:”Jim”},$snapshot:true})
+      #+END_EXAMPLE
+      快照后就会针对不变的集合进行游标运动了,看看使用方法.
+      + 高级查询选项
+        + $query 
+        + $orderby
+        + $maxsan：integer最多扫描的文档数
+        + $min：doc查询开始
+        + $max：doc查询结束
+        + $hint：doc使用哪个索引
+        + $explain:boolean统计
+        + $snapshot:boolean一致快照
+    + 其他
+      + 查询点(70,180)最近的3个点
+        #+BEGIN_EXAMPLE
+          db.map.find({gis:{$near:[70,180]}},{_id:0,gis:1}).limit(3)
+        #+END_EXAMPLE
+      + 查询以点(50,50)和点(190,190)为对角线的正方形中的所有的点
+        #+BEGIN_EXAMPLE
+          db.map.find({gis:{$within:{$box:[[50,50],[190,190]]}}},{_id:0,gis:1})
+        #+END_EXAMPLE
+      + 查询出以圆心为(56,80)半径为50规则下的圆心面积中的点
+        #+BEGIN_EXAMPLE
+          db.map.find({gis:{$with:{$center:[[56,80],50]}}},{_id:0,gis:1})
+        #+END_EXAMPLE
+
+    + Count+Distinct+Group 
+      + count查询结果条数
+        #+BEGIN_EXAMPLE
+          db.persons.find({country:"USA"}).count()
+        #+END_EXAMPLE
+      + Distinct去重
+        请查询出persons中一共有多少个国家分别是什么
+        #+BEGIN_EXAMPLE
+          ＃key 表示去重的键
+          db.runCommand({distinct:"persons",key:"country"}).values
+        #+END_EXAMPLE
+      + group分组
+        #+BEGIN_EXAMPLE
+        db.runCommand({ group:{
+          ns:"集合的名字",
+          key:"分组键对象",
+          initial:"初始化累加器",
+          $reduce:"分解器",
+          condition:"条件",
+          finalize:"组完成器"
+          }})
+          分组首先会按照key进行分组,每组的 每一个文档全要执行$reduce的方法,他接收2个参数一个是组内本条记录,一个是累加器数据.
+        #+END_EXAMPLE
+        + 请查出persons中每个国家学生数学成绩最好的学生信息(必须在90以上)
+          #+BEGIN_EXAMPLE
+          db.runCommand({
+            group:{
+            ns:"persons",
+            key:{"country":true},
+            initial:{m:0},
+            $reduce:function(doc,prev){
+            if(doc.m>prev.m){
+            prev.m = doc.m;
+            prev.name = doc.m;
+            prev.country = doc.country;
+            }
+            },
+            咕泡出品，必属精品 www.gupaoedu.com
+            22
+            condition:{m:{$gt:90}},
+            finalize:function(prev){
+            prev.m = prev.name+" comes from "+prev.country+" ,Math score is
+            "+prev.m;
+            }
+            }
+            })
+          #+END_EXAMPLE
+      + 函数格式化分组键
+        如果集合中出现键Counrty和counTry同时存在
+        #+BEGIN_EXAMPLE
+        $keyf:function(doc){
+          if(doc.country){
+          return {country:doc.country}
+          }
+          return {country:doc.counTry}
+          }
+        #+END_EXAMPLE
+    + 常用命令举例
+      + 查询服务器版本号和主机操作系统
+        #+BEGIN_EXAMPLE
+        db.runCommand({buildInfo:1})
+        #+END_EXAMPLE
+      + 查询执行集合的详细信息,大小,空间,索引等
+        #+BEGIN_EXAMPLE
+        db.runCommand({collStats:"persons"})
+        #+END_EXAMPLE
+      + 查看操作本集合最后一次错误信息
+        #+BEGIN_EXAMPLE
+        db.runCommand({getLastError:"persons"})
+        #+END_EXAMPLE
+    + 固定集合
+      + 特性
+      固定集合默认是没有索引的就算是_id也是没有索引的
+      由于不需分配新的空间他的插入速度是非常快的固定集合的顺是确定的导致查询速度是非常快的最适合就是日志管理
+      + 创建固定集合
+        + 创建一个新的固定集合要求大小是100个字节,可以存储文档10个
+          #+BEGIN_EXAMPLE
+          db.createCollection("mycoll",{size:100,capped:true,max:10})
+          #+END_EXAMPLE
+        + 把一个普通集合转换成固定集合
+          #+BEGIN_EXAMPLE
+          db.runCommand({convertToCapped:"persons",size:1000})
+          #+END_EXAMPLE
+      + 对固定集合反向排序，默认情况是插入的顺序排序
+        #+BEGIN_EXAMPLE
+          db.mycoll.find().sort({$natural:-1})
+        #+END_EXAMPLE
+* mongodb 高级命令
+** 用户管理
+*** 添加用户
+    + 为user-demo添加zhangsan用户
+    #+BEGIN_EXAMPLE
+      use testdb
+      db.createUser({user:"zhangsan",pwd:"123",roles:[{ role:"dbAdmin",db:"user-demo"}]})
+    #+END_EXAMPLE
+    + 具体角色有
+    read：允许用户读取指定数据库readWrite：允许用户读写指定数据库
+    dbAdmin：允许用户在指定数据库中执行管理函数，如索引创建、删除，查看统计或访问system.profile userAdmin：允许用户向system.users集合写入，可以找指定数据库里创建、删除和管理用户
+    clusterAdmin：只在admin数据库中可用，赋予用户所有分片和复制集相关函数的管理权限。
+    readAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的读权限
+    readWriteAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的读写权限
+    userAdminAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的userAdmin权限
+    dbAdminAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的dbAdmin权限。
+    root：只在admin数据库中可用。超级账号，超级权限
+*** 查看所有用户
+    #+BEGIN_EXAMPLE
+      db.system.users.find()
+    #+END_EXAMPLE
+    和用户管理相关的操作基本都要在admin数据库下运行，要先use admin;
+    如果在某个单一的数据库下，那只能对当前数据库的权限进行操
+*** 用户删除操作
+    #+BEGIN_EXAMPLE
+    db.system.users.remove({user:"zhangsan"});
+    #+END_EXAMPLE
+*** 查看当前用户权限
+    #+BEGIN_EXAMPLE
+      db.runCommand({usersInfo:"tom",showPrivileges:true})
+    #+END_EXAMPLE
+*** 修改密码
+    #+BEGIN_EXAMPLE
+      db.changeUserPassword("zhangsan", "123456")
+    #+END_EXAMPLE
+*** 启用用户
+    #+BEGIN_EXAMPLE
+      db.auth("zhangsan","123")
+    #+END_EXAMPLE
+*** 安全检查--auth
+    非testdb是不能操作数据库的,启用自己的用户才能访问
+    非admin数据库的用户不能使用数据库命令，admin数据库中的数据经过认证为管理员用户
+** MongoDB高可用方案实战演
+  详解RouteServer（路由服务器）、
+  ConfigServer（配置服务器）、ReplicaSet（副本集）、
+  Shard（切片）、
+  Chunk（分块）MongDB启动与关闭
+*** 命令行启动
+    #+BEGIN_EXAMPLE
+    ./mongod --fork --dbpath=/opt/mongodb/data
+    #+END_EXAMPLE
+*** 配置文件启动
+    #+BEGIN_EXAMPLE
+    ./mongod -f mongodb.cfg
+    #+END_EXAMPLE
+    mongoDB基本配置/opt/mongodb/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/data
+      logpath=/opt/mongodb/logs/mongodb.log
+      logappend=true
+      fork=true
+      bind_ip=192.168.209.128
+      port=27017
+    #+END_EXAMPLE
+    环境变量配置
+    Mongodb的三种集群方式的搭建：Master-Slaver/ReplicaSet/Sharding。
+*** MongoDB主从搭建
+    这个是最简答的集群搭建，不过准确说也不能算是集群，只能说是主备。并且官方已经不推荐这种方式， 所以在这里只是简单的介绍下吧，搭建方式也相对简单。
+    主机配置/opt/mongodb/master-slave/master/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/master-slave/master/data
+      logpath=/opt/mongodb/master-slave/master/logs/mongodb.log
+      logappend=true
+      fork=true
+      bind_ip=192.168.209.128
+      port=27001
+      master=true
+      source=192.168.209.128:27002
+    #+END_EXAMPLE
+    从机配置/opt/mongodb/master-slave/slave/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/master-slave/slave/data
+      logpath=/opt/mongodb/master-slave/slave/logs/mongodb.log
+      logappend=true
+      fork=true
+      bind_ip=192.168.209.128
+      port=27002
+      slave=true
+      source=192.168.209.128:27001
+    #+END_EXAMPLE
+    启动服务
+    #+BEGIN_EXAMPLE
+      cd /opt/mongodb/master-slave/master/
+      mongod --config mongodb.cfg #
+      cd /opt/mongodb/master-slave/slave/
+      mongod --config mongodb.cfg #
+    #+END_EXAMPLE
+    连接测试
+    #+BEGIN_EXAMPLE
+      mongo --host 192.168.209.128 --port 27001
+      mongo --host 192.168.209.128 --port 27002
+    #+END_EXAMPLE
+    基本上只要在主节点和备节点上分别执行这两条命令，Master-Slaver就算搭建完成了。我没有试过主节点挂掉后备节点是否能变成主节点，不过既然已经不推荐了，大家就没必要去使用了。
+*** MongoDB副本集
+      中文翻译叫做副本集，不过我并不喜欢把英文翻译成中文，总是感觉怪怪的。其实简单来说就是集群当中包含了多份数据，保证主节点挂掉了，备节点能继续提供数据服务，提供的前提就是数据需要和主节点一致.
+    Mongodb(M)表示主节点，Mongodb(S)表示备节点，Mongodb(A)表示仲裁节点。主备节点存储数据，仲裁节点不存储数据。客户端同时连接主节点与备节点，不连接仲裁节点。
+    默认设置下，主节点提供所有增删查改服务，备节点不提供任何服务。但是可以通过设置使备节点提供查询服务，这样就可以减少主节点的压力，当客户端进行数据查询时，请求自动转到备节点上。这个设置叫做ReadPreferenceModes，同时Java客户端提供了简单的配置方式，可以不必直接对数据库进行操作。
+    仲裁节点是一种特殊的节点，它本身并不存储数据，主要的作用是决定哪一个备节点在主节点挂掉之后提升为主节点，所以客户端不需要连接此节点。这里虽然只有一个备节点，但是仍然需要一个仲裁节点来提升备节点级别。我开始也不相信必须要有仲裁节点，但是自己也试过没仲裁节点的话，主节点挂了备节点还是备节点，所以咱们还是需要它的。
+    介绍完了集群方案，那么现在就开始搭建了。
+    + 建立数据文件夹
+      一般情况下不会把数据目录建立在mongodb的解压目录下，不过这里方便起见，就建在mongodb解压目录下吧。
+      #+BEGIN_EXAMPLE
+        mkdir -p /opt/mongodb/replset/master
+        mkdir -p /opt/mongodb/replset/slaver
+        mkdir -p /opt/mongodb/replset/arbiter
+      #+END_EXAMPLE
+    + 建立配置文件
+    由于配置比较多，所以我们将配置写到文件里。
+    vi/opt/mongodb/replset/master/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/replset/master/data
+      logpath=/opt/mongodb/replset/master/logs/mongodb.log
+      logappend=true
+      replSet=shard002
+      bind_ip=192.168.209.128
+      port=27017
+      fork=true
+    #+END_EXAMPLE
+    vi/opt/mongodb/replset/slave/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/replset/slave/data
+      logpath=/opt/mongodb/replset/slave/logs/mongodb.log
+      logappend=true
+      replSet=shard002
+      bind_ip=192.168.209.129
+      port=27017
+      fork=true
+    #+END_EXAMPLE
+    vi/opt/mongodb/replset/arbiter/mongodb.cfg
+    #+BEGIN_EXAMPLE
+      dbpath=/opt/mongodb/replset/arbiter/data
+      logpath=/opt/mongodb/replset/arbiter/logs/mongodb.log
+      logappend=true
+      replSet=shard002
+      bind_ip=192.168.209.130
+      port=27017
+      fork=true
+    #+END_EXAMPLE
+    参数解释：
+    dbpath：数据存放目录
+    logpath：日志存放路径logappend：以追加的方式记录日志replSet：replicaset的名字
+    bind_ip：mongodb所绑定的ip地址
+    port：mongodb进程所使用的端口号，默认为27017
+    fork：以后台方式运行进程
+    + 分发到集群下的其他机器
+      #+BEGIN_EXAMPLE
+        # 192.168.209.129
+        scp -r /opt/mongodb/replset/slave
+        root@192.168.209.129:/opt/mongodb/replset
+        # 192.168.209.130
+        scp -r /opt/mongodb/replset/arbiter
+        root@192.168.209.130:/opt/mongodb/replset
+      #+END_EXAMPLE
+    + 启动mongodb
+      进入每个mongodb节点的bin目录下
+      #+BEGIN_EXAMPLE
+        # 192.168.209.128 
+        monood -f /opt/mongodb/replset/master/mongodb.cfg
+        # 192.168.209.129 
+        mongod -f /opt/mongodb/replset/slave/mongodb.cfg
+        # 192.168.209.130 
+        mongod -f /opt/mongodb/replset/arbiter/mongodb.cfg
+      #+END_EXAMPLE
+      注意配置文件的路径一定要保证正确，可以是相对路径也可以是绝对路径。
+    + 配置主，备，仲裁节点
+    可以通过客户端连接mongodb，也可以直接在三个节点中选择一个连接mongodb。
+    #+BEGIN_EXAMPLE
+      #ip  port 
+        mongo 192.168.209.128:27017
+        use admin
+        cfg={_id:"shard002",members:[{_id:0,host:'192.168.209.128:27017',pri
+        ority:9},{_id:1,host:'192.168.209.129:27017',priority:1},{_id:2,host
+        :'192.168.209.130:27017',arbiterOnly:true}]};
+        #
+        rs.initiate(cfg)
+    #+END_EXAMPLE
+      注意：cfg是相当于设置一个变量，可以是任意的名字，当然最好不要是mongodb的关键字，conf，
+      config都可以。最外层的_id表示replicaset的名字，members里包含的是所有节点的地址以及优先级。优先级最高的即成为主节点，即这里的192.168.209.128:27017。特别注意的是，对于仲裁节点，需要有个特别的配置——arbiterOnly:true。这个千万不能少了，不然主备模式就不能生效。
+      配置的生效时间根据不同的机器配置会有长有短，配置不错的话基本上十几秒内就能生效，有的配置需要一两分钟。如果生效了，执行rs.status()命令会看到如下信息：
+      如果配置正在生效，其中会包含如下信息：
+  同时可以查看对应节点的日志，发现正在等待别的节点生效或者正在分配数据文件。
+  现在基本上已经完成了集群的所有搭建工作。至于测试工作，可以留给大家自己试试。一个是往主节点插入数据，能从备节点查到之前插入的数据（查询备节点可能会遇到某个问题，可以自己去网上查查看）。二是停掉主节点，备节点能变成主节点提供服务。三是恢复主节点，备节点也能恢复其备的角色，而不是继续充当主的角色。二和三都可以通过rs.status()命令实时查看集群的变化。
+*** MongoDB数据分片
+    和ReplicaSet类似，都需要一个仲裁节点，但是Sharding还需要配置节点和路由节点。就三种集群搭建方式来说，这种是最复杂的。
+  + 配置数据节点
+    #+BEGIN_EXAMPLE
+    mkdir -p /opt/mongodb/shard/replset/replica1/data
+    mkdir -p /opt/mongodb/shard/replset/replica1/logs
+    mkdir -p /opt/mongodb/shard/replset/replica2/data
+    mkdir -p /opt/mongodb/shard/replset/replica2/logs
+    mkdir -p /opt/mongodb/shard/replset/replica3/data
+    mkdir -p /opt/mongodb/shard/replset/replica3/logs
+    #+END_EXAMPLE
+    + vi/opt/mongodb/shard/replset/replica1/mongodb.cfg
+    #+BEGIN_EXAMPLE
+    dbpath=/opt/mongodb/shard/replset/replica1/data
+    logpath=/opt/mongodb/shard/replset/replica1/logs/mongodb.log
+    logappend=true
+    fork=true
+    bind_ip=192.168.209.128
+    port=27001
+    replSet=shard001
+    shardsvr=true
+    #+END_EXAMPLE
+    + vi/opt/mongodb/shard/replset/replica2/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        dbpath=/opt/mongodb/shard/replset/replica2/data
+        logpath=/opt/mongodb/shard/replset/replica2/logs/mongodb.log
+        logappend=true
+        fork=true
+        bind_ip=192.168.209.128
+        port=27002
+        replSet=shard001
+        shardsvr=true
+      #+END_EXAMPLE
+    + vi/opt/mongodb/shard/replset/replica3/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        dbpath=/opt/mongodb/shard/replset/replica3/data
+        logpath=/opt/mongodb/shard/replset/replica3/logs/mongodb.log
+        logappend=true
+        fork=true
+        bind_ip=192.168.209.128
+        port=27003
+        replSet=shard001
+        shardsvr=true
+      #+END_EXAMPLE
+  + 启动数据节点
+    #+BEGIN_EXAMPLE
+      mongod -f /opt/mongodb/shard/replset/replica1/mongodb.cfg
+      #192.168.209.128:27001
+      mongod -f /opt/mongodb/shard/replset/replica2/mongodb.cfg
+      #192.168.209.128:27002
+      mongod -f /opt/mongodb/shard/replset/replica3/mongodb.cfg
+      #192.168.209.128:27003
+    #+END_EXAMPLE
+  + 使数据节点集群生效
+    #+BEGIN_EXAMPLE
+      mongo 192.168.209.128:27001
+      #ip  port 
+      cfg={_id:"shard001",members:[{_id:0,host:'192.168.209.128:27001'},{_i
+      d:1,host:'192.168.209.128:27002'},{_id:2,host:'192.168.209.128:27003'
+      }]};
+      rs.initiate(cfg) #
+    #+END_EXAMPLE
+  + 配置configsvr
+    #+BEGIN_EXAMPLE
+      mkdir -p /opt/mongodb/shard/configsvr/config1/data
+      mkdir -p /opt/mongodb/shard/configsvr/config1/logs
+      mkdir -p /opt/mongodb/shard/configsvr/config2/data
+      mkdir -p /opt/mongodb/shard/configsvr/config2/logs
+      mkdir -p /opt/mongodb/shard/configsvr/config3/data
+      mkdir -p /opt/mongodb/shard/configsvr/config3/logs
+    #+END_EXAMPLE
+    + /opt/mongodb/shard/configsvr/config1/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        dbpath=/opt/mongodb/shard/configsvr/config1/data
+        configsvr=true
+        port=28001
+        fork=true
+        logpath=/opt/mongodb/shard/configsvr/config1/logs/mongodb.log
+        replSet=configrs
+        logappend=true
+        bind_ip=192.168.209.128
+      #+END_EXAMPLE
+    + /opt/mongodb/shard/configsvr/config2/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        dbpath=/opt/mongodb/shard/configsvr/config2/data
+        configsvr=true
+        port=28002
+        fork=true
+        logpath=/opt/mongodb/shard/configsvr/config2/logs/mongodb.log
+        replSet=configrs
+        logappend=true
+        bind_ip=192.168.209.128
+      #+END_EXAMPLE
+    + /opt/mongodb/shard/configsvr/config3/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        dbpath=/opt/mongodb/shard/configsvr/config3/data
+        configsvr=true
+        port=28003
+        fork=true
+        logpath=/opt/mongodb/shard/configsvr/config3/logs/mongodb.log
+        replSet=configrs
+        logappend=true
+        bind_ip=192.168.209.128
+      #+END_EXAMPLE
+    + 启动configsvr节点
+      #+BEGIN_EXAMPLE
+        mongod -f /opt/mongodb/shard/configsvr/config1/mongodb.cfg
+        #192.168.209.128:28001
+        mongod -f /opt/mongodb/shard/configsvr/config2/mongodb.cfg
+        #192.168.209.128:28002
+        mongod -f /opt/mongodb/shard/configsvr/config3/mongodb.cfg
+        #192.168.209.128:28003
+      #+END_EXAMPLE
+    + 使configsvr节点集群生效
+      #+BEGIN_EXAMPLE
+        mongo 192.168.209.128:28001
+        #ip  port 
+        use admin # admin
+        cfg={_id:"configrs",members:[{_id:0,host:'192.168.209.128:28001'},{_i
+        d:1,host:'192.168.209.128:28002'},{_id:2,host:'192.168.209.128:28003'
+        }]};
+        rs.initiate(cfg) #
+      #+END_EXAMPLE
+    + 配置路由节点
+      #+BEGIN_EXAMPLE
+        mkdir -p /opt/mongodb/shard/routesvr/logs
+        #: 路由节点不需要data目录
+      #+END_EXAMPLE
+      + vi/opt/mongodb/shard/routesvr/mongodb.cfg
+      #+BEGIN_EXAMPLE
+        configdb=configrs/192.168.209.128:28001,192.168.209.128:28002,192.168.209.128:28003
+        port=30000
+        fork=true
+        logpath=/opt/mongodb/shard/routesvr/logs/mongodb.log
+        logappend=true
+        bind_ip=192.168.209.128
+      #+END_EXAMPLE
+    + 启动路由节点
+      #+BEGIN_EXAMPLE
+      ./mongos -f /opt/mongodb/shard/routesvr/mongodb.cfg
+      #192.168.209.128:30000
+      #+END_EXAMPLE
+      这里我们没有用配置文件的方式启动，其中的参数意义大家应该都明白。一般来说一个数据节点对应一个配置节点，仲裁节点则不需要对应的配置节点。注意在启动路由节点时，要将配置节点地址写入到启动命令里。
+    + 配置ReplicaSet
+      这里可能会有点奇怪为什么Sharding会需要配置ReplicaSet。其实想想也能明白，多个节点的数据肯定是相关联的，如果不配一个ReplicaSet，怎么标识是同一个集群的呢。这也是人家mongodb的规定，咱们还是遵守吧。配置方式和之前所说的一样，定一个cfg，然后初始化配置。
+    + 配置Sharding
+      #+BEGIN_EXAMPLE
+      mongo 192.168.209.128:30000 #
+      sh.addShard("shard001/192.168.209.128:27001");
+      sh.addShard("shard002/192.168.209.128:27017");
+      #shard001shard002  replica set   shard 
+      set 
+      use testdb
+      sh.enableSharding("testdb") #testdb is database name
+      sh.shardCollection("testdb.testcon",{"name":"hashed"})
+      db.collection.status()
+      #+END_EXAMPLE
+      第一个命令很容易理解，第二个命令是对需要进行Sharding的数据库进行配置，第三个命令是对需要进行Sharding的Collection进行配置，这里的testcon即为Collection的名字。另外还有个key，这个是比较关键的东西，对于查询效率会有很大的影响。
+      到这里Sharding也已经搭建完成了，以上只是最简单的搭建方式，其中某些配置仍然使用的是默认配置。如果设置不当，会导致效率异常低下，所以建议大家多看看官方文档再进行默认配置的修改。
+      以上三种集群搭建方式首选ReplicaSet，只有真的是大数据，Sharding才能显现威力，毕竟备节点同步数据是需要时间的。Sharding可以将多片数据集中到路由节点上进行一些对比，然后将数据返回给客户端，但是效率还是比较低的说。
+      我自己有测试过，不过具体的机器配置已经不记得了。ReplicaSet的ips在数据达到1400W条时基本能达到1000左右，而Sharding在300W时已经下降到500IPS，两者的单位数据大小大概是10kb。大家在应用的时候还是多多做下性能测试，毕竟不像Redis有benchmark。
+** MongoDB索引
+*** 索引
+      + 创建索引
+        #+BEGIN_EXAMPLE
+          db.books.ensureIndex{{number:1}}
+        #+END_EXAMPLE
+      + 创建索引同时指定索引的名字
+        #+BEGIN_EXAMPLE
+        db.books.ensureIndex({number:1},{name:"book_"})
+        #+END_EXAMPLE
+      + 索引使用需要注意的地方
+        + 创建索引的时候注意1是正序创建索引-1是倒序创建索引
+        + 索引的创建在提高查询性能的同事会影响插入的性能 对于经常查询少插入的文档可以考虑用索引
+        + 符合索引要注意索引的先后顺序
+        + 每个键全建立索引不一定就能提高性能呢 索引不是万能的
+        + 在做排序工作的时候如果是超大数据量也可以考虑加上索引 用来提高排序的性能
+      + 唯一索引
+        解决文档books不能插入重复的数值
+      + 剔除重复值
+        #+BEGIN_EXAMPLE
+          默认插入相同的name会报错
+          db.books.ensureIndex({name:-1},{unique:true})
+          需要使用下面方式剔除重复
+          db.books.ensureIndex({name:1},{name:"book_",unique:true,dropDups:true})
+        #+END_EXAMPLE
+      如果建议唯一索引之前已经有重复数值如何处理
+      + 后台执行创建索引
+        为了解决创建索引锁表的问题，在不影响查询功能，可以在后台运行
+        #+BEGIN_EXAMPLE
+        db.books.ensureIndex({name:1},{background:true})
+        #+END_EXAMPLE
+      + 强制查询已经建立好的索引
+        #+BEGIN_EXAMPLE
+          db.books.find({name:"323book"}).hint({name:1})
+        #+END_EXAMPLE
+      + 在shell查看数据库已经建立的索引
+        #+BEGIN_EXAMPLE
+          db.system.indexes.find()
+          db.system.namespaces.find()
+        #+END_EXAMPLE
+      + 查询索引信息和查询状态信息
+        #+BEGIN_EXAMPLE
+          db.books.find({name:"123book"}).explain()
+        #+END_EXAMPLE
+      + 批量和精确删除索引
+        #+BEGIN_EXAMPLE
+          db.runCommand({dropIndexes : "books" , index:"name_-1"})
+          db.runCommand({dropIndexes : "books" , index:"*"})
+        #+END_EXAMPLE
+*** 二维索引建立二维索引
+    #+BEGIN_EXAMPLE
+      默认是[-108,108]的范围
+      db.map.ensureIndex({gis:"2d"},{min:-1,max:201})
+    #+END_EXAMPLE
+** MongoDB数据转存及恢复
+*** 导出数据(中断其他操作)
+    使用mongoexport命令行
+    -d指明使用的库
+    -c指明要导出的表
+    -o指明要导出的文件名
+    -csv指定导出的csv格式
+    -q过滤导出
+    --type<json|csv|tsv>
+    把数据好testdb中的persons导出
+    #+BEGIN_EXAMPLE
+      mongoexport -d testdb -c persons -o D:/persons.json
+    #+END_EXAMPLE
+    导出其他主机数据库的文档
+    #+BEGIN_EXAMPLE
+      mongoexport --host 192.168.0.16 --port 37017
+    #+END_EXAMPLE
+*** 导入数据(中断其他操作)
+*** 运行时备份mongodump.exe
+    API:http://cn.docs.mongodb.org/manual/reference/mongodump
+    #+BEGIN_EXAMPLE
+    mongodump --host 127.0.0.1:27017 -d testdb -o d:/testdb
+    #+END_EXAMPLE
+*** 运行时恢复mongorestore.exe
+    API:http://cn.docs.mongodb.org/manual/reference/mongorestore
+    恢复数据库
+    #+BEGIN_EXAMPLE
+    db.dropDatabase()
+    mongorestore --host 127.0.0.1:27017 -d testdb -directoryperdb
+    d:/testdb/testdb
+    #+END_EXAMPLE
+*** mongoDB是文件数据库这其实就可以用拷贝文件的方式进行备份
+*** 上锁和解锁
+    #+BEGIN_EXAMPLE
+    b.runCommand({fsync:1,lock:1}) 
+    db.currentOp() 
+    #+END_EXAMPLE
+*** 数据修复
+    当停电等不可逆转灾难来临的时候,由于mongodb的存储结构导致会产生垃圾数据,在数据恢复以后这垃圾数据依然存在,这是数据库提供一个自我修复的能力.使用起来很简单
+    #+BEGIN_EXAMPLE
+    db.repairDatabase()
+    #+END_EXAMPLE

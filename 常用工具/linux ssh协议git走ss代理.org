@@ -1,0 +1,17 @@
++ 各种屏蔽横行的情况下， 出现不能直接访问到github， 或者gitlab之类网站, 提示 ssh_exchange_identification: read: Connection reset by peer, 或者其他类似问题, 这种情况需啊需要用到代理访问
++ 代理访问方式很多， 根据git使用不同的协议也会有不同的配置方式， 具体可参考 https://segmentfault.com/q/1010000000118837
++ 下面只对ssh协议下的git命令进行代理访问
+  1. 首先需要有代理:(代理可以直接用ssh， 或者ss(推荐: 稳定不掉线, 防监控)), 具体怎么搞代理服务器，或者买号，不在讨论范围
+  2. 开启ss代理，本地 127.0.0.1：1080（测试： 浏览器配置代理后，访问下google）
+  3. 下载一个工具 wget https://raw.githubusercontent.com/bronzeee/ssh_connect/master/connect.c 到指定目录(我的再~/applications)
+      + 执行命令 gcc -o connect connect.c  编译成可执行文件
+      + 我测试使用过nc 工具， 没成功
+  4. 创建或打开～/.ssh/config文件，加入以下内容
+      #+BEGIN_EXAMPLE
+      Host git.gupaoedu.com
+          Hostname git.gupaoedu.com
+          User git
+          ProxyCommand ~/applications/connect -S 127.0.0.1:1080 %h %p
+      #+END_EXAMPLE
+  5. glt clone 'xxxxxx'
+  6. 参考 https://kyonli.com/p/142
