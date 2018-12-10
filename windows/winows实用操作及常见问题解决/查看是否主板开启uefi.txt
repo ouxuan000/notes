@@ -1,0 +1,1 @@
+ C:\Windows\System32\WindowsPowerShell\v1.0\powershell，管理员运行，键入Confirm-SecureBootUEFI;如果出现 False—你的UEFI已经关闭 True—你的系统装有了UEFI，并且你需要自己去关闭 Cmdlet not supported on this platform—没有secure boot，不用管了。
