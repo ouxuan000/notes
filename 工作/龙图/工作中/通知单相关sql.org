@@ -1,5 +1,5 @@
-####  查看重复生成通知单的数据
-```
+*  查看重复生成通知单的数据
+#+BEGIN_SRC sql
 --通知单重复 明细和vchtypeid都在重复组合里
 SELECT T.GUID AS "业务数据guid",
        T2.NAME AS "单据名称",
@@ -42,9 +42,9 @@ SELECT T.GUID AS "业务数据guid",
                         GROUP BY T2.GUID, T3.SUBID
                        HAVING COUNT(1) > 1)
  ORDER BY t4.code, t.amt;
-```
-##### 通知单是否生成了到账通知书
-```
+#+END_SRC
+* 通知单是否生成了到账通知书
+#+BEGIN_SRC sql
 SELECT GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_SETPARM('', '1500', '2017', '')
   FROM DUAL;
 -- 通知单是否生成了到账通知书
@@ -62,10 +62,9 @@ SELECT T.GUID
           FROM BANK_T_AUTHORIZEINNOTICESUB T
          WHERE T.MAINGUID IN
                (SELECT T.GUID FROM BANK_T_AUTHORIZEINNOTICEMAIN T))
-```
-##### 俩比通知单明细guid是否完全相同
-> 也可以将多个明细都查出来，整体比较是否相同
-```
+#+END_SRC
+* 俩比通知单明细guid是否完全相同,也可以将多个明细都查出来，整体比较是否相同
+#+BEGIN_SRC sql
 --比较俩比通知单明细是否完全相同
 SELECT SUBID, COUNT(1)
   FROM (SELECT T.SUBID
@@ -79,15 +78,14 @@ SELECT SUBID, COUNT(1)
                (SELECT GUID FROM PAY_T_ORDER T WHERE T.BILLCODE = ''))
  GROUP BY SUBID
 HAVING COUNT(*) < 2;
-```
-##### 取基数列或者偶数列
+#+END_SRC
+* 取基数列或者偶数列
+#+BEGIN_SRC sql
 > 这里竟然出现了多次查询取数不一致的情况，慎用，可以直接通过vim进行基偶取数
-```
 SELECT * FROM (SELECT MOD(ROWNUM, 2) A, T.* FROM TABLENAME) WHERE A = 0;
-```
-
-##### 功能分类科目为2130331的额度都有哪些单位有
-```
+#+END_SRC
+* 功能分类科目为2130331的额度都有哪些单位有
+#+BEGIN_SRC sql
 SELECT
   T4.CODE,
   T4.NAME
@@ -110,10 +108,9 @@ AND EXISTS
     WHERE
       T.GUID = T3.SUBID
   );
-```
-
-##### 没有生成授权额度汇总清算通知单的计划
-```
+#+END_SRC
+* 没有生成授权额度汇总清算通知单的计划
+#+BEGIN_SRC sql
 SELECT
   GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_SETPARM('', '1500', '2017', '')
 FROM
@@ -165,9 +162,9 @@ AND NVL(PAYTYPEGUID,'nl') IN
   )
 ORDER BY
   t.TIMESTAMPS DESC; 
-```
-##### 通知单单号跳号
-``` 
+#+END_SRC
+* 通知单单号跳号
+#+BEGIN_SRC sql
   SELECT
   *
 FROM
@@ -188,9 +185,9 @@ FROM
   )
 WHERE
   GAP_START IS NOT NULL;
-```
-##### 通知单明细笔数
-```
+#+END_SRC
+* 通知单明细笔数
+#+BEGIN_SRC sql
 SELECT
   COUNT(1)
 FROM
@@ -207,9 +204,9 @@ WHERE
   )
 GROUP BY
   T.ORDERID;
-```
-#####  通知单的金额不等于明细金额和
-```
+#+END_SRC
+* 通知单的金额不等于明细金额和
+#+BEGIN_SRC sql
 SELECT
   *
 FROM
@@ -232,4 +229,4 @@ WHERE
           t1.guid = t2.orderid
       )
   );
-```
+#+END_SRC

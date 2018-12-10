@@ -1,14 +1,18 @@
 1. 创建用户，名字自己改
->create user fasp_20151118 identified by 1 default tablespace EFMIS;
->create user efmis_20151118 identified by 1 default tablespace EFMIS;
+  #+BEGIN_EXAMPLE
+    create user fasp_20151118 identified by 1 default tablespace EFMIS;
+    create user efmis_20151118 identified by 1 default tablespace EFMIS;
+  #+END_EXAMPLE
 2. 导入数据，在命令行中执行
->impdp system/orcl@localhost/orcl directory=dp_dir
->remap_schema=fasp_62gansu:fasp_yf_20151118 dumpfile=fasp_62gansu20151105.dmp
->impdp system/orcl@localhost/orcl directory=dp_dir
->remap_schema=efmis_62gansu:efmis_yf_20151118 dumpfile=efmis_62gansu20151105.dmp
->--dumpfile所指定文件名需要放在默认的逻辑目录中
->--remap_schema=xx:xxx
->冒号前面表示要导入文件的schema即原来数据库的登录名，冒号后面表示要导入的用户名
+  #+BEGIN_EXAMPLE
+    impdp system/orcl@localhost/orcl directory=dp_dir
+    remap_schema=fasp_62gansu:fasp_yf_20151118 dumpfile=fasp_62gansu20151105.dmp
+    impdp system/orcl@localhost/orcl directory=dp_dir
+    remap_schema=efmis_62gansu:efmis_yf_20151118 dumpfile=efmis_62gansu20151105.dmp
+    >--dumpfile所指定文件名需要放在默认的逻辑目录中
+    >--remap_schema=xx:xxx
+    >冒号前面表示要导入文件的schema即原来数据库的登录名，冒号后面表示要导入的用户名
+  #+END_EXAMPLE
 3. 导入过程中出现的编译错误都不需要去处理，等导入完成即可
 4. 现在平台库中对业务库进行授权执行 P_FASP_GRANT("业务库用户名");
 5. 在业务库中刷同义词，执行P_FASP_SYNC("平台用户名");

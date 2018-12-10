@@ -1,4 +1,4 @@
-```
+#+BEGIN_SRC sql
 SELECT GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_SETPARM('', '1500', '2017', '') FROM DUAL;
 
 --调帐单
@@ -10,7 +10,6 @@ SELECT  t.wfstatus, t.agencyguid,t.BILLCODE,  t.amt, t.REMARK, t.CREATEDATE, t.g
 
 --调帐单明细
 SELECT t.amt, t.ADJUSTAMT, t.ADJUSTGUID, t.guid, t.billcode FROM pay_t_request t WHERE t.ADJUSTGUID = '9EA0042A7AA61AA32DDC4A375366F87A';
-
 
 --调帐单明细 一正一负
 select t.amt, t.ADJUSTAMT, t.ADJUSTGUID, t.guid, t.billcode from pay_t_request t where t.amt > 0 and t.ADJUSTGUID = 'E0928E445655AB1837892AED1E199CB5';
@@ -68,4 +67,4 @@ SELECT * FROM pay_t_paysub t4 WHERE t4.REQUESTGUID IN (SELECT t3.MAINGUID FROM p
 SELECT * FROM pay_t_requestsub t3 WHERE t3.amt < 0 AND t3.MAINGUID IN(SELECT t.guid FROM pay_t_request t WHERE t.ADJUSTGUID IN (SELECT t2.guid FROM PAY_T_AJACCOUNT t2));
 --逆向凭证 5
 SELECT * FROM pay_t_paysub t3 WHERE t3.AMT < 0 and t3.MAINGUID IN( select t.guid from PAY_T_PAYMAIN t where t.ADJUSTGUID in (select t2.guid from PAY_T_AJACCOUNT t2 ));
-```
+#+END_SRC

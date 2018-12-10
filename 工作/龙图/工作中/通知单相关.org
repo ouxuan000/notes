@@ -1,9 +1,9 @@
-```
+#+BEGIN_SRC sql
 select global_multyear_cz.Secu_f_Global_Setparm('', '1500', '2017', '')
   from dual;
-```
-##### --生成授权额度通知单的计划
-```
+#+END_SRC
+* --生成授权额度通知单的计划
+#+BEGIN_SRC sql
 select *
   from pay_t_plan t
  where t.guid in
@@ -17,14 +17,14 @@ select *
                           from fasp_t_pavoucher t
                          where t.MOULDID = '4AD1F41DEDFC5B419E21B6B6D288F333'
                            and t.CODE = '007002')));
-```
-##### --生成凭证的申请 
+#+END_SRC
+* --生成凭证的申请 
+#+BEGIN_SRC sql
 /*004001  直接支付凭证
 004003  授权支付凭证
 004002  直接支付凭证（电子化）
 查询生成凭证的申请单号，以及凭证单号， 替换单据的code
 */
-```
 SELECT *
   FROM FASP_T_PAVOUCHER T
  WHERE T.MOULDID = '688A2466EBA83DF4D0A0A6C198EC1DAE';
@@ -45,23 +45,23 @@ SELECT T_PAYMAIN.BILLCODE  AS "凭证单号",
           FROM FASP_T_PAVOUCHER T
          WHERE T.MOULDID = '688A2466EBA83DF4D0A0A6C198EC1DAE'
            AND T.CODE = '004001');
-```
-##### --业务数据丢失工作流历史信息
-```
+#+END_SRC
+* --业务数据丢失工作流历史信息
+#+BEGIN_SRC sql
 select *
   from pay_t_plan t
  where t.guid not in
        (select procinst.business_key_ from act_hi_procinst procinst);
-```
-##### --业务数据又历史信息，但是没有执行过程信息    
-```   
+#+END_SRC
+* --业务数据又历史信息，但是没有执行过程信息    
+#+BEGIN_SRC sql
 select procinst.proc_inst_id_
   from act_hi_procinst procinst
  where procinst.proc_inst_id_ not in
        (select actinst.proc_inst_id_ from act_hi_actinst actinst);
-```
-##### --审核情况 （如果有必要放入任意个业务数据guid）
-```
+#+END_SRC
+* --审核情况 （如果有必要放入任意个业务数据guid）
+#+BEGIN_SRC sql
 SELECT T.NAME_ AS "操作",
        T_CAUSER.NAME AS "操作人",
        T.START_TIME_ AS "操作时间",
@@ -78,4 +78,4 @@ SELECT T.NAME_ AS "操作",
                ('BE3078BE40EB3991243F68EB3A891425',
                 '8D014D46B3AF7309A8F0C90E6632D752'))
  ORDER BY T.START_TIME_ ASC;
-```
+#+END_SRC

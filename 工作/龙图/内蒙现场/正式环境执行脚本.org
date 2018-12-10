@@ -18,12 +18,8 @@ where t.MENUTYPE in ('56F0D14B19CA3C0AE055000000000001',
     from fasp_t_papage t
   where t.mouldid in (select t3.guid from fasp_t_pabusinessmould t3 where t3.appid = 'bdg'));
 #+END_SRC
-
-/*
-select * from busfw_T_uitable t2*/
-/*
-所有带有金额列， 处追减外的列表，全部计算合计
-*/
+* 所有带有金额列， 处追减外的列表，全部计算合计
+#+BEGIN_SRC sql
 update busfw_T_uitable t2 set t2.totaltag = '1' where t2.totaltag <> '1' and t2.key not in(
 select t.UIKEY
   from fasp_t_papage t
@@ -33,23 +29,22 @@ where t.MENUTYPE in ('56F0D14B19CA3C0AE055000000000001',
   from fasp_t_papage t
 where t.mouldid in (select t3.guid from fasp_t_pabusinessmould t3 where t3.appid = 'bdg'))
 and (select count(1) from busfw_t_uicolumn t4 where t2.key = t4.key and lower(t4.columncode) in ('curbal', 'amt', 'csamt', 'zbsyamt')) > 0;
-
-
---来源去向单据不显示
+#+END_SRC
+* 来源去向单据不显示
+#+BEGIN_SRC sql
 delete from busfw_t_uicolumn t where t.key = '/bdg/common/srcto/index' and t.columncode = 'VCHNAME';
-
---修改发文日期和创建日期类型
-update Busfw_t_Uiqueryform t set t.type = 'd', t.config = '{"region":1}'
-  where lower(t.columncode) in ('senddoctime', 'createdate')
-    and t.key in
+#+END_SRC
+* 修改发文日期和创建日期类型
+#+BEGIN_SRC sql
+update Busfw_t_Uiqueryform t set t.type = 'd', t.config = '{"region":1}' where lower(t.columncode) in ('senddoctime', 'createdate') and t.key in
         (select t2.uikey from fasp_t_papage t2 where t2.mouldid in (select t.guid from fasp_t_pabusinessmould t where t.appid = 'bdg'))
 
-  --      
+#+END_SRC
   
+#+BEGIN_SRC sql
   update Busfw_t_Uiqueryform t set t.type = 'amt', t.config = '{"region":1}'
   where lower(t.columncode) in ('amt')
     and t.key in
         (select t2.uikey from fasp_t_papage t2 where t2.mouldid in (select t.guid from fasp_t_pabusinessmould t where t.appid = 'bdg'))
 
-  
-  select * from busfw_T_uiqueryform t where t.key = '0039ECFF388B543DD37BE78B0C752530' ;
+#+END_SRC
