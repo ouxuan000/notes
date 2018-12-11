@@ -40,15 +40,15 @@ values."
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     helm
-     ivy
+     ;; helm
+     ;; ivy
      auto-completion
      better-defaults
      emacs-lisp
      markdown
      git
      (org :variables org-want-todo-bindings t)
-     ;; (shell :variables
+     ;; (Shell :Variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
      spell-checking
