@@ -32,3 +32,6 @@ Insert into busfw_t_uieditform (GUID,KEY,TABLECODE,TYPE,NAME,COLUMNCODE,ISVISIAB
    + 每一层都需要合计
 ** 中央来文指标对账
    + 需要导出txt文件 (目前可以导出excel, 另存为csv文件)
+** 待分指标清理功能
+   + 需要单独做页面，保存用户录入的意见及金额信息
+   + 不影响原业务数据, 单独存储
