@@ -23,3 +23,12 @@ Insert into busfw_t_uieditform (GUID,KEY,TABLECODE,TYPE,NAME,COLUMNCODE,ISVISIAB
 Insert into busfw_t_uieditform (GUID,KEY,TABLECODE,TYPE,NAME,COLUMNCODE,ISVISIABLE,SHOWLEVEL,REQUIREMENT,DEFAULTVALUE,ORDERNUM,COLSPANNUM,TEXTAREAROWS,APPID,ISEDIT,LEVELCONTROL,CONFIG,FROMSOURCE,BOTTOMCONTRL,SETVALUE) values (sys_guid(),'/bdg/bdgassign/auditmod/editform','BDG_T_BDGMAIN','amt','已支付数','QSAMT',0,null,null,null,3,null,null,'bdg',0,null,'{issync:1}',null,null,null);
 
 #+END_EXAMPLE
+* 12月需求
+** 综合操作页面增加页面允许用户查看来源及明细信息
+   + 明细信息需要根据配置进行汇总(汇总规则)
+** 来源去向相同来源只展示一个
+** 指标选择单位批量新增按照单位合计
+   + 需要区分本级和市县
+   + 每一层都需要合计
+** 中央来文指标对账
+   + 需要导出txt文件 (目前可以导出excel, 另存为csv文件)
